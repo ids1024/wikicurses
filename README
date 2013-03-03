@@ -1,7 +1,7 @@
 This is quick weekend hack made to access Wikipedia from command line.
 
 
-Its written in python.To compile it just run 'python cliwiki.py'(without quotes) from your terminal and then enter the search title to get Wikipedia page.. 
+Its written in python.To compile it just run 'python cliwiki.py'(without quotes) from your terminal and then enter the search title to get Wikipedia page on your terminal! 
 
 
 It can also be given one of following 3 command line arguments.
