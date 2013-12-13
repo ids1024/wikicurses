@@ -1,3 +1,11 @@
+Wikipedia CLI
+=========
+
+
+@AnirudhBhat 
+
+
+
 This is quick weekend hack made to access Wikipedia from command line.
 
 
