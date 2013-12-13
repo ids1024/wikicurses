@@ -1,85 +1,167 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
-from __future__ import print_function
+""" CLI to access wikipedia informations """
+
 import json
-import urllib2
+import urllib.request
 import sys
 import re
+# import argparse
+
+
+# **** Global Variables ****
+BASE_URL = "http://en.wikipedia.org/w/api.php?"
+ACTION = "action=query"
+FORMAT = "&format=json"
+TITLES = "&titles="
 
 
 
-KEY = 0
-
-base_url = "http://en.wikipedia.org/w/api.php?"
-
-action = "action=query"
-
-
-Format = "&format=json"
-
-
-titles="&titles="
-
-
-
+# **** Functions ****
 
 def get_title():
-    title = raw_input('enter the title you want to search\n')
-    title = title.replace(' ','_')
-    global titles
-    titles = titles + title
+    """ Ask the user for a title and store the input """
+
+    title = input('Enter the title you want to search --> \n')
+    global TITLES
+    TITLES += title.replace(' ','_')
+
+
+
+def wiki_search():
+    """ Search function """
+
+    prop = "&prop=extracts"
+    plaintext = "&explaintext"
+    section_format = "&exsectionformat=plain"
+
+    try:
+        url = (BASE_URL + ACTION + TITLES
+            + prop + plaintext + section_format + FORMAT)
+
+        # open url, read content (bytes), convert in string via decode()
+        result = json.loads(urllib.request.urlopen(url).read().decode('utf-8'))
+
+        key = list(result['query']['pages'].keys())[0][0:]
+
+        print(result['query']['pages'][key]['extract'])
+
+    except KeyError:
+        print('No wikipedia page for that title. '
+              'Wikipedia search titles are case sensitive.')
 
 
 
 def url_and_displaytitle():
-    print('\ntitle and url for this wikipedia site',end="\n")
-    global base_url
-    global action
-    global titles
-    global Format
-    prop = "&prop=info"
-    inprop = "&inprop=url|displaytitle"
-    url = base_url + action + titles + prop + inprop + Format
-    result = json.load(urllib2.urlopen(url))  
-    key = result['query']['pages'].keys()
-    global KEY
-    KEY = (key[0][:])
-    print(result['query']['pages'][str(KEY)]['title'])
-    print(result['query']['pages'][str(KEY)]['fullurl'])
-    print('\t-------------------\t')
-        
+
+    """ Display URL and Title for the page """
+
+    print('\n\nTitle and url for this Wikipedia page: \n')
+
+    prop_inprop = "&prop=info&inprop=url|displaytitle"
+
+    url = BASE_URL + ACTION + TITLES + prop_inprop + FORMAT
+
+    # open url, read content (bytes), convert in string via decode()
+    result = json.loads(urllib.request.urlopen(url).read().decode('utf-8'))
+
+    # In python 3 dict_keys are not indexable, so we need to use list()
+    key = list(result['query']['pages'].keys())[0][:]
+
+    print('\t'+result['query']['pages'][key]['title'])
+    print('\t'+result['query']['pages'][key]['fullurl'])
+    print('\n\t-------------------\t')
+
 
 
 def interesting_links():
-    print('\nyou may also be interested in the following links',end="\n") 
-    global base_url
-    global Format
-    global action
-    global titles
-    prop = "&prop=extlinks"
-    try:
-        url = base_url + action + titles + prop + Format
-        result =json.load(urllib2.urlopen(url))
-        key = result['query']['pages'].keys()
-        key = key[0][0:]
-        j = 0
-        offset = result['query-continue']['extlinks']['eloffset']
-        while j < offset:
-            print(result['query']['pages'][str(key)]['extlinks'][j])
-            j=j+1
-    except:
-        print('sorry,couldn\'t find any links') 
 
+    """Fonction displaying related links => Interest on the CLI ?"""
+
+    print('\nYou may also be interested in the following links: \n')
+
+    prop = "&prop=extlinks"
+
+    try:
+        url = BASE_URL + ACTION + TITLES + prop + FORMAT
+
+        # open url, read content (bytes), convert in string via decode()
+        result = json.loads(urllib.request.urlopen(url).read().decode('utf-8'))
+
+        key = list(result['query']['pages'].keys())[0][0:]
+
+        offset = result['query-continue']['extlinks']['eloffset']
+
+        for j in range(0, offset):
+
+            # ['*'] => elements of ....[j] are dict, and their keys are '*'
+            print('\t'+result['query']['pages'][key]['extlinks'][j]['*'])
+
+    except KeyError:
+        print("Sorry, we couldn't find any links.")
+
+
+
+def images():
+    """ Get images urls """
+
+    print('\nAll images related to this search : \n')
+    image_url = "http://en.wikipedia.org/wiki/"
+
+    prop = "&prop=images"
+
+    url = BASE_URL + ACTION + TITLES + prop + FORMAT
+
+    # open url, read content (bytes), convert in string via decode()
+    result = json.loads(urllib.request.urlopen(url).read().decode('utf-8'))
+
+    key = list(result['query']['pages'].keys())[0][0:]
+
+    try:
+        for i in range(1, len(result['query']['pages'][key]['images'])):
+
+            image = result['query']['pages'][key]['images'][i]['title']
+            image = image_url + image.replace(' ','_')
+            print('\t'+image)
+
+        print('\n\t------------------\t')
+
+    except KeyError:
+        print('\n\t------------------\t')
+
+
+
+
+def featured_feed():
+    """Featured Feed"""
+
+    ACTION = "&action=featuredfeed"
+
+    feed = "&feed=" + sys.argv[1]
+    url = BASE_URL + ACTION + feed + FORMAT
+
+    print(url)
+
+    result = urllib.request.urlopen(url).read().decode('utf-8')
+
+    res1 = re.compile('<title>(.*)</title>')
+    res2 = re.compile('<link>(.*)en</link>')
+
+    result1 = re.findall(res1, result)
+    result2 = re.findall(res2, result)
+
+    for i in enumerate(zip(result1, result2)):
+        print(i)
 
 
 
 #def interwiki_links():
  #   print('inter wiki links found for this search',end="\n")
-  #  base_url
-   # action
-   #  titles
+  #  BASE_URL
+   # ACTION
+   #  TITLES
   #  prop = "&prop=iwlinks"
-  #  url = base_url + action + titles + prop
+  #  url = BASE_URL + ACTION + TITLES + prop
   #  print(url)
   #  result = urllib2.urlopen(url)
   #  for i in result:
@@ -87,94 +169,19 @@ def interesting_links():
 
 
 
-
-def wiki_search():
-    global base_url
-    global action
-    global titles
-    global Format
-    prop = "&prop=extracts"
-    plaintext = "&explaintext"
-    section_format = "&exsectionformat=plain"
-    try:
-        url = base_url + action + titles + prop + plaintext + section_format + Format
-        result = json.load(urllib2.urlopen(url))
-        key = result['query']['pages'].keys()
-        key = key[0][0:]
-        print(result['query']['pages'][str(key)]['extract'],end="\n")
-    except:
-        print('oops!,no wikipedia page for that title.Wikipedia search titles are case Sensitive...')
-    
+def main():
+    """ Main function """
+    if len(sys.argv) < 2:
+        get_title()
+        wiki_search()
+        url_and_displaytitle()
+        images()
+        #interwiki_links()
+        interesting_links()
+    else:
+        featured_feed()
 
 
 
-
-def images():
-    print('\nall images related to this search',end="\n")
-    image_url = "http://en.wikipedia.org/wiki/"
-    global base_url
-    global Format
-    global action
-    global titles
-    prop = "&prop=images"
-    url = base_url + action + titles + prop + Format
-    result = json.load(urllib2.urlopen(url))
-    key = result['query']['pages'].keys()
-    key = key[0][0:]
-    try:
-        i = 1
-        while(i):
-            Image = str(result['query']['pages'][str(key)]['images'][i]['title'])
-            image = image_url + Image.replace(' ','_')
-            print(image)
-            i=i+1
-    except:
-        print('\t------------------\t',end="\n")
-        pass     
-    
-
-
-
-
-
-
-def featured_feed():
-    global base_url
-    Format = "&format=json"
-    action = "&action=featuredfeed"
-    try:
-        feed = "&feed=" + str(sys.argv[1])
-        url = base_url + action + feed + Format
-        print(url)
-        result = urllib2.urlopen(url).read()
-        res1 = re.compile('<title>(.*)</title>')
-        res2 = re.compile('<link>(.*)en</link>')
-        Result1 = re.findall(res1,result)
-        Result2 = re.findall(res2,result)
-        for i in enumerate(zip(Result1,Result2)):
-            print(i)
-    except:
-        print('error!')
-
-        
-    
-
-
-
-
-
-if len(sys.argv) < 2:
-    get_title()
-    wiki_search()
-    url_and_displaytitle()
-    images()
-    #interwiki_links()
-    interesting_links()
-else:
-    featured_feed()
-
-
-
-
-
-
+if __name__ == "__main__":
+    main()
