@@ -1,21 +1,6 @@
 Wikipedia CLI
 =========
 
+Command line interface to access wikipedia pages. 
 
-@AnirudhBhat 
-
-
-
-This is quick weekend hack made to access Wikipedia from command line.
-
-
-Its written in python.To compile it just run 'python cliwiki.py'(without quotes) from your terminal and then enter the search title to get Wikipedia page on your terminal! 
-
-
-It can also be given one of following 3 command line arguments.
-
-1)potd
-2)featured
-3)onthisday 
-
-this is just a quick hack and there's lot of crappy code in it.So please feel free to fork and send pull request if u want to improve it.
+This version is a fork of [AnirudhBhat](https://github.com/AnirudhBhat)'s and now run on python 3.
