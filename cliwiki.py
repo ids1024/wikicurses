@@ -4,9 +4,8 @@
 
 import json
 import urllib.request
-import sys
 import re
-# import argparse
+import argparse
 
 
 # **** Global Variables ****
@@ -18,15 +17,6 @@ TITLES = "&titles="
 
 
 # **** Functions ****
-
-def get_title():
-    """ Ask the user for a title and store the input """
-
-    title = input('Enter the title you want to search --> \n')
-    global TITLES
-    TITLES += title.replace(' ','_')
-
-
 
 def wiki_search():
     """ Search function """
@@ -105,12 +95,11 @@ def interesting_links():
 def images():
     """ Get images urls """
 
-    print('\nAll images related to this search : \n')
     image_url = "http://en.wikipedia.org/wiki/"
-
     prop = "&prop=images"
-
     url = BASE_URL + ACTION + TITLES + prop + FORMAT
+
+    print('\nAll images related to this search : \n')
 
     # open url, read content (bytes), convert in string via decode()
     result = json.loads(urllib.request.urlopen(url).read().decode('utf-8'))
@@ -121,7 +110,7 @@ def images():
         for i in range(1, len(result['query']['pages'][key]['images'])):
 
             image = result['query']['pages'][key]['images'][i]['title']
-            image = image_url + image.replace(' ','_')
+            image = image_url + image.replace(' ', '_')
             print('\t'+image)
 
         print('\n\t------------------\t')
@@ -132,54 +121,98 @@ def images():
 
 
 
-def featured_feed():
+def featured_feed(feed):
     """Featured Feed"""
 
-    ACTION = "&action=featuredfeed"
-
-    feed = "&feed=" + sys.argv[1]
-    url = BASE_URL + ACTION + feed + FORMAT
-
-    print(url)
+    url = BASE_URL + "&action=featuredfeed" + "&feed=" + feed + FORMAT
 
     result = urllib.request.urlopen(url).read().decode('utf-8')
 
-    res1 = re.compile('<title>(.*)</title>')
-    res2 = re.compile('<link>(.*)en</link>')
+    re_title = re.compile('<title>(.*)</title>')
+    re_links = re.compile('<link>(.*)en</link>')
 
-    result1 = re.findall(res1, result)
-    result2 = re.findall(res2, result)
+    result1 = re.findall(re_title, result)
+    result2 = re.findall(re_links, result)
 
-    for i in enumerate(zip(result1, result2)):
-        print(i)
+    print('\n')
+
+    for desc, url in zip(result1, result2):
+        print(desc + ':\t ' + url)
 
 
 
-#def interwiki_links():
- #   print('inter wiki links found for this search',end="\n")
-  #  BASE_URL
-   # ACTION
-   #  TITLES
-  #  prop = "&prop=iwlinks"
-  #  url = BASE_URL + ACTION + TITLES + prop
-  #  print(url)
-  #  result = urllib2.urlopen(url)
-  #  for i in result:
-  #      print(i)
+
+def interwiki_links():
+    """ Inter wiki links """
+
+    print('Inter wiki links found for this search: ')
+
+    url = BASE_URL + ACTION + TITLES + "&prop=iwlinks"+ FORMAT
+
+    print(url)
+
+    # TODO: parse the json, match it with a dict containing
+    # url to append depending on the key returned in the url,
+    # and then only show the resulting urls
+
+    # result = urllib.request.urlopen(url).read().decode('utf-8')
+
+    # for i in reslut:
+        # print(i)
 
 
 
 def main():
     """ Main function """
-    if len(sys.argv) < 2:
-        get_title()
-        wiki_search()
-        url_and_displaytitle()
-        images()
-        #interwiki_links()
-        interesting_links()
-    else:
-        featured_feed()
+
+    # Gestion des paramètres
+    parser = argparse.ArgumentParser(description =
+                                        "Access Wikipedia from Command Line")
+
+    parser.add_argument('search', help = "Page to search for on Wikipedia")
+
+    group = parser.add_mutually_exclusive_group()
+
+    group.add_argument('-d', '--today',
+                        action = 'store_const',
+                        const = 'onthisday',
+                        help='Display URLs for the "On this day" pages')
+
+    group.add_argument('-f', '--featured',
+                        action = 'store_const',
+                        const = 'featured',
+                        help = 'Display the featured articles URLs')
+
+    group.add_argument('-p', '--picture',
+                        action = 'store_const',
+                        const = 'potd',
+                        help='Display URLs for the "Picture of the day" pages')
+
+    args = parser.parse_args()
+
+    try:
+        if args.search :
+
+            global TITLES
+            TITLES += args.search.replace(' ','_')
+
+            wiki_search()
+            url_and_displaytitle()
+            images()
+            interesting_links()
+            # interwiki_links()
+
+        elif args.featured:
+            featured_feed(args.featured)
+
+        elif args.picture:
+            featured_feed(args.picture)
+
+        elif args.today:
+            featured_feed(args.today)
+
+    except KeyboardInterrupt:
+        print('\n\n Program interrupted')
 
 
 
