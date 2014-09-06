@@ -27,7 +27,7 @@ def wiki_query():
     # open url, read content (bytes), convert in string via decode()
     RESULT = json.loads(urllib.request.urlopen(url).read().decode('utf-8'))
     # In python 3 dict_keys are not indexable, so we need to use list()
-    key = list(RESULT['query']['pages'].keys())[0][:]
+    key = list(RESULT['query']['pages'])[0][:]
     PAGE = RESULT['query']['pages'][key]
 
 
