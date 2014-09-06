@@ -162,6 +162,10 @@ def main():
                         action = 'store_true',
                         help="Show page contents in markdown format")
 
+    parser.add_argument('--nopager',
+                        action = 'store_true',
+                        help="Do not display using a pager")
+
     group = parser.add_mutually_exclusive_group(required = True)
 
     group.add_argument('search',
@@ -191,7 +195,7 @@ def main():
     USEMARKDOWN = args.markdown
 
     global PAGER
-    if sys.stdout.isatty():
+    if sys.stdout.isatty() and not args.nopager:
         pager = os.environ.get("PAGER", "less")
         if pager == "vimpager":
             vformat = "markdown" if USEMARKDOWN else "text"
