@@ -2,6 +2,8 @@
 
 """ CLI to access wikipedia informations """
 
+import sys
+import os
 import json
 import urllib.request
 import re
@@ -15,6 +17,7 @@ TITLES = ""
 RESULT = None
 PAGE = None
 USEMARKDOWN = False
+PAGER = None
 
 
 # **** Functions ****
@@ -35,6 +38,12 @@ def wiki_query():
     PAGE = RESULT['query']['pages'][key]
 
 
+def output(text):
+    if PAGER is not None:
+        print(text, file=PAGER.stdin)
+    else:
+        print(text)
+
 
 def wiki_search():
     """ Search function """
@@ -43,12 +52,12 @@ def wiki_search():
         if USEMARKDOWN:
             pandoc = Popen(("pandoc", "-f", "html", "-t", "markdown"),
                      stdin=PIPE, stdout=PIPE)
-            print(pandoc.communicate(PAGE['extract'].encode())[0].decode())
+            output(pandoc.communicate(PAGE['extract'].encode())[0].decode())
         else:
-            print(PAGE['extract'])
+            output(PAGE['extract'])
 
     except KeyError:
-        print('No wikipedia page for that title. '
+        output('No wikipedia page for that title. '
               'Wikipedia search titles are case sensitive.')
 
 
@@ -56,18 +65,18 @@ def wiki_search():
 def url_and_displaytitle():
     """ Display URL and Title for the page """
 
-    print('\n\nTitle and url for this Wikipedia page: \n')
+    output('\n\nTitle and url for this Wikipedia page: \n')
 
-    print('\t'+PAGE['title'])
-    print('\t'+PAGE['fullurl'])
-    print('\n\t-------------------\t')
+    output('\t'+PAGE['title'])
+    output('\t'+PAGE['fullurl'])
+    output('\n\t-------------------\t')
 
 
 
 def interesting_links():
     """Fonction displaying related links => Interest on the CLI ?"""
 
-    print('\nYou may also be interested in the following links: \n')
+    output('\nYou may also be interested in the following links: \n')
 
     try:
         offset = RESULT['query-continue']['extlinks']['eloffset']
@@ -77,10 +86,10 @@ def interesting_links():
             link = PAGE['extlinks'][j]['*']
             if link.startswith("//"):
                 link = "http:" + link
-            print('\t'+link)
+            output('\t'+link)
 
     except KeyError:
-        print("Sorry, we couldn't find any links.")
+        output("Sorry, we couldn't find any links.")
 
 
 
@@ -89,18 +98,18 @@ def images():
 
     image_url = "http://en.wikipedia.org/wiki/"
 
-    print('\nAll images related to this search : \n')
+    output('\nAll images related to this search : \n')
 
     try:
         for i in range(1, len(PAGE['images'])):
             image = PAGE['images'][i]['title']
             image = image_url + image.replace(' ', '_')
-            print('\t'+image)
+            output('\t'+image)
 
-        print('\n\t------------------\t')
+        output('\n\t------------------\t')
 
     except KeyError:
-        print('\n\t------------------\t')
+        output('\n\t------------------\t')
 
 
 def featured_feed(feed):
@@ -117,20 +126,20 @@ def featured_feed(feed):
     result1 = re.findall(re_title, result)
     result2 = re.findall(re_links, result)
 
-    print('\n')
+    output('\n')
 
     for desc, url in zip(result1, result2):
-        print(desc + ':\t ' + url)
+        output(desc + ':\t ' + url)
 
 
 def interwiki_links():
     """ Inter wiki links """
 
-    print('Inter wiki links found for this search: ')
+    output('Inter wiki links found for this search: ')
 
     url = BASE_URL + ACTION + TITLES + REDIRECTS + "&prop=iwlinks"+ FORMAT
 
-    print(url)
+    output(url)
 
     # TODO: parse the json, match it with a dict containing
     # url to append depending on the key returned in the url,
@@ -181,6 +190,15 @@ def main():
     global USEMARKDOWN
     USEMARKDOWN = args.markdown
 
+    global PAGER
+    if sys.stdout.isatty():
+        pager = os.environ.get("PAGER", "less")
+        if pager == "vimpager":
+            vformat = "markdown" if USEMARKDOWN else "text"
+            pager = ("vimpager", "-c", "setf "+"markdown")
+        PAGER = Popen(pager, stdin=PIPE, universal_newlines=True)
+
+
     try:
         if args.search :
 
@@ -202,6 +220,10 @@ def main():
 
         elif args.today:
             featured_feed(args.today)
+
+        if PAGER is not None:
+            PAGER.stdin.close()
+            PAGER.wait()
 
     except KeyboardInterrupt:
         print('\n\n Program interrupted')
