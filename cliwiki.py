@@ -74,7 +74,10 @@ def interesting_links():
         for j in range(0, offset):
 
             # ['*'] => elements of ....[j] are dict, and their keys are '*'
-            print('\t'+result['query']['pages'][key]['extlinks'][j]['*'])
+            link = result['query']['pages'][key]['extlinks'][j]['*']
+            if link.startswith("//"):
+                link = "http:" + link
+            print('\t'+link)
 
     except KeyError:
         print("Sorry, we couldn't find any links.")
