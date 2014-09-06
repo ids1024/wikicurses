@@ -33,7 +33,6 @@ def wiki_query():
 
 
 def wiki_search():
-
     """ Search function """
 
     try:
@@ -46,7 +45,6 @@ def wiki_search():
 
 
 def url_and_displaytitle():
-
     """ Display URL and Title for the page """
 
     print('\n\nTitle and url for this Wikipedia page: \n')
@@ -58,7 +56,6 @@ def url_and_displaytitle():
 
 
 def interesting_links():
-
     """Fonction displaying related links => Interest on the CLI ?"""
 
     print('\nYou may also be interested in the following links: \n')
@@ -67,7 +64,6 @@ def interesting_links():
         offset = RESULT['query-continue']['extlinks']['eloffset']
 
         for j in range(0, offset):
-
             # ['*'] => elements of ....[j] are dict, and their keys are '*'
             link = PAGE['extlinks'][j]['*']
             if link.startswith("//"):
@@ -88,7 +84,6 @@ def images():
 
     try:
         for i in range(1, len(PAGE['images'])):
-
             image = PAGE['images'][i]['title']
             image = image_url + image.replace(' ', '_')
             print('\t'+image)
@@ -97,8 +92,6 @@ def images():
 
     except KeyError:
         print('\n\t------------------\t')
-
-
 
 
 def featured_feed(feed):
@@ -121,8 +114,6 @@ def featured_feed(feed):
         print(desc + ':\t ' + url)
 
 
-
-
 def interwiki_links():
     """ Inter wiki links """
 
@@ -140,7 +131,6 @@ def interwiki_links():
 
     # for i in reslut:
         # print(i)
-
 
 
 def main():
@@ -198,7 +188,6 @@ def main():
 
     except KeyboardInterrupt:
         print('\n\n Program interrupted')
-
 
 
 if __name__ == "__main__":
