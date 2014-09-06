@@ -11,15 +11,24 @@ import argparse
 # **** Global Variables ****
 BASE_URL = "http://en.wikipedia.org/w/api.php?"
 TITLES = ""
+RESULT = None
+PAGE = None
 
 
 # **** Functions ****
-def wiki_query(**properties):
-    data = {"action":"query", "titles":TITLES, "redirects":True, "format":"json"}
-    data.update(properties)
+def wiki_query():
+    global RESULT
+    global PAGE
+    data = {"action":"query", "prop":"extracts|info|extlinks|images",
+            "titles":TITLES, "redirects":True, "format":"json",
+            "explaintext":True, "exsectionformat":"plain",
+            "inprop":"url|displaytitle"}
     url = BASE_URL + urllib.parse.urlencode(data)
     # open url, read content (bytes), convert in string via decode()
-    return json.loads(urllib.request.urlopen(url).read().decode('utf-8'))
+    RESULT = json.loads(urllib.request.urlopen(url).read().decode('utf-8'))
+    # In python 3 dict_keys are not indexable, so we need to use list()
+    key = list(RESULT['query']['pages'].keys())[0][:]
+    PAGE = RESULT['query']['pages'][key]
 
 
 
@@ -28,12 +37,7 @@ def wiki_search():
     """ Search function """
 
     try:
-        result = wiki_query(prop="extracts",
-                explaintext=True, exsectionformat="plain")
-
-        key = list(result['query']['pages'].keys())[0][0:]
-
-        print(result['query']['pages'][key]['extract'])
+        print(PAGE['extract'])
 
     except KeyError:
         print('No wikipedia page for that title. '
@@ -47,13 +51,8 @@ def url_and_displaytitle():
 
     print('\n\nTitle and url for this Wikipedia page: \n')
 
-    result = wiki_query(prop="info", inprop="url|displaytitle")
-
-    # In python 3 dict_keys are not indexable, so we need to use list()
-    key = list(result['query']['pages'].keys())[0][:]
-
-    print('\t'+result['query']['pages'][key]['title'])
-    print('\t'+result['query']['pages'][key]['fullurl'])
+    print('\t'+PAGE['title'])
+    print('\t'+PAGE['fullurl'])
     print('\n\t-------------------\t')
 
 
@@ -65,16 +64,12 @@ def interesting_links():
     print('\nYou may also be interested in the following links: \n')
 
     try:
-        result = wiki_query(prop="extlinks")
-
-        key = list(result['query']['pages'].keys())[0][0:]
-
-        offset = result['query-continue']['extlinks']['eloffset']
+        offset = RESULT['query-continue']['extlinks']['eloffset']
 
         for j in range(0, offset):
 
             # ['*'] => elements of ....[j] are dict, and their keys are '*'
-            link = result['query']['pages'][key]['extlinks'][j]['*']
+            link = PAGE['extlinks'][j]['*']
             if link.startswith("//"):
                 link = "http:" + link
             print('\t'+link)
@@ -89,17 +84,12 @@ def images():
 
     image_url = "http://en.wikipedia.org/wiki/"
 
-    result = wiki_query(prop="images")
-
     print('\nAll images related to this search : \n')
 
-
-    key = list(result['query']['pages'].keys())[0][0:]
-
     try:
-        for i in range(1, len(result['query']['pages'][key]['images'])):
+        for i in range(1, len(PAGE['images'])):
 
-            image = result['query']['pages'][key]['images'][i]['title']
+            image = PAGE['images'][i]['title']
             image = image_url + image.replace(' ', '_')
             print('\t'+image)
 
@@ -184,6 +174,7 @@ def main():
             global TITLES
             TITLES = args.search
 
+            wiki_query()
             wiki_search()
             url_and_displaytitle()
             images()
