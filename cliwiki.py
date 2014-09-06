@@ -104,7 +104,10 @@ def images():
 def featured_feed(feed):
     """Featured Feed"""
 
-    result = wiki_query(action="featuredfeed", feed="")
+    data = {"action":"featuredfeed", "feed":feed, "format": "json"}
+    url = BASE_URL + urllib.parse.urlencode(data)
+
+    result = urllib.request.urlopen(url).read().decode('utf-8')
 
     re_title = re.compile('<title>(.*)</title>')
     re_links = re.compile('<link>(.*)en</link>')
@@ -147,9 +150,12 @@ def main():
     parser = argparse.ArgumentParser(description =
                                         "Access Wikipedia from Command Line")
 
-    parser.add_argument('search', help = "Page to search for on Wikipedia")
+    group = parser.add_mutually_exclusive_group(required = True)
 
-    group = parser.add_mutually_exclusive_group()
+    group.add_argument('search',
+                        nargs = '?',
+                        default = '',
+                        help = "Page to search for on Wikipedia")
 
     group.add_argument('-d', '--today',
                         action = 'store_const',
