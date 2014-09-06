@@ -182,7 +182,7 @@ def main():
         if args.search :
 
             global TITLES
-            TITLES += args.search.replace(' ','_')
+            TITLES = args.search
 
             wiki_search()
             url_and_displaytitle()
