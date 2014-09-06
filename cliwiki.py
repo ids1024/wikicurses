@@ -15,10 +15,9 @@ TITLES = ""
 
 # **** Functions ****
 def wiki_query(**properties):
-    properties = properties.copy()
-    properties.update({"action":"query",
-        "titles":TITLES, "redirects":True, "format":"json"})
-    url = BASE_URL + urllib.parse.urlencode(properties)
+    data = {"action":"query", "titles":TITLES, "redirects":True, "format":"json"}
+    data.update(properties)
+    url = BASE_URL + urllib.parse.urlencode(data)
     # open url, read content (bytes), convert in string via decode()
     return json.loads(urllib.request.urlopen(url).read().decode('utf-8'))
 
