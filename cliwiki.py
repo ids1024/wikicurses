@@ -6,6 +6,7 @@ import json
 import urllib.request
 import re
 import argparse
+from subprocess import Popen, PIPE
 
 
 # **** Global Variables ****
@@ -13,6 +14,7 @@ BASE_URL = "http://en.wikipedia.org/w/api.php?"
 TITLES = ""
 RESULT = None
 PAGE = None
+USEMARKDOWN = False
 
 
 # **** Functions ****
@@ -21,8 +23,10 @@ def wiki_query():
     global PAGE
     data = {"action":"query", "prop":"extracts|info|extlinks|images",
             "titles":TITLES, "redirects":True, "format":"json",
-            "explaintext":True, "exsectionformat":"plain",
             "inprop":"url|displaytitle"}
+    if not USEMARKDOWN:
+            data.update({"explaintext":True, "exsectionformat":"plain"})
+
     url = BASE_URL + urllib.parse.urlencode(data)
     # open url, read content (bytes), convert in string via decode()
     RESULT = json.loads(urllib.request.urlopen(url).read().decode('utf-8'))
@@ -36,7 +40,12 @@ def wiki_search():
     """ Search function """
 
     try:
-        print(PAGE['extract'])
+        if USEMARKDOWN:
+            pandoc = Popen(("pandoc", "-f", "html", "-t", "markdown"),
+                     stdin=PIPE, stdout=PIPE)
+            print(pandoc.communicate(PAGE['extract'].encode())[0].decode())
+        else:
+            print(PAGE['extract'])
 
     except KeyError:
         print('No wikipedia page for that title. '
@@ -140,6 +149,10 @@ def main():
     parser = argparse.ArgumentParser(description =
                                         "Access Wikipedia from Command Line")
 
+    parser.add_argument('-m', '--markdown',
+                        action = 'store_true',
+                        help="Show page contents in markdown format")
+
     group = parser.add_mutually_exclusive_group(required = True)
 
     group.add_argument('search',
@@ -162,7 +175,11 @@ def main():
                         const = 'potd',
                         help='Display URLs for the "Picture of the day" pages')
 
+
     args = parser.parse_args()
+
+    global USEMARKDOWN
+    USEMARKDOWN = args.markdown
 
     try:
         if args.search :
