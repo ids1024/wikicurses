@@ -10,16 +10,15 @@ import argparse
 
 # **** Global Variables ****
 BASE_URL = "http://en.wikipedia.org/w/api.php?"
-ACTION = "action=query"
-FORMAT = "&format=json"
-TITLES = "&titles="
-REDIRECTS = "&redirects"
-
+TITLES = ""
 
 
 # **** Functions ****
-def wiki_query(properties):
-    url = (BASE_URL + ACTION + TITLES + REDIRECTS + properties + FORMAT)
+def wiki_query(**properties):
+    properties = properties.copy()
+    properties.update({"action":"query",
+        "titles":TITLES, "redirects":True, "format":"json"})
+    url = BASE_URL + urllib.parse.urlencode(properties)
     # open url, read content (bytes), convert in string via decode()
     return json.loads(urllib.request.urlopen(url).read().decode('utf-8'))
 
@@ -33,7 +32,8 @@ def wiki_search():
     section_format = "&exsectionformat=plain"
 
     try:
-        result = wiki_query(prop + plaintext + section_format)
+        result = wiki_query(prop="extracts",
+                explaintext=True, exsectionformat="plain")
 
         key = list(result['query']['pages'].keys())[0][0:]
 
@@ -51,9 +51,7 @@ def url_and_displaytitle():
 
     print('\n\nTitle and url for this Wikipedia page: \n')
 
-    prop_inprop = "&prop=info&inprop=url|displaytitle"
-
-    result = wiki_query(prop_inprop)
+    result = wiki_query(prop="info", inprop="url|displaytitle")
 
     # In python 3 dict_keys are not indexable, so we need to use list()
     key = list(result['query']['pages'].keys())[0][:]
@@ -70,10 +68,8 @@ def interesting_links():
 
     print('\nYou may also be interested in the following links: \n')
 
-    prop = "&prop=extlinks"
-
     try:
-        result = wiki_query(prop)
+        result = wiki_query(prop="extlinks")
 
         key = list(result['query']['pages'].keys())[0][0:]
 
@@ -93,9 +89,8 @@ def images():
     """ Get images urls """
 
     image_url = "http://en.wikipedia.org/wiki/"
-    prop = "&prop=images"
 
-    result = wiki_query(prop)
+    result = wiki_query(prop="images")
 
     print('\nAll images related to this search : \n')
 
@@ -120,7 +115,7 @@ def images():
 def featured_feed(feed):
     """Featured Feed"""
 
-    result = wiki_query("&action=featuredfeed" + "&feed=")
+    result = wiki_query(action="featuredfeed", feed="")
 
     re_title = re.compile('<title>(.*)</title>')
     re_links = re.compile('<link>(.*)en</link>')
