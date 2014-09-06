@@ -24,11 +24,8 @@ def wiki_query(**properties):
 
 
 def wiki_search():
-    """ Search function """
 
-    prop = "&prop=extracts"
-    plaintext = "&explaintext"
-    section_format = "&exsectionformat=plain"
+    """ Search function """
 
     try:
         result = wiki_query(prop="extracts",
