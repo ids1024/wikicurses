@@ -18,6 +18,12 @@ REDIRECTS = "&redirects"
 
 
 # **** Functions ****
+def wiki_query(properties):
+    url = (BASE_URL + ACTION + TITLES + REDIRECTS + properties + FORMAT)
+    # open url, read content (bytes), convert in string via decode()
+    return json.loads(urllib.request.urlopen(url).read().decode('utf-8'))
+
+
 
 def wiki_search():
     """ Search function """
@@ -27,11 +33,7 @@ def wiki_search():
     section_format = "&exsectionformat=plain"
 
     try:
-        url = (BASE_URL + ACTION + TITLES + REDIRECTS
-            + prop + plaintext + section_format + FORMAT)
-
-        # open url, read content (bytes), convert in string via decode()
-        result = json.loads(urllib.request.urlopen(url).read().decode('utf-8'))
+        result = wiki_query(prop + plaintext + section_format)
 
         key = list(result['query']['pages'].keys())[0][0:]
 
@@ -51,10 +53,7 @@ def url_and_displaytitle():
 
     prop_inprop = "&prop=info&inprop=url|displaytitle"
 
-    url = BASE_URL + ACTION + TITLES + REDIRECTS + prop_inprop + FORMAT
-
-    # open url, read content (bytes), convert in string via decode()
-    result = json.loads(urllib.request.urlopen(url).read().decode('utf-8'))
+    result = wiki_query(prop_inprop)
 
     # In python 3 dict_keys are not indexable, so we need to use list()
     key = list(result['query']['pages'].keys())[0][:]
@@ -74,10 +73,7 @@ def interesting_links():
     prop = "&prop=extlinks"
 
     try:
-        url = BASE_URL + ACTION + TITLES + REDIRECTS + prop + FORMAT
-
-        # open url, read content (bytes), convert in string via decode()
-        result = json.loads(urllib.request.urlopen(url).read().decode('utf-8'))
+        result = wiki_query(prop)
 
         key = list(result['query']['pages'].keys())[0][0:]
 
@@ -98,12 +94,11 @@ def images():
 
     image_url = "http://en.wikipedia.org/wiki/"
     prop = "&prop=images"
-    url = BASE_URL + ACTION + TITLES + REDIRECTS + prop + FORMAT
+
+    result = wiki_query(prop)
 
     print('\nAll images related to this search : \n')
 
-    # open url, read content (bytes), convert in string via decode()
-    result = json.loads(urllib.request.urlopen(url).read().decode('utf-8'))
 
     key = list(result['query']['pages'].keys())[0][0:]
 
@@ -125,9 +120,7 @@ def images():
 def featured_feed(feed):
     """Featured Feed"""
 
-    url = BASE_URL + REDIRECTS + "&action=featuredfeed" + "&feed=" + feed + FORMAT
-
-    result = urllib.request.urlopen(url).read().decode('utf-8')
+    result = wiki_query("&action=featuredfeed" + "&feed=")
 
     re_title = re.compile('<title>(.*)</title>')
     re_links = re.compile('<link>(.*)en</link>')
