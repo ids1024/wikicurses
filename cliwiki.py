@@ -13,6 +13,7 @@ BASE_URL = "http://en.wikipedia.org/w/api.php?"
 ACTION = "action=query"
 FORMAT = "&format=json"
 TITLES = "&titles="
+REDIRECTS = "&redirects"
 
 
 
@@ -26,7 +27,7 @@ def wiki_search():
     section_format = "&exsectionformat=plain"
 
     try:
-        url = (BASE_URL + ACTION + TITLES
+        url = (BASE_URL + ACTION + TITLES + REDIRECTS
             + prop + plaintext + section_format + FORMAT)
 
         # open url, read content (bytes), convert in string via decode()
@@ -50,7 +51,7 @@ def url_and_displaytitle():
 
     prop_inprop = "&prop=info&inprop=url|displaytitle"
 
-    url = BASE_URL + ACTION + TITLES + prop_inprop + FORMAT
+    url = BASE_URL + ACTION + TITLES + REDIRECTS + prop_inprop + FORMAT
 
     # open url, read content (bytes), convert in string via decode()
     result = json.loads(urllib.request.urlopen(url).read().decode('utf-8'))
@@ -73,7 +74,7 @@ def interesting_links():
     prop = "&prop=extlinks"
 
     try:
-        url = BASE_URL + ACTION + TITLES + prop + FORMAT
+        url = BASE_URL + ACTION + TITLES + REDIRECTS + prop + FORMAT
 
         # open url, read content (bytes), convert in string via decode()
         result = json.loads(urllib.request.urlopen(url).read().decode('utf-8'))
@@ -97,7 +98,7 @@ def images():
 
     image_url = "http://en.wikipedia.org/wiki/"
     prop = "&prop=images"
-    url = BASE_URL + ACTION + TITLES + prop + FORMAT
+    url = BASE_URL + ACTION + TITLES + REDIRECTS + prop + FORMAT
 
     print('\nAll images related to this search : \n')
 
@@ -124,7 +125,7 @@ def images():
 def featured_feed(feed):
     """Featured Feed"""
 
-    url = BASE_URL + "&action=featuredfeed" + "&feed=" + feed + FORMAT
+    url = BASE_URL + REDIRECTS + "&action=featuredfeed" + "&feed=" + feed + FORMAT
 
     result = urllib.request.urlopen(url).read().decode('utf-8')
 
@@ -147,7 +148,7 @@ def interwiki_links():
 
     print('Inter wiki links found for this search: ')
 
-    url = BASE_URL + ACTION + TITLES + "&prop=iwlinks"+ FORMAT
+    url = BASE_URL + ACTION + TITLES + REDIRECTS + "&prop=iwlinks"+ FORMAT
 
     print(url)
 
