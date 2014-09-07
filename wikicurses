@@ -14,7 +14,15 @@ from html.parser import HTMLParser
 
 import urwid
 
+
 base_url = "http://en.wikipedia.org/w/api.php?"
+
+listpath = "/usr/share/wikicurses/interwiki.list"
+if os.path.exists("interwiki.list"):
+    listpath = "interwiki.list"
+with open(listpath) as file:
+    wikis = dict([i.split('|')[0:2] for i in file.readlines() if i[0]!='#'])
+
 
 class ExcerptHTMLParser(HTMLParser):
     sections = OrderedDict({'':[]})
@@ -80,7 +88,7 @@ class ExcerptHTMLParser(HTMLParser):
         self.add_text(text)
 
 def wiki_query(titles):
-    data = {"action":"query", "prop":"extracts|info|extlinks|images",
+    data = {"action":"query", "prop":"extracts|info|extlinks|images|iwlinks",
             "titles":titles, "redirects":True, "format":"json",
             "inprop":"url|displaytitle"}
 
@@ -143,6 +151,22 @@ def images(page):
         pass
 
 
+def interwiki_links(page):
+    """ Inter wiki links """
+
+    try:
+        iwlinks = page['iwlinks']
+    except KeyError:
+        return
+    output = ''
+    for j in page['iwlinks']:
+        try:
+            output += wikis[j['prefix']].replace('$1', j['*']) + '\n'
+        except KeyError:
+            continue
+    return output
+
+
 def featured_feed(feed):
     """Featured Feed"""
 
@@ -161,25 +185,6 @@ def featured_feed(feed):
     for desc, url in zip(result1, result2):
         output += desc + ':\t ' + url
     return output
-
-
-def interwiki_links():
-    """ Inter wiki links """
-
-    output('Inter wiki links found for this search: ')
-
-    url = base_url + ACTION + TITLES + REDIRECTS + "&prop=iwlinks"+ FORMAT
-
-    output(url)
-
-    # TODO: parse the json, match it with a dict containing
-    # url to append depending on the key returned in the url,
-    # and then only show the resulting urls
-
-    # result = urllib.request.urlopen(url).read().decode('utf-8')
-
-    # for i in reslut:
-        # print(i)
 
 
 def main():
@@ -211,8 +216,8 @@ def main():
                         const = 'potd',
                         help='Display URLs for the "Picture of the day" pages')
 
-
     args = parser.parse_args()
+
 
     screen = urwid.raw_display.Screen() 
     screen.register_palette_entry('h1', 'yellow,bold', '')
@@ -226,7 +231,6 @@ def main():
 
     if args.search :
         result, page = wiki_query(args.search)
-        # interwiki_links()
 
         widgets.append(urwid.Text(('h1', page['title']), align="center"))
 
@@ -245,6 +249,11 @@ def main():
         if links:
             widgets.append(urwid.Text(('h2', '\nExternal links\n'), align="center"))
             widgets.append(urwid.Text(links))
+
+        iwlinks = interwiki_links(page)
+        if iwlinks:
+            widgets.append(urwid.Text(('h2', '\nInterwiki links\n'), align="center"))
+            widgets.append(urwid.Text(iwlinks))
 
     else:
         if args.featured:
