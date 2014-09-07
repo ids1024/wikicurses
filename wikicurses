@@ -14,13 +14,7 @@ from html.parser import HTMLParser
 
 import urwid
 
-
-# **** Global Variables ****
-BASE_URL = "http://en.wikipedia.org/w/api.php?"
-TITLES = ""
-RESULT = None
-PAGE = None
-
+base_url = "http://en.wikipedia.org/w/api.php?"
 
 class ExcerptHTMLParser(HTMLParser):
     sections = OrderedDict({'':[]})
@@ -85,28 +79,26 @@ class ExcerptHTMLParser(HTMLParser):
         text = re.sub('\n+', '\n', text)
         self.add_text(text)
 
-def wiki_query():
-    global RESULT
-    global PAGE
+def wiki_query(titles):
     data = {"action":"query", "prop":"extracts|info|extlinks|images",
-            "titles":TITLES, "redirects":True, "format":"json",
+            "titles":titles, "redirects":True, "format":"json",
             "inprop":"url|displaytitle"}
 
-    url = BASE_URL + urllib.parse.urlencode(data)
+    url = base_url + urllib.parse.urlencode(data)
     # open url, read content (bytes), convert in string via decode()
-    RESULT = json.loads(urllib.request.urlopen(url).read().decode('utf-8'))
+    result = json.loads(urllib.request.urlopen(url).read().decode('utf-8'))
     # In python 3 dict_keys are not indexable, so we need to use list()
-    key = list(RESULT['query']['pages'])[0][:]
-    PAGE = RESULT['query']['pages'][key]
+    key = list(result['query']['pages'])[0][:]
+    page = result['query']['pages'][key]
+    return (result, page)
 
 
-
-def wiki_search():
+def wiki_search(page):
     """ Search function """
 
     try:
         parser = ExcerptHTMLParser()
-        parser.feed(PAGE['extract'])
+        parser.feed(page['extract'])
         parser.sections.pop("External links", '')
         parser.sections.pop("References", '')
         return parser.sections
@@ -117,15 +109,15 @@ def wiki_search():
 
 
 
-def external_links():
+def external_links(result, page):
     """ Get external links """
 
     try:
-        offset = RESULT['query-continue']['extlinks']['eloffset']
+        offset = result['query-continue']['extlinks']['eloffset']
         output = ''
         for j in range(0, offset):
             # ['*'] => elements of ....[j] are dict, and their keys are '*'
-            link = PAGE['extlinks'][j]['*']
+            link = page['extlinks'][j]['*']
             if link.startswith("//"):
                 link = "http:" + link
             output += link + '\n'
@@ -135,15 +127,15 @@ def external_links():
 
 
 
-def images():
+def images(page):
     """ Get images urls """
 
     image_url = "http://en.wikipedia.org/wiki/"
 
     try:
         output = ''
-        for i in range(1, len(PAGE['images'])):
-            image = PAGE['images'][i]['title']
+        for i in range(1, len(page['images'])):
+            image = page['images'][i]['title']
             image = image_url + image.replace(' ', '_')
             output += image + '\n'
         return output
@@ -155,7 +147,7 @@ def featured_feed(feed):
     """Featured Feed"""
 
     data = {"action":"featuredfeed", "feed":feed, "format": "json"}
-    url = BASE_URL + urllib.parse.urlencode(data)
+    url = base_url + urllib.parse.urlencode(data)
 
     result = urllib.request.urlopen(url).read().decode('utf-8')
 
@@ -176,7 +168,7 @@ def interwiki_links():
 
     output('Inter wiki links found for this search: ')
 
-    url = BASE_URL + ACTION + TITLES + REDIRECTS + "&prop=iwlinks"+ FORMAT
+    url = base_url + ACTION + TITLES + REDIRECTS + "&prop=iwlinks"+ FORMAT
 
     output(url)
 
@@ -233,38 +225,37 @@ def main():
 
 
     if args.search :
-        global TITLES
-        TITLES = args.search
-        wiki_query()
-        sections = wiki_search()
-        imgurls = images()
-        links = external_links()
+        result, page = wiki_query(args.search)
         # interwiki_links()
 
-        widgets.append(urwid.Text(('h1', PAGE['title']), align="center"))
+        widgets.append(urwid.Text(('h1', page['title']), align="center"))
 
+        sections = wiki_search(page)
         for i in sections:
             if i:
                 widgets.append(urwid.Text(('h2', i), align="center"))
             widgets.append(urwid.Text(sections[i]))
+
+        imgurls = images(page)
         if imgurls:
             widgets.append(urwid.Text(('h2', 'Images\n'), align="center"))
             widgets.append(urwid.Text(imgurls))
+
+        links = external_links(result, page)
         if links:
             widgets.append(urwid.Text(('h2', '\nExternal links\n'), align="center"))
             widgets.append(urwid.Text(links))
 
-    elif args.featured:
-        widgets.append(urwid.Text(('h1', "Featured Articles"), align="center"))
-        widgets.append(urwid.Text(featured_feed(args.featured)))
-
-    elif args.picture:
-        widgets.append(urwid.Text(('h1', "Picture of the Day"), align="center"))
-        widgets.append(urwid.Text(featured_feed(args.picture)))
-
-    elif args.today:
-        widgets.append(urwid.Text(('h1', "On this Day"), align="center"))
-        widgets.append(urwid.Text(featured_feed(args.today)))
+    else:
+        if args.featured:
+            title = "Featured Articles"
+        elif args.picture:
+            title = "Picture of the Day"
+        else:
+            title = "On this Day"
+        feed = args.featured or args.picture or args.today
+        widgets.append(urwid.Text(('h1', title), align="center"))
+        widgets.append(urwid.Text(featured_feed(feed)))
 
 
     pager = urwid.ListBox(widgets)
