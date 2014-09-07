@@ -50,9 +50,15 @@ def wiki_search():
 
     try:
         if USEMARKDOWN:
+            html = PAGE['extract']
+            # Suboptimal method to remove unwanted sections at the end.
+            #html = re.sub("<h2>See also</h2>.*", "", html, flags=re.DOTALL)
+            html = re.sub("<h2>External links</h2>.*", "", html, flags=re.DOTALL)
+            html = re.sub("<h2>References</h2>.*", "", html, flags=re.DOTALL)
+
             pandoc = Popen(("pandoc", "-f", "html", "-t", "markdown"),
                      stdin=PIPE, stdout=PIPE)
-            output(pandoc.communicate(PAGE['extract'].encode())[0].decode())
+            output(pandoc.communicate(html.encode())[0].decode())
         else:
             output(PAGE['extract'])
 
@@ -77,7 +83,9 @@ def url_and_displaytitle():
 def interesting_links():
     """Fonction displaying related links => Interest on the CLI ?"""
 
-    output('\nYou may also be interested in the following links: \n')
+    output('\nExternal Links')
+    if USEMARKDOWN:
+        output(len('External Links')*'-'+'\n')
 
     try:
         offset = RESULT['query-continue']['extlinks']['eloffset']
@@ -87,7 +95,10 @@ def interesting_links():
             link = PAGE['extlinks'][j]['*']
             if link.startswith("//"):
                 link = "http:" + link
-            output('\t'+link)
+            if USEMARKDOWN:
+                output('- <'+link+'>')
+            else:
+                output('\t'+link)
 
     except KeyError:
         output("Sorry, we couldn't find any links.")
@@ -99,18 +110,21 @@ def images():
 
     image_url = "http://en.wikipedia.org/wiki/"
 
-    output('\nAll images related to this search : \n')
+    output('\nImages')
+    if USEMARKDOWN:
+        output(len('Images')*'-'+'\n')
 
     try:
         for i in range(1, len(PAGE['images'])):
             image = PAGE['images'][i]['title']
             image = image_url + image.replace(' ', '_')
-            output('\t'+image)
-
-        output('\n\t------------------\t')
+            if USEMARKDOWN:
+                output('- <'+image+'>')
+            else:
+                output('\t'+image)
 
     except KeyError:
-        output('\n\t------------------\t')
+        pass
 
 
 def featured_feed(feed):
