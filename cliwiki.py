@@ -128,7 +128,7 @@ def external_links():
             link = PAGE['extlinks'][j]['*']
             if link.startswith("//"):
                 link = "http:" + link
-            output += '- <'+link+'>'
+            output += link + '\n'
         return output
     except KeyError:
         pass
@@ -145,7 +145,7 @@ def images():
         for i in range(1, len(PAGE['images'])):
             image = PAGE['images'][i]['title']
             image = image_url + image.replace(' ', '_')
-            output += '- <'+image+'>'
+            output += image + '\n'
         return output
     except KeyError:
         pass
