@@ -197,10 +197,6 @@ def main():
     parser = argparse.ArgumentParser(description =
                                         "A simple curses interface for accessing Wikipedia.")
 
-    parser.add_argument('--nopager',
-                        action = 'store_true',
-                        help="Do not display using a pager")
-
     group = parser.add_mutually_exclusive_group(required = True)
 
     group.add_argument('search',

@@ -6,9 +6,9 @@ A simple curses interface for accessing Wikipedia.
 ## Usage
 ~~~bash
 $ ./cliwiki.py -h
-usage: cliwiki.py [-h] [-d | -f | -p] search
+usage: wikicurses [-h] [-d] [-f] [-p] [search]
 
-Access Wikipedia from Command Line
+A simple curses interface for accessing Wikipedia.
 
 positional arguments:
   search          Page to search for on Wikipedia
