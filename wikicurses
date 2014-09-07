@@ -285,6 +285,7 @@ def main():
             return False
         return True
     loop.unhandled_input = keymapper
+    loop.handle_mouse = False
     loop.run()
 
 
