@@ -50,7 +50,7 @@ class ExcerptHTMLParser(HTMLParser):
         elif tag == 'b':
             self.add_text('**')
         elif tag == 'li':
-            self.add_text("-    ")
+            self.add_text("- ")
         elif tag == 'blockquote':
             self.inblockquote = True
         else:
@@ -60,6 +60,8 @@ class ExcerptHTMLParser(HTMLParser):
         if tag == 'h2':
             self.inh2 = False
             self.sections[self.cursection] = ''
+        elif re.fullmatch("h[3-6]", tag):
+            self.add_text('\n')
         elif tag == 'i':
             self.add_text('*')
         elif tag == 'b':
@@ -72,7 +74,9 @@ class ExcerptHTMLParser(HTMLParser):
             pass
 
     def handle_data(self, data):
-        self.add_text(data.replace('*','\\*'))
+        text = data.replace('*', '\\*')
+        text = re.sub('\n+', '\n', text)
+        self.add_text(text)
 
 def wiki_query():
     global RESULT
