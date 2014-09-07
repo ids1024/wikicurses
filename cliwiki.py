@@ -43,12 +43,13 @@ class ExcerptHTMLParser(HTMLParser):
             self.inh2 = True
             self.cursection = ''
         elif re.fullmatch("h[3-6]", tag):
+            self.add_text('\033[32m')
             num = int(re.sub("h([3-6])", "\\1", tag))
             self.add_text('\n'+'#'*num)
         elif tag == 'i':
-            self.add_text('*')
+            self.add_text('\033[3m')
         elif tag == 'b':
-            self.add_text('**')
+            self.add_text('\033[1m')
         elif tag == 'li':
             self.add_text("- ")
         elif tag == 'blockquote':
@@ -61,11 +62,12 @@ class ExcerptHTMLParser(HTMLParser):
             self.inh2 = False
             self.sections[self.cursection] = ''
         elif re.fullmatch("h[3-6]", tag):
+            self.add_text('\033[0m')
             self.add_text('\n')
         elif tag == 'i':
-            self.add_text('*')
+            self.add_text('\033[23m')
         elif tag == 'b':
-            self.add_text('**')
+            self.add_text('\033[21m')
         elif tag == 'p':
             self.add_text('\n')
         elif tag == 'blockquote':
