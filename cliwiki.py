@@ -8,7 +8,11 @@ import json
 import urllib.request
 import re
 import argparse
+import textwrap
+
+from collections import OrderedDict
 from subprocess import Popen, PIPE
+from html.parser import HTMLParser
 
 
 # **** Global Variables ****
@@ -16,19 +20,66 @@ BASE_URL = "http://en.wikipedia.org/w/api.php?"
 TITLES = ""
 RESULT = None
 PAGE = None
-USEMARKDOWN = False
 PAGER = None
 
 
 # **** Functions ****
+class ExcerptHTMLParser(HTMLParser):
+    sections = OrderedDict({'':''})
+    cursection = ''
+    inh2 = False
+    inblockquote = False
+
+    def add_text(self, text):
+        if self.inh2:
+            self.cursection += text
+        elif self.inblockquote:
+            self.sections[self.cursection] += '> ' + text
+        else:
+            self.sections[self.cursection] += text
+
+    def handle_starttag(self, tag, attrs):
+        if tag == 'h2':
+            self.inh2 = True
+            self.cursection = ''
+        elif re.fullmatch("h[3-6]", tag):
+            num = int(re.sub("h([3-6])", "\\1", tag))
+            self.add_text('\n'+'#'*num)
+        elif tag == 'i':
+            self.add_text('*')
+        elif tag == 'b':
+            self.add_text('**')
+        elif tag == 'li':
+            self.add_text("-    ")
+        elif tag == 'blockquote':
+            self.inblockquote = True
+        else:
+            pass
+
+    def handle_endtag(self, tag):
+        if tag == 'h2':
+            self.inh2 = False
+            self.sections[self.cursection] = ''
+        elif tag == 'i':
+            self.add_text('*')
+        elif tag == 'b':
+            self.add_text('**')
+        elif tag == 'p':
+            self.add_text('\n')
+        elif tag == 'blockquote':
+            self.inblockquote = False
+        else:
+            pass
+
+    def handle_data(self, data):
+        self.add_text(data.replace('*','\\*'))
+
 def wiki_query():
     global RESULT
     global PAGE
     data = {"action":"query", "prop":"extracts|info|extlinks|images",
             "titles":TITLES, "redirects":True, "format":"json",
             "inprop":"url|displaytitle"}
-    if not USEMARKDOWN:
-            data.update({"explaintext":True, "exsectionformat":"plain"})
 
     url = BASE_URL + urllib.parse.urlencode(data)
     # open url, read content (bytes), convert in string via decode()
@@ -49,18 +100,21 @@ def wiki_search():
     """ Search function """
 
     try:
-        if USEMARKDOWN:
-            html = PAGE['extract']
-            # Suboptimal method to remove unwanted sections at the end.
-            #html = re.sub("<h2>See also</h2>.*", "", html, flags=re.DOTALL)
-            html = re.sub("<h2>External links</h2>.*", "", html, flags=re.DOTALL)
-            html = re.sub("<h2>References</h2>.*", "", html, flags=re.DOTALL)
+        parser = ExcerptHTMLParser()
+        parser.feed(PAGE['extract'])
+        parser.sections.pop("External links", '')
+        parser.sections.pop("References", '')
 
-            pandoc = Popen(("pandoc", "-f", "html", "-t", "markdown"),
-                     stdin=PIPE, stdout=PIPE)
-            output(pandoc.communicate(html.encode())[0].decode())
-        else:
-            output(PAGE['extract'])
+        wrapper = textwrap.TextWrapper(replace_whitespace=False,
+                  drop_whitespace=False)
+        for i in parser.sections:
+            if i:
+                output(i)
+                output(len(i)*'-')
+            for line in parser.sections[i].splitlines():
+                output(wrapper.fill(line))
+
+
 
     except KeyError:
         output('No wikipedia page for that title. '
@@ -72,11 +126,8 @@ def url_and_displaytitle():
     """ Display URL and Title for the page """
 
     output(PAGE['title'])
-    if USEMARKDOWN:
-        output(len(PAGE['title'])*'=')
-        output('<'+PAGE['fullurl']+'>\n')
-    else:
-        output(PAGE['fullurl']+'\n')
+    output(len(PAGE['title'])*'=')
+    output('<'+PAGE['fullurl']+'>\n')
 
 
 
@@ -84,8 +135,7 @@ def interesting_links():
     """Fonction displaying related links => Interest on the CLI ?"""
 
     output('\nExternal Links')
-    if USEMARKDOWN:
-        output(len('External Links')*'-'+'\n')
+    output(len('External Links')*'-'+'\n')
 
     try:
         offset = RESULT['query-continue']['extlinks']['eloffset']
@@ -95,10 +145,7 @@ def interesting_links():
             link = PAGE['extlinks'][j]['*']
             if link.startswith("//"):
                 link = "http:" + link
-            if USEMARKDOWN:
-                output('- <'+link+'>')
-            else:
-                output('\t'+link)
+            output('- <'+link+'>')
 
     except KeyError:
         output("Sorry, we couldn't find any links.")
@@ -111,17 +158,13 @@ def images():
     image_url = "http://en.wikipedia.org/wiki/"
 
     output('\nImages')
-    if USEMARKDOWN:
-        output(len('Images')*'-'+'\n')
+    output(len('Images')*'-'+'\n')
 
     try:
         for i in range(1, len(PAGE['images'])):
             image = PAGE['images'][i]['title']
             image = image_url + image.replace(' ', '_')
-            if USEMARKDOWN:
-                output('- <'+image+'>')
-            else:
-                output('\t'+image)
+            output('- <'+image+'>')
 
     except KeyError:
         pass
@@ -173,10 +216,6 @@ def main():
     parser = argparse.ArgumentParser(description =
                                         "Access Wikipedia from Command Line")
 
-    parser.add_argument('-m', '--markdown',
-                        action = 'store_true',
-                        help="Show page contents in markdown format")
-
     parser.add_argument('--nopager',
                         action = 'store_true',
                         help="Do not display using a pager")
@@ -206,21 +245,16 @@ def main():
 
     args = parser.parse_args()
 
-    global USEMARKDOWN
-    USEMARKDOWN = args.markdown
-
     global PAGER
     if sys.stdout.isatty() and not args.nopager:
         pager = os.environ.get("PAGER", "less")
         if pager == "vimpager":
-            vformat = "markdown" if USEMARKDOWN else "text"
-            pager = ("vimpager", "-c", "setf "+"markdown")
+            pager = ("vimpager", "-c", "setf markdown")
         PAGER = Popen(pager, stdin=PIPE, universal_newlines=True)
 
 
     try:
         if args.search :
-
             global TITLES
             TITLES = args.search
 
