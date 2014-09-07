@@ -5,7 +5,7 @@ A simple curses interface for accessing Wikipedia.
 
 ## Usage
 ~~~bash
-$ ./cliwiki.py -h
+$ wikicurses -h
 usage: wikicurses [-h] [-d] [-f] [-p] [search]
 
 A simple curses interface for accessing Wikipedia.
