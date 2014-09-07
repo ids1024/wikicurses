@@ -254,8 +254,6 @@ def main():
     global PAGER
     if sys.stdout.isatty() and not args.nopager:
         pager = os.environ.get("PAGER", "less")
-        if pager == "vimpager":
-            pager = ("vimpager", "-c", "setf markdown")
         PAGER = Popen(pager, stdin=PIPE, universal_newlines=True)
 
 
