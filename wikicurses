@@ -195,7 +195,7 @@ def main():
 
     # Gestion des paramètres
     parser = argparse.ArgumentParser(description =
-                                        "Access Wikipedia from Command Line")
+                                        "A simple curses interface for accessing Wikipedia.")
 
     parser.add_argument('--nopager',
                         action = 'store_true',
