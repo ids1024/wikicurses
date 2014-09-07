@@ -65,11 +65,12 @@ def wiki_search():
 def url_and_displaytitle():
     """ Display URL and Title for the page """
 
-    output('\n\nTitle and url for this Wikipedia page: \n')
-
-    output('\t'+PAGE['title'])
-    output('\t'+PAGE['fullurl'])
-    output('\n\t-------------------\t')
+    output(PAGE['title'])
+    if USEMARKDOWN:
+        output(len(PAGE['title'])*'=')
+        output('<'+PAGE['fullurl']+'>\n')
+    else:
+        output(PAGE['fullurl']+'\n')
 
 
 
@@ -210,8 +211,8 @@ def main():
             TITLES = args.search
 
             wiki_query()
-            wiki_search()
             url_and_displaytitle()
+            wiki_search()
             images()
             interesting_links()
             # interwiki_links()
