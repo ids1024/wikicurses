@@ -2,292 +2,110 @@
 
 """ CLI to access wikipedia informations """
 
-import sys
-import os
 import json
 import urllib.request
 import re
 import argparse
 
-from collections import OrderedDict
-from html.parser import HTMLParser
-
 import urwid
 
+from wikicurses.wiki import Wiki
 
 base_url = "http://en.wikipedia.org/w/api.php?"
 
-listpath = "/usr/share/wikicurses/interwiki.list"
-if os.path.exists("interwiki.list"):
-    listpath = "interwiki.list"
-with open(listpath) as file:
-    wikis = dict([i.split('|')[0:2] for i in file.readlines() if i[0]!='#'])
+
+parser = argparse.ArgumentParser(description =
+                                    "A simple curses interface for accessing Wikipedia.")
+
+group = parser.add_mutually_exclusive_group(required = True)
+
+group.add_argument('search',
+                    nargs = '?',
+                    default = '',
+                    help = "Page to search for on Wikipedia")
+
+group.add_argument('-d', '--today',
+                    action = 'store_const',
+                    const = 'onthisday',
+                    help='Display URLs for the "On this day" pages')
+
+group.add_argument('-f', '--featured',
+                    action = 'store_const',
+                    const = 'featured',
+                    help = 'Display the featured articles URLs')
+
+group.add_argument('-p', '--picture',
+                    action = 'store_const',
+                    const = 'potd',
+                    help='Display URLs for the "Picture of the day" pages')
+
+args = parser.parse_args()
+
+wiki = Wiki(base_url)
+
+screen = urwid.raw_display.Screen() 
+screen.register_palette_entry('h1', 'yellow,bold', '')
+screen.register_palette_entry('h2', 'underline', '')
+#screen.register_palette_entry('italic', 'italics', '') #No italics option?
+screen.register_palette_entry('bold', 'bold', '')
+screen.register_palette_entry('bolditalic', 'bold', '')
+
+widgets = urwid.SimpleFocusListWalker([])
 
 
-class ExcerptHTMLParser(HTMLParser):
-    sections = OrderedDict({'':[]})
-    cursection = ''
-    inh2 = False
-    inblockquote = False
-    bold = False
-    italic = False
+if args.search :
+    wiki.search(args.search)
+    title = wiki.get_title()
 
-    def add_text(self, text):
-        if self.bold and self.italic:
-            tformat = "bolditalic"
-        elif self.bold:
-            tformat = "bold"
-        elif self.italic:
-            tformat = "italic"
-        else:
-            tformat = ''
-        if self.inh2:
-            self.cursection += text
-        elif self.inblockquote:
-            self.sections[self.cursection].append((tformat, '> ' + text))
-        else:
-            self.sections[self.cursection].append((tformat, text))
+    widgets.append(urwid.Text(('h1', title), align="center"))
 
-    def handle_starttag(self, tag, attrs):
-        if tag == 'h2':
-            self.inh2 = True
-            self.cursection = ''
-        elif re.fullmatch("h[3-6]", tag):
-            self.add_text('\n')
-        elif tag == 'i':
-            self.italic = True
-        elif tag == 'b':
-            self.bold = True
-        elif tag == 'li':
-            self.add_text("- ")
-        elif tag == 'blockquote':
-            self.inblockquote = True
-        else:
-            pass
+    sections = wiki.get_extract()
+    for i in sections:
+        if i:
+            widgets.append(urwid.Text(('h2', i), align="center"))
+        widgets.append(urwid.Text(sections[i]))
 
-    def handle_endtag(self, tag):
-        if tag == 'h2':
-            self.inh2 = False
-            self.sections[self.cursection] = []
-        elif re.fullmatch("h[3-6]", tag):
-            self.add_text('\n')
-        elif tag == 'i':
-            self.italic = False
-        elif tag == 'b':
-            self.bold = False
-        elif tag == 'p':
-            self.add_text('\n')
-        elif tag == 'blockquote':
-            self.inblockquote = False
-        else:
-            pass
+    imgurls = wiki.get_images()
+    if imgurls:
+        widgets.append(urwid.Text(('h2', 'Images\n'), align="center"))
+        widgets.append(urwid.Text(imgurls))
 
-    def handle_data(self, data):
-        text = data.replace('*', '\\*')
-        text = re.sub('\n+', '\n', text)
-        self.add_text(text)
+    links = wiki.get_external_links()
+    if links:
+        widgets.append(urwid.Text(('h2', '\nExternal links\n'), align="center"))
+        widgets.append(urwid.Text(links))
 
+    iwlinks = wiki.get_interwiki_links()
+    if iwlinks:
+        widgets.append(urwid.Text(('h2', '\nInterwiki links\n'), align="center"))
+        widgets.append(urwid.Text(iwlinks))
 
-class Wiki(object):
-    result = None
-    page = None
-
-    def __init__(self, url):
-        self.siteurl = url
-
-    def search(self, titles):
-        data = {"action":"query", "prop":"extracts|info|extlinks|images|iwlinks",
-                "titles":titles, "redirects":True, "format":"json",
-                "inprop":"url|displaytitle"}
-
-        url = self.siteurl + urllib.parse.urlencode(data)
-        # open url, read content (bytes), convert in string via decode()
-        self.result = json.loads(urllib.request.urlopen(url).read().decode('utf-8'))
-        # In python 3 dict_keys are not indexable, so we need to use list()
-        key = list(self.result['query']['pages'])[0][:]
-        self.page = self.result['query']['pages'][key]
-
-    def get_title(self):
-        return self.page['title']
-
-    def get_extract(self):
-        """ Get extract """
-        try:
-            parser = ExcerptHTMLParser()
-            parser.feed(self.page['extract'])
-            parser.sections.pop("External links", '')
-            parser.sections.pop("References", '')
-            return parser.sections
-
-        except KeyError:
-            return {'':'No wikipedia page for that title.\n'
-                   'Wikipedia search titles are case sensitive.'}
-
-
-    def get_external_links(self):
-        """ Get external links """
-        try:
-            offset = self.result['query-continue']['extlinks']['eloffset']
-            output = ''
-            for j in range(0, offset):
-                # ['*'] => elements of ....[j] are dict, and their keys are '*'
-                link = self.page['extlinks'][j]['*']
-                if link.startswith("//"):
-                    link = "http:" + link
-                output += link + '\n'
-            return output
-        except KeyError:
-            pass
-
-    def get_interwiki_links(self):
-        """ Inter wiki links """
-        try:
-            iwlinks = self.page['iwlinks']
-        except KeyError:
-            return
-        output = ''
-        for j in self.page['iwlinks']:
-            try:
-                output += wikis[j['prefix']].replace('$1', j['*']) + '\n'
-            except KeyError:
-                continue
-        return output
-
-    def get_images(self):
-
-        """ Get images urls """
-        image_url = "http://en.wikipedia.org/wiki/"
-
-        try:
-            output = ''
-            for i in range(1, len(self.page['images'])):
-                image = self.page['images'][i]['title']
-                image = image_url + image.replace(' ', '_')
-                output += image + '\n'
-            return output
-        except KeyError:
-            pass
-
-    def get_featured_feed(self, feed):
-        """Featured Feed"""
-
-        data = {"action":"featuredfeed", "feed":feed, "format": "json"}
-        url = self.siteurl + urllib.parse.urlencode(data)
-
-        result = urllib.request.urlopen(url).read().decode('utf-8')
-
-        re_title = re.compile('<title>(.*)</title>')
-        re_links = re.compile('<link>(.*)en</link>')
-
-        result1 = re.findall(re_title, result)
-        result2 = re.findall(re_links, result)
-
-        output = '\n'
-        for desc, url in zip(result1, result2):
-            output += desc + ':\t ' + url
-        return output
-
-
-def main():
-    """ Main function """
-
-    # Gestion des paramètres
-    parser = argparse.ArgumentParser(description =
-                                        "A simple curses interface for accessing Wikipedia.")
-
-    group = parser.add_mutually_exclusive_group(required = True)
-
-    group.add_argument('search',
-                        nargs = '?',
-                        default = '',
-                        help = "Page to search for on Wikipedia")
-
-    group.add_argument('-d', '--today',
-                        action = 'store_const',
-                        const = 'onthisday',
-                        help='Display URLs for the "On this day" pages')
-
-    group.add_argument('-f', '--featured',
-                        action = 'store_const',
-                        const = 'featured',
-                        help = 'Display the featured articles URLs')
-
-    group.add_argument('-p', '--picture',
-                        action = 'store_const',
-                        const = 'potd',
-                        help='Display URLs for the "Picture of the day" pages')
-
-    args = parser.parse_args()
-
-    wiki = Wiki(base_url)
-
-    screen = urwid.raw_display.Screen() 
-    screen.register_palette_entry('h1', 'yellow,bold', '')
-    screen.register_palette_entry('h2', 'underline', '')
-    #screen.register_palette_entry('italic', 'italics', '') #No italics option?
-    screen.register_palette_entry('bold', 'bold', '')
-    screen.register_palette_entry('bolditalic', 'bold', '')
-
-    widgets = urwid.SimpleFocusListWalker([])
-
-
-    if args.search :
-        wiki.search(args.search)
-        title = wiki.get_title()
-
-        widgets.append(urwid.Text(('h1', title), align="center"))
-
-        sections = wiki.get_extract()
-        for i in sections:
-            if i:
-                widgets.append(urwid.Text(('h2', i), align="center"))
-            widgets.append(urwid.Text(sections[i]))
-
-        imgurls = wiki.get_images()
-        if imgurls:
-            widgets.append(urwid.Text(('h2', 'Images\n'), align="center"))
-            widgets.append(urwid.Text(imgurls))
-
-        links = wiki.get_external_links()
-        if links:
-            widgets.append(urwid.Text(('h2', '\nExternal links\n'), align="center"))
-            widgets.append(urwid.Text(links))
-
-        iwlinks = wiki.get_interwiki_links()
-        if iwlinks:
-            widgets.append(urwid.Text(('h2', '\nInterwiki links\n'), align="center"))
-            widgets.append(urwid.Text(iwlinks))
-
+else:
+    if args.featured:
+        title = "Featured Articles"
+    elif args.picture:
+        title = "Picture of the Day"
     else:
-        if args.featured:
-            title = "Featured Articles"
-        elif args.picture:
-            title = "Picture of the Day"
-        else:
-            title = "On this Day"
-        feed = args.featured or args.picture or args.today
-        widgets.append(urwid.Text(('h1', title), align="center"))
-        widgets.append(urwid.Text(wiki.get_featured_feed(feed)))
+        title = "On this Day"
+    feed = args.featured or args.picture or args.today
+    widgets.append(urwid.Text(('h1', title), align="center"))
+    widgets.append(urwid.Text(wiki.get_featured_feed(feed)))
 
 
-    pager = urwid.ListBox(widgets)
-    pager._command_map['k'] = 'cursor up'
-    pager._command_map['j'] = 'cursor down'
-    pager._command_map['ctrl b'] = 'cursor page up'
-    pager._command_map['ctrl f'] = 'cursor page down'
+pager = urwid.ListBox(widgets)
+pager._command_map['k'] = 'cursor up'
+pager._command_map['j'] = 'cursor down'
+pager._command_map['ctrl b'] = 'cursor page up'
+pager._command_map['ctrl f'] = 'cursor page down'
 
-    loop = urwid.MainLoop(pager,screen=screen)
-    def keymapper(input):
-        #TODO: Implement gg and G
-        if input == 'q':
-            raise  urwid.ExitMainLoop
-        else:
-            return False
-        return True
-    loop.unhandled_input = keymapper
-    loop.handle_mouse = False
-    loop.run()
-
-
-if __name__ == "__main__":
-    main()
+loop = urwid.MainLoop(pager,screen=screen)
+def keymapper(input):
+    #TODO: Implement gg and G
+    if input == 'q':
+        raise  urwid.ExitMainLoop
+    else:
+        return False
+    return True
+loop.unhandled_input = keymapper
+loop.handle_mouse = False
+loop.run()
