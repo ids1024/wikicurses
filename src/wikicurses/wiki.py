@@ -24,10 +24,11 @@ class Wiki(object):
         key = list(self.result['query']['pages'])[0][:]
         self.page = self.result['query']['pages'][key]
 
-    def get_title(self):
+    @property
+    def title(self):
         return self.page['title']
 
-    def get_extract(self):
+    def __get_extract(self):
         """ Get extract """
         try:
             parser = ExcerptHTMLParser()
@@ -40,8 +41,7 @@ class Wiki(object):
             return {'':'No wikipedia page for that title.\n'
                    'Wikipedia search titles are case sensitive.'}
 
-
-    def get_external_links(self):
+    def __get_external_links(self):
         """ Get external links """
         try:
             offset = self.result['query-continue']['extlinks']['eloffset']
@@ -56,7 +56,7 @@ class Wiki(object):
         except KeyError:
             pass
 
-    def get_interwiki_links(self):
+    def __get_interwiki_links(self):
         """ Inter wiki links """
         try:
             iwlinks = self.page['iwlinks']
@@ -70,9 +70,9 @@ class Wiki(object):
                 continue
         return output
 
-    def get_images(self):
-
+    def __get_images(self):
         """ Get images urls """
+
         image_url = "http://en.wikipedia.org/wiki/"
 
         try:
@@ -84,6 +84,15 @@ class Wiki(object):
             return output
         except KeyError:
             pass
+
+    def get_content(self):
+        sections = self.__get_extract()
+        sections.update({
+            'Images\n':self.__get_images(),
+            '\nExternal links\n':self.__get_external_links(),
+            '\nInterwiki links\n':self.__get_interwiki_links()
+            })
+        return sections
 
     def get_featured_feed(self, feed):
         """Featured Feed"""
