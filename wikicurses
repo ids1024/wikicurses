@@ -48,11 +48,10 @@ if args.search :
     article = wiki.search(args.search)
     widgets.append(urwid.Text(('h1', article.title), align="center"))
 
-    sections = article.get_content()
-    for i in sections:
-        if i:
-            widgets.append(urwid.Text(('h2', i), align="center"))
-        widgets.append(urwid.Text(sections[i]))
+    for title, content in article.get_content().items():
+        if title:
+            widgets.append(urwid.Text(('h2', title), align="center"))
+        widgets.append(urwid.Text(content))
 
 else:
     if args.featured:
