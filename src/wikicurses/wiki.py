@@ -19,6 +19,25 @@ class Wiki(object):
         result = json.loads(urllib.request.urlopen(url).read().decode('utf-8'))
         return _Article(result)
 
+    def get_featured_feed(self, feed):
+        """Featured Feed"""
+
+        data = {"action":"featuredfeed", "feed":feed, "format": "json"}
+        url = self.siteurl + urllib.parse.urlencode(data)
+
+        result = urllib.request.urlopen(url).read().decode('utf-8')
+
+        re_title = re.compile('<title>(.*)</title>')
+        re_links = re.compile('<link>(.*)en</link>')
+
+        result1 = re.findall(re_title, result)
+        result2 = re.findall(re_links, result)
+
+        output = '\n'
+        for desc, url in zip(result1, result2):
+            output += desc + ':\t ' + url
+        return output
+
 
 class _Article(object):
     def __init__(self, result):
@@ -97,22 +116,3 @@ class _Article(object):
             '\nInterwiki links\n':self._get_interwiki_links()
             })
         return sections
-
-    def get_featured_feed(self, feed):
-        """Featured Feed"""
-
-        data = {"action":"featuredfeed", "feed":feed, "format": "json"}
-        url = self.siteurl + urllib.parse.urlencode(data)
-
-        result = urllib.request.urlopen(url).read().decode('utf-8')
-
-        re_title = re.compile('<title>(.*)</title>')
-        re_links = re.compile('<link>(.*)en</link>')
-
-        result1 = re.findall(re_title, result)
-        result2 = re.findall(re_links, result)
-
-        output = '\n'
-        for desc, url in zip(result1, result2):
-            output += desc + ':\t ' + url
-        return output

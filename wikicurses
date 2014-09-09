@@ -63,7 +63,7 @@ else:
         title = "On this Day"
     feed = args.featured or args.picture or args.today
     widgets.append(urwid.Text(('h1', title), align="center"))
-    widgets.append(urwid.Text(article.get_featured_feed(feed)))
+    widgets.append(urwid.Text(wiki.get_featured_feed(feed)))
 
 
 pager = urwid.ListBox(widgets)
