@@ -45,10 +45,10 @@ wiki = Wiki(base_url)
 widgets = []
 
 if args.search :
-    wiki.search(args.search)
-    widgets.append(urwid.Text(('h1', wiki.title), align="center"))
+    article = wiki.search(args.search)
+    widgets.append(urwid.Text(('h1', article.title), align="center"))
 
-    sections = wiki.get_content()
+    sections = article.get_content()
     for i in sections:
         if i:
             widgets.append(urwid.Text(('h2', i), align="center"))
@@ -63,7 +63,7 @@ else:
         title = "On this Day"
     feed = args.featured or args.picture or args.today
     widgets.append(urwid.Text(('h1', title), align="center"))
-    widgets.append(urwid.Text(wiki.get_featured_feed(feed)))
+    widgets.append(urwid.Text(article.get_featured_feed(feed)))
 
 
 pager = urwid.ListBox(widgets)
