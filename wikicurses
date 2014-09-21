@@ -39,7 +39,7 @@ wiki = Wiki(base_url)
 if args.search :
     article = wiki.search(args.search)
     title = article.title
-    content = article.get_content()
+    content = article.content
 else:
     feed = args.featured or args.picture or args.today
     title = {'onthisday': 'On this Day',

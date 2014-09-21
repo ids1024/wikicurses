@@ -47,7 +47,8 @@ class _Article(object):
         self.page = next(iter(result['query']['pages'].values()))
         self.title = self.page['title']
 
-    def get_content(self):
+    @property
+    def content(self):
         if 'extract' not in self.page:
             return {'':'Page Not Found.'}
         sections = parseExtract(self.page['extract'])
