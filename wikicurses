@@ -1,6 +1,5 @@
 #! /usr/bin/env python3
 
-""" CLI to access wikipedia informations """
 
 import json
 import urllib.request
@@ -13,27 +12,22 @@ from wikicurses.wiki import Wiki
 
 base_url = "http://en.wikipedia.org/w/api.php?"
 
-
 parser = argparse.ArgumentParser(description =
                                     "A simple curses interface for accessing Wikipedia.")
 
 group = parser.add_mutually_exclusive_group(required = True)
-
 group.add_argument('search',
                     nargs = '?',
                     default = '',
                     help = "Page to search for on Wikipedia")
-
 group.add_argument('-d', '--today',
                     action = 'store_const',
                     const = 'onthisday',
                     help='Display URLs for the "On this day" pages')
-
 group.add_argument('-f', '--featured',
                     action = 'store_const',
                     const = 'featured',
                     help = 'Display the featured articles URLs')
-
 group.add_argument('-p', '--picture',
                     action = 'store_const',
                     const = 'potd',
