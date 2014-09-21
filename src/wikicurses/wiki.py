@@ -1,8 +1,10 @@
 import json
 import urllib.request
 import re
+import  xml.etree.ElementTree as ET
+from collections import OrderedDict
 
-from wikicurses.htmlparse import parseExtract
+from wikicurses.htmlparse import parseExtract, parseFeature
 from wikicurses import wikis
 
 image_url = "http://en.wikipedia.org/wiki/"
@@ -26,16 +28,17 @@ class Wiki(object):
     def get_featured_feed(self, feed):
         """Featured Feed"""
 
-        data = {"action":"featuredfeed", "feed":feed, "format": "json"}
-        result = self._query(data)
-
-        re_title = re.compile('<title>(.*)</title>')
-        re_links = re.compile('<link>(.*)en</link>')
-
-        result1 = re.findall(re_title, result)
-        result2 = re.findall(re_links, result)
-
-        return '\n' + ''.join('%s:\t %s' % i for i in zip(result1, result2))
+        data = {"action":"featuredfeed", "feed":feed}
+        result = ET.fromstring(self._query(data))
+        sections = OrderedDict()
+        for i in result[0].findall('item'):
+            title = i.find('title').text
+            url = i.find('link').text
+            description = i.find('description').text
+            htmls = re.findall("<li>(.*?)</li>", description, flags=re.DOTALL)
+            text = '\n'.join(map(parseFeature, htmls))
+            sections[title] = url + '\n' + text
+        return sections
 
 
 class _Article(object):

@@ -36,17 +36,11 @@ group.add_argument('-p', '--picture',
 args = parser.parse_args()
 
 wiki = Wiki(base_url)
-widgets = []
 
 if args.search :
     article = wiki.search(args.search)
-    widgets.append(urwid.Text([('h1', article.title), '\n'], align="center"))
-
-    for title, content in article.get_content().items():
-        if title:
-            widgets.append(urwid.Text(['\n', ('h2', title)], align="center"))
-        widgets.append(urwid.Text(content))
-
+    title = article.title
+    content = article.get_content()
 else:
     if args.featured:
         title = "Featured Articles"
@@ -55,8 +49,14 @@ else:
     else:
         title = "On this Day"
     feed = args.featured or args.picture or args.today
-    widgets.append(urwid.Text(('h1', title), align="center"))
-    widgets.append(urwid.Text(wiki.get_featured_feed(feed)))
+    content = wiki.get_featured_feed(feed)
+
+widgets = []
+widgets.append(urwid.Text([('h1', title), '\n'], align="center"))
+for title, content in content.items():
+    if title:
+        widgets.append(urwid.Text(['\n', ('h2', title)], align="center"))
+    widgets.append(urwid.Text(content))
 
 
 pager = urwid.ListBox(widgets)

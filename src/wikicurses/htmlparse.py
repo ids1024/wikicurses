@@ -11,13 +11,20 @@ def parseExtract(html):
     parser.feed(html)
     return parser.sections
 
+def parseFeature(html):
+    parser = _FeatureHTMLParser()
+    parser.feed(html)
+    return parser.text
+
 class _ExtractHTMLParser(HTMLParser):
-    sections = OrderedDict({'':[]})
-    cursection = ''
-    inh = 0
-    inblockquote = False
-    bold = False
-    italic = False
+    def __init__(self):
+        self.sections = OrderedDict({'':[]})
+        self.cursection = ''
+        self.inh = 0
+        self.inblockquote = False
+        self.bold = False
+        self.italic = False
+        super().__init__(self)
 
     def add_text(self, text):
         if text == ENDPAR:
@@ -89,3 +96,9 @@ class _ExtractHTMLParser(HTMLParser):
         text = data.replace('*', '\\*')
         text = re.sub('\n+', '\n', text)
         self.add_text(text)
+
+
+class _FeatureHTMLParser(HTMLParser):
+    text = ''
+    def handle_data(self, data):
+        self.text += data
