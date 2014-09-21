@@ -9,23 +9,23 @@ class Wiki(object):
     def __init__(self, url):
         self.siteurl = url
 
+    def _query(self, data):
+        url = self.siteurl + urllib.parse.urlencode(data)
+        # open url, read content (bytes), convert in string via decode()
+        return urllib.request.urlopen(url).read().decode('utf-8')
+
     def search(self, titles):
         data = {"action":"query", "prop":"extracts|info|extlinks|images|iwlinks",
                 "titles":titles, "redirects":True, "format":"json",
                 "inprop":"url|displaytitle"}
-
-        url = self.siteurl + urllib.parse.urlencode(data)
-        # open url, read content (bytes), convert in string via decode()
-        result = json.loads(urllib.request.urlopen(url).read().decode('utf-8'))
+        result = json.loads(self._query(data))
         return _Article(result)
 
     def get_featured_feed(self, feed):
         """Featured Feed"""
 
         data = {"action":"featuredfeed", "feed":feed, "format": "json"}
-        url = self.siteurl + urllib.parse.urlencode(data)
-
-        result = urllib.request.urlopen(url).read().decode('utf-8')
+        result = self._query(data)
 
         re_title = re.compile('<title>(.*)</title>')
         re_links = re.compile('<link>(.*)en</link>')
