@@ -82,6 +82,7 @@ screen.register_palette_entry('h', 'underline', '')
 #screen.register_palette_entry('italic', 'italics', '') #No italics option?
 screen.register_palette_entry('bold', 'bold', '')
 screen.register_palette_entry('bolditalic', 'bold', '')
+screen.register_palette_entry('blockquote', 'dark gray', '')
 
 loop = urwid.MainLoop(pager, screen=screen, handle_mouse=False,
                      unhandled_input=keymapper)

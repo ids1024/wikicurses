@@ -32,7 +32,9 @@ class _ExtractHTMLParser(HTMLParser):
         elif not text.strip():
             return
 
-        if self.bold and self.italic:
+        if self.inblockquote:
+            tformat = "blockquote"
+        elif self.bold and self.italic:
             tformat = "bolditalic"
         elif self.bold:
             tformat = "bold"
