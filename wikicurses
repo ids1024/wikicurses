@@ -40,11 +40,11 @@ widgets = []
 
 if args.search :
     article = wiki.search(args.search)
-    widgets.append(urwid.Text(('h1', article.title), align="center"))
+    widgets.append(urwid.Text([('h1', article.title), '\n'], align="center"))
 
     for title, content in article.get_content().items():
         if title:
-            widgets.append(urwid.Text(('h2', title), align="center"))
+            widgets.append(urwid.Text(['\n', ('h2', title)], align="center"))
         print(content)
         widgets.append(urwid.Text(content))
 
@@ -78,6 +78,7 @@ def keymapper(input):
 screen = urwid.raw_display.Screen() 
 screen.register_palette_entry('h1', 'yellow,bold', '')
 screen.register_palette_entry('h2', 'underline', '')
+screen.register_palette_entry('h', 'underline', '')
 #screen.register_palette_entry('italic', 'italics', '') #No italics option?
 screen.register_palette_entry('bold', 'bold', '')
 screen.register_palette_entry('bolditalic', 'bold', '')

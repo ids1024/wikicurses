@@ -65,8 +65,8 @@ class _Article(object):
                   for i in self.page['iwlinks'] if i['prefix'] in wikis)
 
         sections.update({
-            'Images\n':'\n'.join(images) + '\n',
-            '\nExternal links\n':'\n'.join(extlinks) + '\n',
-            '\nInterwiki links\n':'\n'.join(iwlinks) + '\n'
+            'Images':'\n'.join(images) + '\n',
+            'External links':'\n'.join(extlinks) + '\n',
+            'Interwiki links':'\n'.join(iwlinks) + '\n'
             })
         return sections
