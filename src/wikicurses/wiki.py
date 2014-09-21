@@ -5,6 +5,8 @@ import re
 from wikicurses.htmlparse import parseExtract
 from wikicurses import wikis
 
+image_url = "http://en.wikipedia.org/wiki/"
+
 class Wiki(object):
     def __init__(self, url):
         self.siteurl = url
@@ -53,33 +55,25 @@ class _Article(object):
         sections.pop("References", '')
         return sections
 
-    def _get_external_links(self):
-        """ Get external links """
-        links = (i['*'] for i in self.page['extlinks'])
-        return ''.join(('http:' + i if i.startswith('//') else i) + '\n'
-                for i in links)
-
-    def _get_interwiki_links(self):
-        """ Inter wiki links """
-        return ''.join(wikis[i['prefix']].replace('$1', i['*']) + '\n'
-                for i in self.page['iwlinks'] if i['prefix'] in wikis)
-
-    def _get_images(self):
-        """ Get images urls """
-
-        image_url = "http://en.wikipedia.org/wiki/"
-
-        return ''.join(image_url + i['title'].replace(' ', '_') + '\n'
-                for i in self.page.get('images', ()))
-
     def get_content(self):
         sections = self._get_extract()
         if sections is None:
             return {'':'No wikipedia page for that title.\n'
                     'Wikipedia search titles are case sensitive.'}
+
+        images = (image_url + i['title'].replace(' ', '_')
+                 for i in self.page.get('images', ()))
+
+        extlinks = (i['*'] for i in self.page['extlinks'])
+        #if an url starts with //, it can by http or https.  Use http.
+        extlinks = ('http:' + i if i.startswith('//') else i for i in extlinks)
+
+        iwlinks = (wikis[i['prefix']].replace('$1', i['*'])
+                  for i in self.page['iwlinks'] if i['prefix'] in wikis)
+
         sections.update({
-            'Images\n':self._get_images(),
-            '\nExternal links\n':self._get_external_links(),
-            '\nInterwiki links\n':self._get_interwiki_links()
+            'Images\n':'\n'.join(images) + '\n',
+            '\nExternal links\n':'\n'.join(extlinks) + '\n',
+            '\nInterwiki links\n':'\n'.join(iwlinks) + '\n'
             })
         return sections
