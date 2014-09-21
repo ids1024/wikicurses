@@ -2,7 +2,7 @@ import json
 import urllib.request
 import re
 
-from wikicurses.htmlparse import ExcerptHTMLParser
+from wikicurses.htmlparse import parseExtract
 from wikicurses import wikis
 
 class Wiki(object):
@@ -54,15 +54,14 @@ class _Article(object):
     def _get_extract(self):
         """ Get extract """
         try:
-            parser = ExcerptHTMLParser()
-            parser.feed(self.page['extract'])
-            parser.sections.pop("External links", '')
-            parser.sections.pop("References", '')
-            return parser.sections
-
+            extract = self.page['extract']
         except KeyError:
             return {'':'No wikipedia page for that title.\n'
                    'Wikipedia search titles are case sensitive.'}
+        sections = parseExtract(extract)
+        sections.pop("External links", '')
+        sections.pop("References", '')
+        return sections
 
     def _get_external_links(self):
         """ Get external links """

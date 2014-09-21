@@ -3,7 +3,12 @@ import re
 from collections import OrderedDict
 from html.parser import HTMLParser
 
-class ExcerptHTMLParser(HTMLParser):
+def parseExtract(html):
+    parser = _ExtractHTMLParser()
+    parser.feed(html)
+    return parser.sections
+
+class _ExtractHTMLParser(HTMLParser):
     sections = OrderedDict({'':[]})
     cursection = ''
     inh2 = False
