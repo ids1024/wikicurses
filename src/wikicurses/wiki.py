@@ -47,30 +47,20 @@ class _Article(object):
         """ Get extract """
         extract = self.page.get('extract')
         if extract is None:
-            sections ={'':'No wikipedia page for that title.\n'
-                      'Wikipedia search titles are case sensitive.'}
-        else:
-            sections = parseExtract(extract)
+            return
+        sections = parseExtract(extract)
         sections.pop("External links", '')
         sections.pop("References", '')
         return sections
 
     def _get_external_links(self):
         """ Get external links """
-        try:
-            extlinks = self.page['extlinks']
-        except KeyError:
-            return ''
-        links = (i['*'] for i in extlinks)
+        links = (i['*'] for i in self.page['extlinks'])
         return ''.join(('http:' + i if i.startswith('//') else i) + '\n'
                 for i in links)
 
     def _get_interwiki_links(self):
         """ Inter wiki links """
-        try:
-            iwlinks = self.page['iwlinks']
-        except KeyError:
-            return ''
         return ''.join(wikis[i['prefix']].replace('$1', i['*']) + '\n'
                 for i in self.page['iwlinks'] if i['prefix'] in wikis)
 
@@ -84,6 +74,9 @@ class _Article(object):
 
     def get_content(self):
         sections = self._get_extract()
+        if sections is None:
+            return {'':'No wikipedia page for that title.\n'
+                    'Wikipedia search titles are case sensitive.'}
         sections.update({
             'Images\n':self._get_images(),
             '\nExternal links\n':self._get_external_links(),
