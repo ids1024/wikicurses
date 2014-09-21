@@ -32,35 +32,30 @@ class Wiki(object):
         result = ET.fromstring(self._query(data))
         sections = OrderedDict()
         for i in result[0].findall('item'):
-            title = i.find('title').text
-            url = i.find('link').text
-            description = i.find('description').text
+            description = i.findtext('description')
             if feed == 'onthisday':
                 htmls = re.findall("<li>(.*?)</li>", description, flags=re.DOTALL)
                 text = '\n'.join(map(parseFeature, htmls))
             else:
                 text = parseFeature(description)
-            sections[title] = url + '\n' + text
+            sections[i.findtext('title')] = i.findtext('link') + '\n' + text
         return sections
 
 
 class _Article(object):
     def __init__(self, result):
-        # In python 3 dict_keys are not indexable, so we need to use list()
-        key = list(result['query']['pages'])[0][:]
-        self.page = result['query']['pages'][key]
+        self.page = next(iter(result['query']['pages'].values()))
         self.title = self.page['title']
 
     def get_content(self):
-        extract = self.page.get('extract')
-        if extract is None:
+        if 'extract' not in self.page:
             return {'':'Page Not Found.'}
-        sections = parseExtract(extract)
+        sections = parseExtract(self.page['extract'])
         sections.pop("External links", '')
         sections.pop("References", '')
 
         images = (image_url + i['title'].replace(' ', '_')
-                 for i in self.page.get('images', ()))
+                 for i in self.page['images'])
 
         extlinks = (i['*'] for i in self.page['extlinks'])
         #if an url starts with //, it can by http or https.  Use http.
