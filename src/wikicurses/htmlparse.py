@@ -46,8 +46,6 @@ class _ExtractHTMLParser(HTMLParser):
             self.add_text("- ")
         elif tag == 'blockquote':
             self.inblockquote = True
-        else:
-            pass
 
     def handle_endtag(self, tag):
         if tag == 'h2':
@@ -63,8 +61,6 @@ class _ExtractHTMLParser(HTMLParser):
             self.add_text('\n')
         elif tag == 'blockquote':
             self.inblockquote = False
-        else:
-            pass
 
     def handle_data(self, data):
         text = data.replace('*', '\\*')
