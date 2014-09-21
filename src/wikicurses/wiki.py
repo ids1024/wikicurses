@@ -33,10 +33,7 @@ class Wiki(object):
         result1 = re.findall(re_title, result)
         result2 = re.findall(re_links, result)
 
-        output = '\n'
-        for desc, url in zip(result1, result2):
-            output += desc + ':\t ' + url
-        return output
+        return '\n' + ''.join('%s:\t %s' % i for i in zip(result1, result2))
 
 
 class _Article(object):
