@@ -3,6 +3,9 @@ import re
 from collections import OrderedDict
 from html.parser import HTMLParser
 
+ENDPAR = 1
+STARTPAR = 2
+
 def parseExtract(html):
     parser = _ExtractHTMLParser()
     parser.feed(html)
@@ -17,8 +20,15 @@ class _ExtractHTMLParser(HTMLParser):
     italic = False
 
     def add_text(self, text):
-        if text is None:
+        if text == ENDPAR:
+            if self.inblockquote:
+                return
             text = '\n\n'
+        elif text == STARTPAR:
+            if self.inblockquote:
+                text = '\n> '
+            else:
+                return
         elif not text.strip():
             return
 
@@ -35,8 +45,6 @@ class _ExtractHTMLParser(HTMLParser):
             self.cursection += text
         elif self.inh > 2:
             self.sections[self.cursection].append(('h', text+'\n'))
-        #elif self.inblockquote:
-        #    self.sections[self.cursection].append((tformat, '> '+text))
         else:
             self.sections[self.cursection].append((tformat, text))
 
@@ -53,6 +61,8 @@ class _ExtractHTMLParser(HTMLParser):
             self.italic = True
         elif tag == 'b':
             self.bold = True
+        elif tag == 'p':
+            self.add_text(STARTPAR)
         elif tag == 'li':
             self.add_text("- ")
         elif tag == 'blockquote':
@@ -69,7 +79,7 @@ class _ExtractHTMLParser(HTMLParser):
         elif tag == 'b':
             self.bold = False
         elif tag == 'p':
-            self.add_text(None) #Newline hack
+            self.add_text(ENDPAR)
         elif tag == 'blockquote':
             self.inblockquote = False
 
