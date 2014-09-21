@@ -54,8 +54,7 @@ class _Article(object):
     def get_content(self):
         extract = self.page.get('extract')
         if extract is None:
-            return {'':'No wikipedia page for that title.\n'
-                    'Wikipedia search titles are case sensitive.'}
+            return {'':'Page Not Found.'}
         sections = parseExtract(extract)
         sections.pop("External links", '')
         sections.pop("References", '')
