@@ -35,8 +35,11 @@ class Wiki(object):
             title = i.find('title').text
             url = i.find('link').text
             description = i.find('description').text
-            htmls = re.findall("<li>(.*?)</li>", description, flags=re.DOTALL)
-            text = '\n'.join(map(parseFeature, htmls))
+            if feed == 'onthisday':
+                htmls = re.findall("<li>(.*?)</li>", description, flags=re.DOTALL)
+                text = '\n'.join(map(parseFeature, htmls))
+            else:
+                text = parseFeature(description)
             sections[title] = url + '\n' + text
         return sections
 
