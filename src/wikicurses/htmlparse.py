@@ -17,13 +17,14 @@ def parseFeature(html):
     return parser.text
 
 class _ExtractHTMLParser(HTMLParser):
+    cursection = ''
+    inh = 0
+    inblockquote = False
+    bold = False
+    italic = False
+
     def __init__(self):
         self.sections = OrderedDict({'':[]})
-        self.cursection = ''
-        self.inh = 0
-        self.inblockquote = False
-        self.bold = False
-        self.italic = False
         super().__init__(self)
 
     def add_text(self, text):
