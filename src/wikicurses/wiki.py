@@ -45,21 +45,14 @@ class _Article(object):
         self.page = result['query']['pages'][key]
         self.title = self.page['title']
 
-    def _get_extract(self):
-        """ Get extract """
+    def get_content(self):
         extract = self.page.get('extract')
         if extract is None:
-            return
+            return {'':'No wikipedia page for that title.\n'
+                    'Wikipedia search titles are case sensitive.'}
         sections = parseExtract(extract)
         sections.pop("External links", '')
         sections.pop("References", '')
-        return sections
-
-    def get_content(self):
-        sections = self._get_extract()
-        if sections is None:
-            return {'':'No wikipedia page for that title.\n'
-                    'Wikipedia search titles are case sensitive.'}
 
         images = (image_url + i['title'].replace(' ', '_')
                  for i in self.page.get('images', ()))
