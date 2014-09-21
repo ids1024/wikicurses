@@ -38,24 +38,19 @@ class Wiki(object):
 
 class _Article(object):
     def __init__(self, result):
-        self.result = result
         # In python 3 dict_keys are not indexable, so we need to use list()
-        key = list(self.result['query']['pages'])[0][:]
-        self.page = self.result['query']['pages'][key]
-
-
-    @property
-    def title(self):
-        return self.page['title']
+        key = list(result['query']['pages'])[0][:]
+        self.page = result['query']['pages'][key]
+        self.title = self.page['title']
 
     def _get_extract(self):
         """ Get extract """
-        try:
-            extract = self.page['extract']
-        except KeyError:
-            return {'':'No wikipedia page for that title.\n'
-                   'Wikipedia search titles are case sensitive.'}
-        sections = parseExtract(extract)
+        extract = self.page.get('extract')
+        if extract is None:
+            sections ={'':'No wikipedia page for that title.\n'
+                      'Wikipedia search titles are case sensitive.'}
+        else:
+            sections = parseExtract(extract)
         sections.pop("External links", '')
         sections.pop("References", '')
         return sections
@@ -63,46 +58,29 @@ class _Article(object):
     def _get_external_links(self):
         """ Get external links """
         try:
-            offset = self.result['query-continue']['extlinks']['eloffset']
-            output = ''
-            for j in range(0, offset):
-                # ['*'] => elements of ....[j] are dict, and their keys are '*'
-                link = self.page['extlinks'][j]['*']
-                if link.startswith("//"):
-                    link = "http:" + link
-                output += link + '\n'
-            return output
+            extlinks = self.page['extlinks']
         except KeyError:
-            pass
+            return ''
+        links = (i['*'] for i in extlinks)
+        return ''.join(('http:' + i if i.startswith('//') else i) + '\n'
+                for i in links)
 
     def _get_interwiki_links(self):
         """ Inter wiki links """
         try:
             iwlinks = self.page['iwlinks']
         except KeyError:
-            return
-        output = ''
-        for j in self.page['iwlinks']:
-            try:
-                output += wikis[j['prefix']].replace('$1', j['*']) + '\n'
-            except KeyError:
-                continue
-        return output
+            return ''
+        return ''.join(wikis[i['prefix']].replace('$1', i['*']) + '\n'
+                for i in self.page['iwlinks'] if i['prefix'] in wikis)
 
     def _get_images(self):
         """ Get images urls """
 
         image_url = "http://en.wikipedia.org/wiki/"
 
-        try:
-            output = ''
-            for i in range(1, len(self.page['images'])):
-                image = self.page['images'][i]['title']
-                image = image_url + image.replace(' ', '_')
-                output += image + '\n'
-            return output
-        except KeyError:
-            pass
+        return ''.join(image_url + i['title'].replace(' ', '_') + '\n'
+                for i in self.page.get('images', ()))
 
     def get_content(self):
         sections = self._get_extract()
