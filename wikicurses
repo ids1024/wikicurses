@@ -45,7 +45,6 @@ if args.search :
     for title, content in article.get_content().items():
         if title:
             widgets.append(urwid.Text(['\n', ('h2', title)], align="center"))
-        print(content)
         widgets.append(urwid.Text(content))
 
 else:
