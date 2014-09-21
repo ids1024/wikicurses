@@ -1,13 +1,8 @@
 #! /usr/bin/env python3
 
-
-import json
-import urllib.request
-import re
 import argparse
 
-import urwid
-
+from wikicurses.ui import createWindow
 from wikicurses.wiki import Wiki
 
 base_url = "http://en.wikipedia.org/w/api.php?"
@@ -38,8 +33,7 @@ wiki = Wiki(base_url)
 
 if args.search :
     article = wiki.search(args.search)
-    title = article.title
-    content = article.content
+    createWindow(article.title, article.content)
 else:
     feed = args.featured or args.picture or args.today
     title = {'onthisday': 'On this Day',
@@ -47,37 +41,4 @@ else:
             'potd': 'Picture of the Day'
             }[feed]
     content = wiki.get_featured_feed(feed)
-
-widgets = [urwid.Text([('h1', title), '\n'], align="center")]
-for title, content in content.items():
-    if title:
-        widgets.append(urwid.Text(['\n', ('h2', title)], align="center"))
-    widgets.append(urwid.Text(content))
-
-
-pager = urwid.ListBox(widgets)
-pager._command_map['k'] = 'cursor up'
-pager._command_map['j'] = 'cursor down'
-pager._command_map['ctrl b'] = 'cursor page up'
-pager._command_map['ctrl f'] = 'cursor page down'
-
-screen = urwid.raw_display.Screen() 
-screen.register_palette_entry('h1', 'yellow,bold', '')
-screen.register_palette_entry('h2', 'underline', '')
-screen.register_palette_entry('h', 'underline', '')
-#screen.register_palette_entry('italic', 'italics', '') #No italics option?
-screen.register_palette_entry('bold', 'bold', '')
-screen.register_palette_entry('bolditalic', 'bold', '')
-screen.register_palette_entry('blockquote', 'dark gray', '')
-
-def keymapper(input):
-    #TODO: Implement gg and G
-    if input == 'q':
-        raise  urwid.ExitMainLoop
-    else:
-        return False
-    return True
-
-loop = urwid.MainLoop(pager, screen=screen, handle_mouse=False,
-                     unhandled_input=keymapper)
-loop.run()
+    createWindow(title, content)
