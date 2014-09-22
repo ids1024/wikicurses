@@ -1,13 +1,17 @@
 import urwid
+from wikicurses import ITALIC, BOLD, BLOCKQUOTE
 
 screen = urwid.raw_display.Screen() 
 screen.register_palette_entry('h1', 'yellow,bold', '')
 screen.register_palette_entry('h2', 'underline', '')
 screen.register_palette_entry('h', 'underline', '')
 #screen.register_palette_entry('italic', 'italics', '') #No italics option?
-screen.register_palette_entry('bold', 'bold', '')
-screen.register_palette_entry('bolditalic', 'bold', '')
-screen.register_palette_entry('blockquote', 'dark gray', '')
+screen.register_palette_entry(BOLD, 'bold', '')
+screen.register_palette_entry(BOLD | ITALIC, 'bold', '')
+screen.register_palette_entry(BLOCKQUOTE, 'dark gray', '')
+screen.register_palette_entry(BLOCKQUOTE | BOLD, 'dark gray,bold', '')
+screen.register_palette_entry(BLOCKQUOTE | ITALIC, 'dark gray', '')
+screen.register_palette_entry(BLOCKQUOTE | BOLD | ITALIC, 'dark gray,bold', '')
 
 def keymapper(input):
     #TODO: Implement gg and G

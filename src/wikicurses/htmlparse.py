@@ -3,8 +3,9 @@ import re
 from collections import OrderedDict
 from html.parser import HTMLParser
 
+from wikicurses import ITALIC, BOLD, BLOCKQUOTE
+
 ENDPAR, STARTPAR, ENDH2 = range(3)
-ITALIC, BOLD, BLOCKQUOTE = (1<<i for i in range(3))
 
 def parseExtract(html):
     parser = _ExtractHTMLParser()
@@ -40,13 +41,7 @@ class _ExtractHTMLParser(HTMLParser):
         elif not text.strip():
             return
 
-        tformat = ''
-        if self.format&BOLD:
-            tformat = "bold"
-        if self.format&ITALIC:
-            tformat += "italic"
-        if self.format&BLOCKQUOTE:
-            tformat = "blockquote"
+        tformat = self.format
 
         if self.inh == 2:
             self.cursection += text
