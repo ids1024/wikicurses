@@ -3,10 +3,9 @@ import re
 from collections import OrderedDict
 from html.parser import HTMLParser
 
-from wikicurses import ITALIC, BOLD, BLOCKQUOTE
+from wikicurses import formats
 
 ENDPAR, STARTPAR, ENDH = range(3)
-fmtdict = {'i':ITALIC, 'b':BOLD, 'blockquote':BLOCKQUOTE}
 
 def parseExtract(html):
     parser = _ExtractHTMLParser()
@@ -29,11 +28,11 @@ class _ExtractHTMLParser(HTMLParser):
 
     def add_text(self, text):
         if text == ENDPAR:
-            if self.format&BLOCKQUOTE:
+            if self.format&formats.blockquote:
                 return
             text = '\n\n'
         elif text == STARTPAR:
-            if self.format&BLOCKQUOTE:
+            if self.format&formats.blockquote:
                 text = '\n> '
             else:
                 return
@@ -64,8 +63,8 @@ class _ExtractHTMLParser(HTMLParser):
             self.add_text(STARTPAR)
         elif tag == 'li':
             self.add_text("- ")
-        elif tag in fmtdict:
-            self.format|=fmtdict[tag]
+        elif tag in (i.name for i in formats):
+            self.format|=formats[tag]
 
     def handle_endtag(self, tag):
         if re.fullmatch("h[2-6]", tag):
@@ -73,8 +72,8 @@ class _ExtractHTMLParser(HTMLParser):
             self.add_text(ENDH)
         elif tag == 'p':
             self.add_text(ENDPAR)
-        elif tag in fmtdict:
-            self.format&=~fmtdict[tag]
+        elif tag in (i.name for i in formats):
+            self.format&=~formats[tag]
 
     def handle_data(self, data):
         self.add_text(re.sub('\n+', '\n', data))

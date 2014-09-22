@@ -1,5 +1,5 @@
 import urwid
-from wikicurses import ITALIC, BOLD, BLOCKQUOTE
+from wikicurses import formats
 
 screen = urwid.raw_display.Screen() 
 screen.register_palette_entry('h1', 'yellow,bold', '')
@@ -7,10 +7,10 @@ screen.register_palette_entry('h2', 'underline', '')
 screen.register_palette_entry('h', 'underline', '')
 
 #(ITALIC, 'italic') does not work. No italics option?
-outputfmt = ((BOLD, 'bold'), (BLOCKQUOTE, 'dark gray'))
-for x in range(BOLD | ITALIC | BLOCKQUOTE + 1):
-    fmt = ','.join(j for i, j in outputfmt if x&i)
-    screen.register_palette_entry(BOLD, fmt, '')
+outputfmt = (('b', 'bold'), ('blockquote', 'dark gray'))
+for x in range(1, sum(formats) + 1):
+    fmt = ','.join(j for i, j in outputfmt if x&formats[i])
+    screen.register_palette_entry(x, fmt, '')
 
 def keymapper(input):
     #TODO: Implement gg and G
