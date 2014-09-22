@@ -3,8 +3,8 @@ import re
 from collections import OrderedDict
 from html.parser import HTMLParser
 
-ENDPAR = 1
-STARTPAR = 2
+ENDPAR, STARTPAR, ENDH2 = range(3)
+ITALIC, BOLD, BLOCKQUOTE = (1<<i for i in range(3))
 
 def parseExtract(html):
     parser = _ExtractHTMLParser()
@@ -19,9 +19,7 @@ def parseFeature(html):
 class _ExtractHTMLParser(HTMLParser):
     cursection = ''
     inh = 0
-    inblockquote = False
-    bold = False
-    italic = False
+    format = 0
 
     def __init__(self):
         self.sections = OrderedDict({'':[]})
@@ -29,34 +27,33 @@ class _ExtractHTMLParser(HTMLParser):
 
     def add_text(self, text):
         if text == ENDPAR:
-            if self.inblockquote:
+            if self.format&BLOCKQUOTE:
                 return
             text = '\n\n'
         elif text == STARTPAR:
-            if self.inblockquote:
+            if self.format&BLOCKQUOTE:
                 text = '\n> '
             else:
                 return
+        elif text == ENDH2:
+            text = '\n'
         elif not text.strip():
             return
 
-        if self.inblockquote:
-            tformat = "blockquote"
-        elif self.bold and self.italic:
-            tformat = "bolditalic"
-        elif self.bold:
+        tformat = ''
+        if self.format&BOLD:
             tformat = "bold"
-        elif self.italic:
-            tformat = "italic"
-        else:
-            tformat = ''
+        if self.format&ITALIC:
+            tformat += "italic"
+        if self.format&BLOCKQUOTE:
+            tformat = "blockquote"
 
         if self.inh == 2:
             self.cursection += text
+            return
         elif self.inh > 2:
-            self.sections[self.cursection].append(('h', text+'\n'))
-        else:
-            self.sections[self.cursection].append((tformat, text))
+            tformat = 'h'
+        self.sections[self.cursection].append((tformat, text))
 
     def handle_starttag(self, tag, attrs):
         if tag == 'h2':
@@ -68,30 +65,31 @@ class _ExtractHTMLParser(HTMLParser):
         elif re.fullmatch("h[3-6]", tag):
             self.inh = int(tag[1:])
         elif tag == 'i':
-            self.italic = True
+            self.format|=ITALIC
         elif tag == 'b':
-            self.bold = True
+            self.format|=BOLD
         elif tag == 'p':
             self.add_text(STARTPAR)
         elif tag == 'li':
             self.add_text("- ")
         elif tag == 'blockquote':
-            self.inblockquote = True
+            self.format|=BLOCKQUOTE
 
     def handle_endtag(self, tag):
         if tag == 'h2':
             self.inh = 0
             self.sections[self.cursection] = []
+            self.add_text(ENDH2)
         elif re.fullmatch("h[3-6]", tag):
             self.inh = 0
         elif tag == 'i':
-            self.italic = False
+            self.format&=~ITALIC
         elif tag == 'b':
-            self.bold = False
+            self.format&=~BOLD
         elif tag == 'p':
             self.add_text(ENDPAR)
         elif tag == 'blockquote':
-            self.inblockquote = False
+            self.format&=~BLOCKQUOTE
 
     def handle_data(self, data):
         text = data.replace('*', '\\*')
