@@ -6,6 +6,7 @@ from html.parser import HTMLParser
 from wikicurses import ITALIC, BOLD, BLOCKQUOTE
 
 ENDPAR, STARTPAR, ENDH = range(3)
+fmtdict = {'i':ITALIC, 'b':BOLD, 'blockquote':BLOCKQUOTE}
 
 def parseExtract(html):
     parser = _ExtractHTMLParser()
@@ -55,37 +56,26 @@ class _ExtractHTMLParser(HTMLParser):
             #Remove previous section if empty
             if not self.sections[self.cursection]:
                 del self.sections[self.cursection]
-            self.inh = 2
             self.cursection = ''
-        elif re.fullmatch("h[3-6]", tag):
+        if re.fullmatch("h[2-6]", tag):
             self.inh = int(tag[1:])
-        elif tag == 'i':
-            self.format|=ITALIC
-        elif tag == 'b':
-            self.format|=BOLD
         elif tag == 'p':
             self.add_text(STARTPAR)
         elif tag == 'li':
             self.add_text("- ")
-        elif tag == 'blockquote':
-            self.format|=BLOCKQUOTE
+        elif tag in fmtdict:
+            self.format|=fmtdict[tag]
 
     def handle_endtag(self, tag):
         if tag == 'h2':
-            self.inh = 0
             self.sections[self.cursection] = []
-            self.add_text(ENDH)
-        elif re.fullmatch("h[3-6]", tag):
+        if re.fullmatch("h[2-6]", tag):
             self.inh = 0
             self.add_text(ENDH)
-        elif tag == 'i':
-            self.format&=~ITALIC
-        elif tag == 'b':
-            self.format&=~BOLD
         elif tag == 'p':
             self.add_text(ENDPAR)
-        elif tag == 'blockquote':
-            self.format&=~BLOCKQUOTE
+        elif tag in fmtdict:
+            self.format&=~fmtdict[tag]
 
     def handle_data(self, data):
         text = data.replace('*', '\\*')
