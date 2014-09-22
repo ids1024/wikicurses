@@ -78,9 +78,7 @@ class _ExtractHTMLParser(HTMLParser):
             self.format&=~fmtdict[tag]
 
     def handle_data(self, data):
-        text = data.replace('*', '\\*')
-        text = re.sub('\n+', '\n', text)
-        self.add_text(text)
+        self.add_text(re.sub('\n+', '\n', data))
 
 
 class _FeatureHTMLParser(HTMLParser):
