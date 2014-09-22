@@ -5,7 +5,7 @@ from html.parser import HTMLParser
 
 from wikicurses import ITALIC, BOLD, BLOCKQUOTE
 
-ENDPAR, STARTPAR, ENDH2 = range(3)
+ENDPAR, STARTPAR, ENDH = range(3)
 
 def parseExtract(html):
     parser = _ExtractHTMLParser()
@@ -36,7 +36,7 @@ class _ExtractHTMLParser(HTMLParser):
                 text = '\n> '
             else:
                 return
-        elif text == ENDH2:
+        elif text == ENDH:
             text = '\n'
         elif not text.strip():
             return
@@ -74,9 +74,10 @@ class _ExtractHTMLParser(HTMLParser):
         if tag == 'h2':
             self.inh = 0
             self.sections[self.cursection] = []
-            self.add_text(ENDH2)
+            self.add_text(ENDH)
         elif re.fullmatch("h[3-6]", tag):
             self.inh = 0
+            self.add_text(ENDH)
         elif tag == 'i':
             self.format&=~ITALIC
         elif tag == 'b':
