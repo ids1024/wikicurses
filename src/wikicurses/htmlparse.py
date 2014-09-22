@@ -45,7 +45,8 @@ class _ExtractHTMLParser(HTMLParser):
         tformat = self.format
 
         if self.inh == 2:
-            self.cursection += text
+            self.cursection = text
+            self.sections[text] = []
             return
         elif self.inh > 2:
             tformat = 'h'
@@ -67,8 +68,6 @@ class _ExtractHTMLParser(HTMLParser):
             self.format|=fmtdict[tag]
 
     def handle_endtag(self, tag):
-        if tag == 'h2':
-            self.sections[self.cursection] = []
         if re.fullmatch("h[2-6]", tag):
             self.inh = 0
             self.add_text(ENDH)
