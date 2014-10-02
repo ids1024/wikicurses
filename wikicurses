@@ -2,7 +2,7 @@
 
 import argparse
 
-from wikicurses.ui import createWindow
+import wikicurses.ui as ui
 from wikicurses.wiki import Wiki
 
 base_url = "http://en.wikipedia.org/w/api.php?"
@@ -33,7 +33,7 @@ wiki = Wiki(base_url)
 
 if args.search :
     article = wiki.search(args.search)
-    createWindow(article.title, article.content)
+    ui.setContent(article.title, article.content)
 else:
     feed = args.featured or args.picture or args.today
     title = {'onthisday': 'On this Day',
@@ -41,4 +41,5 @@ else:
             'potd': 'Picture of the Day'
             }[feed]
     content = wiki.get_featured_feed(feed)
-    createWindow(title, content)
+    ui.setContent(title, content)
+ui.loop.run()

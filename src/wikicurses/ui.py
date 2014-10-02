@@ -70,7 +70,3 @@ def setContent(title, content):
             widgets.append(h2)
             widgetnames[title] = h2
         widgets.append(urwid.Text(content))
-
-def createWindow(title, content):
-    setContent(title, content)
-    loop.run()
