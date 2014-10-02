@@ -38,7 +38,7 @@ def keymapper(input):
         if loop.widget is pager:
             radiobuttons = []
             for name, widget in widgetnames.items():
-                urwid.RadioButton(radiobuttons, name,
+                urwid.RadioButton(radiobuttons, name, state=False,
                         on_state_change=selectWidget, user_data=[widget])
             toc = urwid.ListBox(radiobuttons)
             overlay = urwid.Overlay(toc, pager,
