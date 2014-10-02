@@ -36,7 +36,6 @@ def keymapper(input):
         raise  urwid.ExitMainLoop
     elif input == 'c':
         if loop.widget is pager:
-            current = None
             for widget in widgetnames.values():
                 if widgets.focus >= widgets.index(widget):
                     current = widget
@@ -62,7 +61,9 @@ loop = urwid.MainLoop(pager, screen=screen, handle_mouse=False,
 def setContent(title, content):
     widgets.clear()
     widgetnames.clear()
-    widgets.append(urwid.Text([('h1', title), '\n'], align="center"))
+    h1 = urwid.Text([('h1', title), '\n'], align="center")
+    widgets.append(h1)
+    widgetnames[title] = h1
     for title, content in content.items():
         if title:
             h2 = urwid.Text([('h1', title), '\n'], align="center")
