@@ -46,14 +46,14 @@ class _Article(object):
         sections.pop("References", '')
 
         images = (image_url + i['title'].replace(' ', '_')
-                 for i in self.page['images'])
+                 for i in self.page.get('images', ()))
 
         extlinks = (i['*'] for i in self.page.get('extlinks', ()))
         #if an url starts with //, it can by http or https.  Use http.
         extlinks = ('http:' + i if i.startswith('//') else i for i in extlinks)
 
         iwlinks = (wikis[i['prefix']].replace('$1', i['*'])
-                  for i in self.page['iwlinks'] if i['prefix'] in wikis)
+                  for i in self.page.get('iwlinks', ()) if i['prefix'] in wikis)
 
         sections.update({
             'Images':'\n'.join(images) + '\n',
