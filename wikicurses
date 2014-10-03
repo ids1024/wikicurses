@@ -11,21 +11,21 @@ parser = argparse.ArgumentParser(description =
 parser.add_argument('search',
                     nargs = '?',
                     default = '',
-                    help = "Page to search for on Wikipedia")
+                    help = "page to search for")
 
 group = parser.add_mutually_exclusive_group()
 group.add_argument('-d', '--today',
                     action = 'store_const',
                     const = 'onthisday',
-                    help='Display URLs for the "On this day" pages')
+                    help='list "On This Day" pages')
 group.add_argument('-f', '--featured',
                     action = 'store_const',
                     const = 'featured',
-                    help = 'Display the featured articles URLs')
+                    help = 'show featured articles')
 group.add_argument('-p', '--picture',
                     action = 'store_const',
                     const = 'potd',
-                    help='Display URLs for the "Picture of the day" pages')
+                    help='Show pictures of the day')
 
 args = parser.parse_args()
 

@@ -8,16 +8,16 @@ This was originally a fork of [cliwiki](https://github.com/AnirudhBhat/cliWiki.p
 ## Usage
 ~~~bash
 $ wikicurses -h
-usage: wikicurses [-h] [-d] [-f] [-p] [search]
+usage: wikicurses [-h] [-d | -f | -p] [search]
 
 A simple curses interface for accessing Wikipedia.
 
 positional arguments:
-  search          Page to search for on Wikipedia
+  search          page to search for
 
 optional arguments:
   -h, --help      show this help message and exit
-  -d, --today     Display URLs for the "On this day" pages
-  -f, --featured  Display the featured articles URLs
-  -p, --picture   Display URLs for the "Picture of the day" pages
+  -d, --today     list "On This Day" pages
+  -f, --featured  show featured articles
+  -p, --picture   Show pictures of the day
 ~~~
