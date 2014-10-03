@@ -39,12 +39,8 @@ def keymapper(input):
         raise  urwid.ExitMainLoop
     elif input == 'c':
         if loop.widget is mainwidget:
-            current = None
-            for widget in widgetnames.values():
-                if widgets.focus >= widgets.index(widget):
-                    current = widget
-                else:
-                    break
+            current = next(reversed([widget for widget in widgetnames.values()
+                if widgets.focus >= widgets.index(widget)]), None)
             radiobuttons = []
             #Go to first widget when title is selected
             urwid.RadioButton(radiobuttons, header.text, state=(not current),
