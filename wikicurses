@@ -32,7 +32,7 @@ args = parser.parse_args()
 if args.search :
     ui.setContent(wiki.search(args.search))
 else:
-    feed = args.featured or args.picture or args.today
-    feed = feed or 'featured'
+    # Show featured by default
+    feed = args.featured or args.picture or args.today or 'featured'
     ui.setContent(wiki.get_featured_feed(feed))
 ui.loop.run()
