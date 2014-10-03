@@ -1,7 +1,7 @@
 from collections import OrderedDict
 import urwid
 from wikicurses import formats
-from wikicurses.wiki import wiki, _Article
+from wikicurses.wiki import wiki
 #TODO: Turn this into a class?
 
 screen = urwid.raw_display.Screen() 
@@ -81,17 +81,11 @@ def keymapper(input):
 loop = urwid.MainLoop(mainwidget, screen=screen, handle_mouse=False,
                      unhandled_input=keymapper)
 
-def setContent(data):
-    if isinstance(data, _Article):
-        title = data.title
-        content = data.content
-    else:
-        title, content = data
-
+def setContent(page):
     widgets.clear()
     widgetnames.clear()
-    header.set_text(title)
-    for title, content in content.items():
+    header.set_text(page.title)
+    for title, content in page.content.items():
         if title:
             h2 = urwid.Text([('h2', title), '\n'], align="center")
             widgets.append(h2)

@@ -27,25 +27,9 @@ class Wiki(object):
         return _Article(result)
 
     def get_featured_feed(self, feed):
-        """Featured Feed"""
-
         data = {"action":"featuredfeed", "feed":feed}
         result = ET.fromstring(self._query(data))
-        sections = OrderedDict()
-        for i in result[0].findall('item'):
-            description = i.findtext('description')
-            if feed == 'onthisday':
-                htmls = re.findall("<li>(.*?)</li>", description, flags=re.DOTALL)
-                text = '\n'.join(map(parseFeature, htmls))
-            else:
-                text = parseFeature(description)
-            sections[i.findtext('title')] = i.findtext('link') + '\n' + text
-
-        title = {'onthisday': 'On this Day',
-                'featured': 'Featured Articles',
-                'potd': 'Picture of the Day'
-                }[feed]
-        return (title, sections)
+        return _Featured(feed, result)
 
 
 class _Article(object):
@@ -77,5 +61,29 @@ class _Article(object):
             'Interwiki links':'\n'.join(iwlinks) + '\n'
             })
         return sections
+
+
+class _Featured(object):
+    def __init__(self, feed, result):
+        self.feed = feed
+        self.result = result
+        self.title = {'onthisday': 'On this Day',
+                'featured': 'Featured Articles',
+                'potd': 'Picture of the Day'
+                }[feed]
+
+    @property
+    def content(self):
+        sections = OrderedDict()
+        for i in self.result[0].findall('item'):
+            description = i.findtext('description')
+            if self.feed == 'onthisday':
+                htmls = re.findall("<li>(.*?)</li>", description, flags=re.DOTALL)
+                text = '\n'.join(map(parseFeature, htmls))
+            else:
+                text = parseFeature(description)
+            sections[i.findtext('title')] = i.findtext('link') + '\n' + text
+        return sections
+
 
 wiki = Wiki(base_url)
