@@ -59,7 +59,7 @@ class _Article(object):
         images = (image_url + i['title'].replace(' ', '_')
                  for i in self.page['images'])
 
-        extlinks = (i['*'] for i in self.page['extlinks'])
+        extlinks = (i['*'] for i in self.page.get('extlinks', ()))
         #if an url starts with //, it can by http or https.  Use http.
         extlinks = ('http:' + i if i.startswith('//') else i for i in extlinks)
 
