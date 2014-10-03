@@ -23,7 +23,6 @@ header = urwid.Text('Wikicurses', align='center')
 mainwidget = urwid.Frame(pager, urwid.AttrMap(header, 'h1'))
 
 urwid.command_map['k'] = 'cursor up'
-urwid.command_map['k'] = 'cursor up'
 urwid.command_map['j'] = 'cursor down'
 urwid.command_map['ctrl b'] = 'cursor page up'
 urwid.command_map['ctrl f'] = 'cursor page down'
@@ -75,6 +74,8 @@ def keymapper(input):
         overlay = urwid.Overlay(search, mainwidget,
             'center', ('relative', 50), 'middle', 3)
         loop.widget = overlay
+    elif input == 'esc':
+        loop.widget = mainwidget
     else:
        return False
     return True
