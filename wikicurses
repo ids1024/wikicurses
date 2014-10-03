@@ -10,11 +10,12 @@ base_url = "http://en.wikipedia.org/w/api.php?"
 parser = argparse.ArgumentParser(description =
                                     "A simple curses interface for accessing Wikipedia.")
 
-group = parser.add_mutually_exclusive_group(required = True)
-group.add_argument('search',
+parser.add_argument('search',
                     nargs = '?',
                     default = '',
                     help = "Page to search for on Wikipedia")
+
+group = parser.add_mutually_exclusive_group()
 group.add_argument('-d', '--today',
                     action = 'store_const',
                     const = 'onthisday',
@@ -36,6 +37,7 @@ if args.search :
     ui.setContent(article.title, article.content)
 else:
     feed = args.featured or args.picture or args.today
+    feed = feed or 'featured'
     title = {'onthisday': 'On this Day',
             'featured': 'Featured Articles',
             'potd': 'Picture of the Day'
