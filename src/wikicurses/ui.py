@@ -46,10 +46,15 @@ def keymapper(input):
             urwid.RadioButton(radiobuttons, header.text, state=(not current),
                     on_state_change=selectWidget, user_data=[widgets[0]])
 
+            curbutton = 0
             for name, widget in widgetnames.items():
-                urwid.RadioButton(radiobuttons, name, state=(current==widget),
+                button = urwid.RadioButton(radiobuttons, name, state=(current==widget),
                         on_state_change=selectWidget, user_data=[widget])
-            toc = urwid.LineBox(urwid.ListBox(radiobuttons), "Table of Contents")
+                if current == widget:
+                    curbutton = radiobuttons.index(button)
+            buttonbox = urwid.ListBox(radiobuttons)
+            buttonbox.set_focus(curbutton)
+            toc = urwid.LineBox(buttonbox, "Table of Contents")
             overlay = urwid.Overlay(toc, mainwidget,
                 'center', ('relative', 50), 'middle', ('relative', 50))
             loop.widget = overlay
