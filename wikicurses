@@ -30,15 +30,9 @@ group.add_argument('-p', '--picture',
 args = parser.parse_args()
 
 if args.search :
-    article = wiki.search(args.search)
-    ui.setContent(article.title, article.content)
+    ui.setContent(wiki.search(args.search))
 else:
     feed = args.featured or args.picture or args.today
     feed = feed or 'featured'
-    title = {'onthisday': 'On this Day',
-            'featured': 'Featured Articles',
-            'potd': 'Picture of the Day'
-            }[feed]
-    content = wiki.get_featured_feed(feed)
-    ui.setContent(title, content)
+    ui.setContent(wiki.get_featured_feed(feed))
 ui.loop.run()

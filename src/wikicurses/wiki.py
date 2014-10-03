@@ -40,7 +40,12 @@ class Wiki(object):
             else:
                 text = parseFeature(description)
             sections[i.findtext('title')] = i.findtext('link') + '\n' + text
-        return sections
+
+        title = {'onthisday': 'On this Day',
+                'featured': 'Featured Articles',
+                'potd': 'Picture of the Day'
+                }[feed]
+        return (title, sections)
 
 
 class _Article(object):

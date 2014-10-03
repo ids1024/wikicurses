@@ -1,7 +1,7 @@
 from collections import OrderedDict
 import urwid
 from wikicurses import formats
-from wikicurses.wiki import wiki
+from wikicurses.wiki import wiki, _Article
 #TODO: Turn this into a class?
 
 screen = urwid.raw_display.Screen() 
@@ -39,8 +39,7 @@ class SearchBox(urwid.Edit):
         if key != 'enter':
             return super().keypress(size, key)
         loop.widget = mainwidget
-        article = wiki.search(self.edit_text)
-        setContent(article.title, article.content)
+        setContent(wiki.search(self.edit_text))
 
 def keymapper(input):
     #TODO: Implement gg and G
@@ -82,7 +81,13 @@ def keymapper(input):
 loop = urwid.MainLoop(mainwidget, screen=screen, handle_mouse=False,
                      unhandled_input=keymapper)
 
-def setContent(title, content):
+def setContent(data):
+    if isinstance(data, _Article):
+        title = data.title
+        content = data.content
+    else:
+        title, content = data
+
     widgets.clear()
     widgetnames.clear()
     header.set_text(title)
