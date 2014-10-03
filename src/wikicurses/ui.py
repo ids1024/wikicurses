@@ -1,6 +1,7 @@
 from collections import OrderedDict
 import urwid
 from wikicurses import formats
+from wikicurses.wiki import wiki
 #TODO: Turn this into a class?
 
 screen = urwid.raw_display.Screen() 
@@ -33,6 +34,14 @@ def selectWidget(radio_button, new_state, args):
         loop.widget = mainwidget
         widgets.set_focus(index)
 
+class SearchBox(urwid.Edit):
+    def keypress(self, size, key):
+        if key != 'enter':
+            return super().keypress(size, key)
+        loop.widget = mainwidget
+        article = wiki.search(self.edit_text)
+        setContent(article.title, article.content)
+
 def keymapper(input):
     #TODO: Implement gg and G
     if input == 'q':
@@ -60,6 +69,12 @@ def keymapper(input):
             loop.widget = overlay
         else:
             loop.widget = mainwidget
+    elif input == 'o':
+        searchbox = SearchBox()
+        search = urwid.LineBox(urwid.ListBox([searchbox]), "Search")
+        overlay = urwid.Overlay(search, mainwidget,
+            'center', ('relative', 50), 'middle', 3)
+        loop.widget = overlay
     else:
        return False
     return True

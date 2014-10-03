@@ -3,9 +3,7 @@
 import argparse
 
 import wikicurses.ui as ui
-from wikicurses.wiki import Wiki
-
-base_url = "http://en.wikipedia.org/w/api.php?"
+from wikicurses.wiki import wiki
 
 parser = argparse.ArgumentParser(description =
                                     "A simple curses interface for accessing Wikipedia.")
@@ -30,7 +28,6 @@ group.add_argument('-p', '--picture',
                     help='Display URLs for the "Picture of the day" pages')
 
 args = parser.parse_args()
-wiki = Wiki(base_url)
 
 if args.search :
     article = wiki.search(args.search)

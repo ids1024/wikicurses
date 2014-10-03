@@ -8,6 +8,7 @@ from wikicurses.htmlparse import parseExtract, parseFeature
 from wikicurses import wikis
 
 image_url = "http://en.wikipedia.org/wiki/"
+base_url = "http://en.wikipedia.org/w/api.php?"
 
 class Wiki(object):
     def __init__(self, url):
@@ -71,3 +72,5 @@ class _Article(object):
             'Interwiki links':'\n'.join(iwlinks) + '\n'
             })
         return sections
+
+wiki = Wiki(base_url)
