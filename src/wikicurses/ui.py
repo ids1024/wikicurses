@@ -22,10 +22,11 @@ pager = urwid.ListBox(widgets)
 header = urwid.Text('Wikicurses', align='center')
 mainwidget = urwid.Frame(pager, urwid.AttrMap(header, 'h1'))
 
-pager._command_map['k'] = 'cursor up'
-pager._command_map['j'] = 'cursor down'
-pager._command_map['ctrl b'] = 'cursor page up'
-pager._command_map['ctrl f'] = 'cursor page down'
+urwid.command_map['k'] = 'cursor up'
+urwid.command_map['k'] = 'cursor up'
+urwid.command_map['j'] = 'cursor down'
+urwid.command_map['ctrl b'] = 'cursor page up'
+urwid.command_map['ctrl f'] = 'cursor page down'
 
 def selectWidget(radio_button, new_state, args):
     if new_state:
