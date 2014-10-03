@@ -29,7 +29,7 @@ group.add_argument('-p', '--picture',
 
 args = parser.parse_args()
 
-if args.search :
+if args.search:
     ui.setContent(wiki.search(args.search))
 else:
     # Show featured by default
