@@ -24,13 +24,13 @@ def openToc():
         if widgets.focus >= widgets.index(widget)]), None)
     radiobuttons = []
     #Go to first widget when title is selected
-    urwid.RadioButton(radiobuttons, header.text, state=(not current),
-            on_state_change=selectWidget, user_data=[widgets[0]])
+    button = urwid.RadioButton(radiobuttons, header.text, state=(not current))
+    urwid.connect_signal(button, 'change', selectWidget, [widgets[0]])
 
     curbutton = 0
     for name, widget in widgetnames.items():
-        button = urwid.RadioButton(radiobuttons, name, state=(current==widget),
-                on_state_change=selectWidget, user_data=[widget])
+        button = urwid.RadioButton(radiobuttons, name, state=(current==widget))
+        urwid.connect_signal(button, 'change', selectWidget, [widget])
         if current == widget:
             curbutton = radiobuttons.index(button)
     buttonbox = urwid.ListBox(radiobuttons)
