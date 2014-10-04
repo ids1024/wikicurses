@@ -41,30 +41,34 @@ class SearchBox(urwid.Edit):
         loop.widget = mainwidget
         setContent(wiki.search(self.edit_text))
 
+#Open popup with table of contents
+def openToc():
+    current = next(reversed([widget for widget in widgetnames.values()
+        if widgets.focus >= widgets.index(widget)]), None)
+    radiobuttons = []
+    #Go to first widget when title is selected
+    urwid.RadioButton(radiobuttons, header.text, state=(not current),
+            on_state_change=selectWidget, user_data=[widgets[0]])
+
+    curbutton = 0
+    for name, widget in widgetnames.items():
+        button = urwid.RadioButton(radiobuttons, name, state=(current==widget),
+                on_state_change=selectWidget, user_data=[widget])
+        if current == widget:
+            curbutton = radiobuttons.index(button)
+    buttonbox = urwid.ListBox(radiobuttons)
+    buttonbox.set_focus(curbutton)
+    toc = urwid.LineBox(buttonbox, "Table of Contents")
+    overlay = urwid.Overlay(toc, mainwidget,
+        'center', ('relative', 50), 'middle', ('relative', 50))
+    loop.widget = overlay
+
 def keymapper(input):
     #TODO: Implement gg and G
     if input == 'q':
         raise  urwid.ExitMainLoop
     elif input == 'c':
-        current = next(reversed([widget for widget in widgetnames.values()
-            if widgets.focus >= widgets.index(widget)]), None)
-        radiobuttons = []
-        #Go to first widget when title is selected
-        urwid.RadioButton(radiobuttons, header.text, state=(not current),
-                on_state_change=selectWidget, user_data=[widgets[0]])
-
-        curbutton = 0
-        for name, widget in widgetnames.items():
-            button = urwid.RadioButton(radiobuttons, name, state=(current==widget),
-                    on_state_change=selectWidget, user_data=[widget])
-            if current == widget:
-                curbutton = radiobuttons.index(button)
-        buttonbox = urwid.ListBox(radiobuttons)
-        buttonbox.set_focus(curbutton)
-        toc = urwid.LineBox(buttonbox, "Table of Contents")
-        overlay = urwid.Overlay(toc, mainwidget,
-            'center', ('relative', 50), 'middle', ('relative', 50))
-        loop.widget = overlay
+        openToc()
     elif input == 'o':
         searchbox = SearchBox()
         search = urwid.LineBox(urwid.ListBox([searchbox]), "Search")
