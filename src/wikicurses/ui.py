@@ -37,8 +37,7 @@ def keymapper(input):
     elif input == 'c':
         openToc()
     elif input == 'o':
-        searchbox = SearchBox()
-        search = urwid.LineBox(urwid.ListBox([searchbox]), "Search")
+        search = urwid.LineBox(urwid.ListBox([SearchBox()]), "Search")
         overlay = urwid.Overlay(search, mainwidget,
             'center', ('relative', 50), 'middle', 3)
         loop.widget = overlay
