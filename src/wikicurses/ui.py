@@ -16,14 +16,14 @@ class SearchBox(urwid.Edit):
 
 class Toc(urwid.ListBox):
     def __init__(self):
+        super().__init__(urwid.SimpleFocusListWalker([]))
+
         current = next(j for i,j in reversed(widgetnames) if widgets.focus >= j)
-        radiobuttons = []
         for name, widget in widgetnames:
-            button = urwid.RadioButton(radiobuttons, name, state=(current==widget))
+            button = urwid.RadioButton(self.body, name, state=(current==widget))
             urwid.connect_signal(button, 'change', self._selectWidget, widget)
-        super().__init__(radiobuttons)
         #Focus selected button
-        self.set_focus(next(x for x, i in enumerate(radiobuttons) if i.state))
+        self.set_focus(next(x for x, i in enumerate(self.body) if i.state))
 
     def _selectWidget(self, radio_button, new_state, index):
         if new_state:
@@ -75,7 +75,7 @@ for x in range(1, sum(formats) + 1):
     fmt = ','.join(j for i, j in outputfmt if x&formats[i])
     screen.register_palette_entry(x, fmt, '')
 
-widgets = urwid.listbox.SimpleFocusListWalker([])
+widgets = urwid.SimpleFocusListWalker([])
 widgetnames = []
 pager = urwid.ListBox(widgets)
 
