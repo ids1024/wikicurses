@@ -1,4 +1,3 @@
-from collections import OrderedDict
 import urwid
 from wikicurses import formats
 from wikicurses.wiki import wiki
@@ -19,11 +18,11 @@ def selectWidget(radio_button, new_state, args):
         widgets.set_focus(widget)
 
 def openToc():
-    current = next(reversed([widget for widget in widgetnames.values()
+    current = next(reversed([widget for _, widget in widgetnames
         if widgets.focus >= widget]))
     radiobuttons = []
     curbutton = 0
-    for name, widget in widgetnames.items():
+    for name, widget in widgetnames:
         button = urwid.RadioButton(radiobuttons, name, state=(current==widget))
         urwid.connect_signal(button, 'change', selectWidget, [widget])
         if current == widget:
@@ -61,9 +60,9 @@ def setContent(page):
         if title:
             h2 = urwid.Text([('h2', title), '\n'], align="center")
             widgets.append(h2)
-            widgetnames[title] = widgets.index(h2)
+            widgetnames.append((title, widgets.index(h2)))
         else:
-            widgetnames[page.title] = 0
+            widgetnames.append((page.title, 0))
         widgets.append(urwid.Text(content))
 
 
@@ -79,7 +78,7 @@ for x in range(1, sum(formats) + 1):
     screen.register_palette_entry(x, fmt, '')
 
 widgets = urwid.listbox.SimpleFocusListWalker([])
-widgetnames = OrderedDict()
+widgetnames = []
 pager = urwid.ListBox(widgets)
 
 header = urwid.Text('Wikicurses', align='center')
