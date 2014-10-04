@@ -9,7 +9,10 @@ class SearchBox(urwid.Edit):
         if key != 'enter':
             return super().keypress(size, key)
         loop.widget = mainwidget
-        setContent(wiki.search(self.edit_text))
+        if self.edit_text:
+            setContent(wiki.search(self.edit_text))
+        else:
+            setContent(wiki.get_featured_feed('featured'))
 
 def openToc():
     def selectWidget(radio_button, new_state, index):
