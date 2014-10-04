@@ -15,17 +15,16 @@ class SearchBox(urwid.Edit):
 def selectWidget(radio_button, new_state, args):
     if new_state:
         widget = args[0]
-        index = widgets.index(widget)
         loop.widget = mainwidget
-        widgets.set_focus(index)
+        widgets.set_focus(widget)
 
 def openToc():
     current = next(reversed([widget for widget in widgetnames.values()
-        if widgets.focus >= widgets.index(widget)]), None)
+        if widgets.focus >= widget]), None)
     radiobuttons = []
     #Go to first widget when title is selected
     button = urwid.RadioButton(radiobuttons, header.text, state=(not current))
-    urwid.connect_signal(button, 'change', selectWidget, [widgets[0]])
+    urwid.connect_signal(button, 'change', selectWidget, [0])
 
     curbutton = 0
     for name, widget in widgetnames.items():
@@ -66,7 +65,7 @@ def setContent(page):
         if title:
             h2 = urwid.Text([('h2', title), '\n'], align="center")
             widgets.append(h2)
-            widgetnames[title] = h2
+            widgetnames[title] = widgets.index(h2)
         widgets.append(urwid.Text(content))
 
 
