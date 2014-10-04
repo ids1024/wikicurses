@@ -16,7 +16,6 @@ class Wiki(object):
 
     def _query(self, data):
         url = self.siteurl + urllib.parse.urlencode(data)
-        # open url, read content (bytes), convert in string via decode()
         return urllib.request.urlopen(url).read().decode('utf-8')
 
     def search(self, titles):
