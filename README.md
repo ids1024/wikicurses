@@ -29,11 +29,11 @@ o: Open searchbox
 
 c: Open table of contents for page
 
-^f or Page Down to scroll down a page
+^f or Page Down: scroll down a page
 
-^b or Page Up to scroll up a page
+^b or Page Up: scroll up a page
 
-j or Down to scroll down a line
+j or Down: scroll down a line
 
-k or Up to scoll up a line
+k or Up: scoll up a line
 
