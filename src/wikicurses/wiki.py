@@ -19,9 +19,9 @@ class Wiki(object):
         return urllib.request.urlopen(url).read().decode('utf-8')
 
     def search(self, titles):
-        data = {"action":"query", "prop":"extracts|info|extlinks|images|iwlinks",
-                "titles":titles, "redirects":True, "format":"json",
-                "inprop":"url|displaytitle"}
+        data = {"action":"query", "redirects":True, "titles":titles, 
+                "prop":"extracts|info|extlinks|images|iwlinks",
+                "inprop":"url|displaytitle", "format":"json"}
         result = json.loads(self._query(data))
         return _Article(result)
 

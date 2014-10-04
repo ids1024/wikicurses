@@ -5,8 +5,8 @@ import argparse
 import wikicurses.ui as ui
 from wikicurses.wiki import wiki
 
-parser = argparse.ArgumentParser(description =
-                                    "A simple curses interface for accessing Wikipedia.")
+parser = argparse.ArgumentParser(
+        description="A simple curses interface for accessing Wikipedia.")
 
 parser.add_argument('search',
                     nargs = '?',
