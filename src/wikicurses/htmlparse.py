@@ -80,9 +80,6 @@ class _ExtractHTMLParser(HTMLParser):
 
 
 class _FeatureHTMLParser(HTMLParser):
-    def __init__(self):
-        self.text = ''
-        super().__init__(self)
-
+    text = ''
     def handle_data(self, data):
         self.text += data
