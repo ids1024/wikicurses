@@ -63,16 +63,15 @@ def setContent(page):
         widgets.append(urwid.Text(content))
 
 
-screen = urwid.raw_display.Screen() 
-screen.register_palette_entry('h1', 'bold', 'dark blue')
-screen.register_palette_entry('h2', 'underline', '')
-screen.register_palette_entry('h', 'underline', '')
+palette = [('h1', 'bold', 'dark blue'),
+           ('h2', 'underline', ''),
+           ('h', 'underline', '')]
 
 #(ITALIC, 'italic') does not work. No italics option?
 outputfmt = (('b', 'bold'), ('blockquote', 'dark gray'))
 for x in range(1, sum(formats) + 1):
     fmt = ','.join(j for i, j in outputfmt if x&formats[i])
-    screen.register_palette_entry(x, fmt, '')
+    palette.append((x, fmt, ''))
 
 widgets = urwid.SimpleFocusListWalker([])
 widgetnames = []
@@ -87,5 +86,5 @@ urwid.command_map['ctrl b'] = 'cursor page up'
 urwid.command_map['ctrl f'] = 'cursor page down'
 
 
-loop = urwid.MainLoop(mainwidget, screen=screen, handle_mouse=False,
+loop = urwid.MainLoop(mainwidget, palette=palette, handle_mouse=False,
                      unhandled_input=keymapper)
