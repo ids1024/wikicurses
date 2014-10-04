@@ -14,31 +14,31 @@ class SearchBox(urwid.Edit):
         else:
             setContent(wiki.get_featured_feed('featured'))
 
-def openToc():
-    def selectWidget(radio_button, new_state, index):
+class Toc(urwid.ListBox):
+    def __init__(self):
+        current = next(j for i,j in reversed(widgetnames) if widgets.focus >= j)
+        radiobuttons = []
+        for name, widget in widgetnames:
+            button = urwid.RadioButton(radiobuttons, name, state=(current==widget))
+            urwid.connect_signal(button, 'change', self._selectWidget, widget)
+        super().__init__(radiobuttons)
+        #Focus selected button
+        self.set_focus(next(x for x, i in enumerate(radiobuttons) if i.state))
+
+    def _selectWidget(self, radio_button, new_state, index):
         if new_state:
             loop.widget = mainwidget
             widgets.set_focus(index)
-
-    current = next(j for i,j in reversed(widgetnames) if widgets.focus >= j)
-    radiobuttons = []
-    for name, widget in widgetnames:
-        button = urwid.RadioButton(radiobuttons, name, state=(current==widget))
-        urwid.connect_signal(button, 'change', selectWidget, widget)
-    buttonbox = urwid.ListBox(radiobuttons)
-    #Focus selected button
-    buttonbox.set_focus(next(x for x, i in enumerate(radiobuttons) if i.state))
-    toc = urwid.LineBox(buttonbox, "Table of Contents")
-    overlay = urwid.Overlay(toc, mainwidget,
-        'center', ('relative', 50), 'middle', ('relative', 50))
-    loop.widget = overlay
 
 def keymapper(input):
     #TODO: Implement gg and G
     if input == 'q':
         raise  urwid.ExitMainLoop
     elif input == 'c':
-        openToc()
+        toc = urwid.LineBox(Toc(), "Table of Contents")
+        overlay = urwid.Overlay(toc, mainwidget,
+            'center', ('relative', 50), 'middle', ('relative', 50))
+        loop.widget = overlay
     elif input == 'o':
         search = urwid.LineBox(urwid.ListBox([SearchBox()]), "Search")
         overlay = urwid.Overlay(search, mainwidget,
