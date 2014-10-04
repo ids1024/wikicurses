@@ -18,8 +18,7 @@ def selectWidget(radio_button, new_state, args):
         widgets.set_focus(widget)
 
 def openToc():
-    current = next(reversed([widget for _, widget in widgetnames
-        if widgets.focus >= widget]))
+    current = next(reversed([j for i,j in widgetnames if widgets.focus >= j]))
     radiobuttons = []
     curbutton = 0
     for name, widget in widgetnames:
