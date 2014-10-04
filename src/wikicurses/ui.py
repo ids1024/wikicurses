@@ -4,35 +4,6 @@ from wikicurses import formats
 from wikicurses.wiki import wiki
 #TODO: Turn this into a class?
 
-screen = urwid.raw_display.Screen() 
-screen.register_palette_entry('h1', 'bold', 'dark blue')
-screen.register_palette_entry('h2', 'underline', '')
-screen.register_palette_entry('h', 'underline', '')
-
-#(ITALIC, 'italic') does not work. No italics option?
-outputfmt = (('b', 'bold'), ('blockquote', 'dark gray'))
-for x in range(1, sum(formats) + 1):
-    fmt = ','.join(j for i, j in outputfmt if x&formats[i])
-    screen.register_palette_entry(x, fmt, '')
-
-widgets = urwid.listbox.SimpleFocusListWalker([])
-widgetnames = OrderedDict()
-pager = urwid.ListBox(widgets)
-
-header = urwid.Text('Wikicurses', align='center')
-mainwidget = urwid.Frame(pager, urwid.AttrMap(header, 'h1'))
-
-urwid.command_map['k'] = 'cursor up'
-urwid.command_map['j'] = 'cursor down'
-urwid.command_map['ctrl b'] = 'cursor page up'
-urwid.command_map['ctrl f'] = 'cursor page down'
-
-def selectWidget(radio_button, new_state, args):
-    if new_state:
-        widget = args[0]
-        index = widgets.index(widget)
-        loop.widget = mainwidget
-        widgets.set_focus(index)
 
 class SearchBox(urwid.Edit):
     def keypress(self, size, key):
@@ -41,7 +12,13 @@ class SearchBox(urwid.Edit):
         loop.widget = mainwidget
         setContent(wiki.search(self.edit_text))
 
-#Open popup with table of contents
+def selectWidget(radio_button, new_state, args):
+    if new_state:
+        widget = args[0]
+        index = widgets.index(widget)
+        loop.widget = mainwidget
+        widgets.set_focus(index)
+
 def openToc():
     current = next(reversed([widget for widget in widgetnames.values()
         if widgets.focus >= widgets.index(widget)]), None)
@@ -81,9 +58,6 @@ def keymapper(input):
        return False
     return True
 
-loop = urwid.MainLoop(mainwidget, screen=screen, handle_mouse=False,
-                     unhandled_input=keymapper)
-
 def setContent(page):
     widgets.clear()
     widgetnames.clear()
@@ -94,3 +68,31 @@ def setContent(page):
             widgets.append(h2)
             widgetnames[title] = h2
         widgets.append(urwid.Text(content))
+
+
+screen = urwid.raw_display.Screen() 
+screen.register_palette_entry('h1', 'bold', 'dark blue')
+screen.register_palette_entry('h2', 'underline', '')
+screen.register_palette_entry('h', 'underline', '')
+
+#(ITALIC, 'italic') does not work. No italics option?
+outputfmt = (('b', 'bold'), ('blockquote', 'dark gray'))
+for x in range(1, sum(formats) + 1):
+    fmt = ','.join(j for i, j in outputfmt if x&formats[i])
+    screen.register_palette_entry(x, fmt, '')
+
+widgets = urwid.listbox.SimpleFocusListWalker([])
+widgetnames = OrderedDict()
+pager = urwid.ListBox(widgets)
+
+header = urwid.Text('Wikicurses', align='center')
+mainwidget = urwid.Frame(pager, urwid.AttrMap(header, 'h1'))
+
+urwid.command_map['k'] = 'cursor up'
+urwid.command_map['j'] = 'cursor down'
+urwid.command_map['ctrl b'] = 'cursor page up'
+urwid.command_map['ctrl f'] = 'cursor page down'
+
+
+loop = urwid.MainLoop(mainwidget, screen=screen, handle_mouse=False,
+                     unhandled_input=keymapper)
