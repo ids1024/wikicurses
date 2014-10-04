@@ -20,12 +20,8 @@ def selectWidget(radio_button, new_state, args):
 
 def openToc():
     current = next(reversed([widget for widget in widgetnames.values()
-        if widgets.focus >= widget]), None)
+        if widgets.focus >= widget]))
     radiobuttons = []
-    #Go to first widget when title is selected
-    button = urwid.RadioButton(radiobuttons, header.text, state=(not current))
-    urwid.connect_signal(button, 'change', selectWidget, [0])
-
     curbutton = 0
     for name, widget in widgetnames.items():
         button = urwid.RadioButton(radiobuttons, name, state=(current==widget))
@@ -66,6 +62,8 @@ def setContent(page):
             h2 = urwid.Text([('h2', title), '\n'], align="center")
             widgets.append(h2)
             widgetnames[title] = widgets.index(h2)
+        else:
+            widgetnames[page.title] = 0
         widgets.append(urwid.Text(content))
 
 
