@@ -19,14 +19,12 @@ def openToc():
 
     current = next(j for i,j in reversed(widgetnames) if widgets.focus >= j)
     radiobuttons = []
-    curbutton = 0
     for name, widget in widgetnames:
         button = urwid.RadioButton(radiobuttons, name, state=(current==widget))
         urwid.connect_signal(button, 'change', selectWidget, widget)
-        if current == widget:
-            curbutton = radiobuttons.index(button)
     buttonbox = urwid.ListBox(radiobuttons)
-    buttonbox.set_focus(curbutton)
+    #Focus selected button
+    buttonbox.set_focus(next(x for x, i in enumerate(radiobuttons) if i.state))
     toc = urwid.LineBox(buttonbox, "Table of Contents")
     overlay = urwid.Overlay(toc, mainwidget,
         'center', ('relative', 50), 'middle', ('relative', 50))
