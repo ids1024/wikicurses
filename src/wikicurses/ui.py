@@ -11,11 +11,10 @@ class SearchBox(urwid.Edit):
         loop.widget = mainwidget
         setContent(wiki.search(self.edit_text))
 
-def selectWidget(radio_button, new_state, args):
+def selectWidget(radio_button, new_state, index):
     if new_state:
-        widget = args[0]
         loop.widget = mainwidget
-        widgets.set_focus(widget)
+        widgets.set_focus(index)
 
 def openToc():
     current = next(reversed([j for i,j in widgetnames if widgets.focus >= j]))
@@ -23,7 +22,7 @@ def openToc():
     curbutton = 0
     for name, widget in widgetnames:
         button = urwid.RadioButton(radiobuttons, name, state=(current==widget))
-        urwid.connect_signal(button, 'change', selectWidget, [widget])
+        urwid.connect_signal(button, 'change', selectWidget, widget)
         if current == widget:
             curbutton = radiobuttons.index(button)
     buttonbox = urwid.ListBox(radiobuttons)
