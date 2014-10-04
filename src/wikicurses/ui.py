@@ -30,20 +30,19 @@ class Toc(urwid.ListBox):
             loop.widget = mainwidget
             widgets.set_focus(index)
 
+def openOverlay(widget, title, height=('relative', 50), width=('relative', 50)):
+    box = urwid.LineBox(widget, title)
+    overlay = urwid.Overlay(box, mainwidget, 'center', width, 'middle', height)
+    loop.widget = overlay
+
 def keymapper(input):
     #TODO: Implement gg and G
     if input == 'q':
         raise  urwid.ExitMainLoop
     elif input == 'c':
-        toc = urwid.LineBox(Toc(), "Table of Contents")
-        overlay = urwid.Overlay(toc, mainwidget,
-            'center', ('relative', 50), 'middle', ('relative', 50))
-        loop.widget = overlay
+        openOverlay(Toc(), "Table of Contents")
     elif input == 'o':
-        search = urwid.LineBox(urwid.ListBox([SearchBox()]), "Search")
-        overlay = urwid.Overlay(search, mainwidget,
-            'center', ('relative', 50), 'middle', 3)
-        loop.widget = overlay
+        openOverlay(urwid.ListBox([SearchBox()]), "Search", height=3)
     elif input == 'esc':
         loop.widget = mainwidget
     else:
