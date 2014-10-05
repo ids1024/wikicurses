@@ -27,7 +27,7 @@ class Wiki(object):
 
     def get_featured_feed(self, feed):
         data = {"action":"featuredfeed", "feed":feed}
-        result = ET.fromstring(self._query(data))
+        result = ET.fromstring(self._query(data))[0]
         return _Featured(feed, result)
 
 
@@ -66,15 +66,12 @@ class _Featured(object):
     def __init__(self, feed, result):
         self.feed = feed
         self.result = result
-        self.title = {'onthisday': 'On this Day',
-                'featured': 'Featured Articles',
-                'potd': 'Picture of the Day'
-                }[feed]
+        self.title = result.find('title').text
 
     @property
     def content(self):
         sections = OrderedDict()
-        for i in self.result[0].findall('item'):
+        for i in self.result.findall('item'):
             description = i.findtext('description')
             if self.feed == 'onthisday':
                 htmls = re.findall("<li>(.*?)</li>", description, flags=re.DOTALL)
