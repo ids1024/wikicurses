@@ -74,6 +74,8 @@ class _ExtractHTMLParser(HTMLParser):
             self.add_text(ENDPAR)
         elif tag in (i.name for i in formats):
             self.format&=~formats[tag]
+        if tag == 'blockquote':
+            self.add_text(ENDPAR)
 
     def handle_data(self, data):
         self.add_text(re.sub('\n+', '\n', data))
