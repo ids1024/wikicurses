@@ -14,21 +14,19 @@ class Wiki(object):
     def __init__(self, url):
         self.siteurl = url
 
-    def _query(self, data):
+    def _query(self, **data):
         url = self.siteurl + urllib.parse.urlencode(data)
         return urllib.request.urlopen(url).read().decode('utf-8')
 
     def search(self, titles):
-        data = {"action":"query", "redirects":True, "titles":titles, 
-                "prop":"extracts|info|extlinks|images|iwlinks",
-                "inprop":"url|displaytitle", "format":"json"}
-        result = json.loads(self._query(data))
-        return _Article(result)
+        result = self._query(action="query", redirects=True, titles=titles, 
+                    prop="extracts|info|extlinks|images|iwlinks",
+                    inprop="url|displaytitle", format="json")
+        return _Article(json.loads(result))
 
     def get_featured_feed(self, feed):
-        data = {"action":"featuredfeed", "feed":feed}
-        result = ET.fromstring(self._query(data))[0]
-        return _Featured(feed, result)
+        result = self._query(action="featuredfeed", feed=feed)
+        return _Featured(feed, ET.fromstring(result)[0])
 
 
 class _Article(object):
