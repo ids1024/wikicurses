@@ -48,11 +48,10 @@ class Bmarks(urwid.ListBox):
             add_bookmark(item.label)
             self.body.insert(index, item)
             self.set_focus(index)
-        if key in ('meta [', 'x'): #meta [ = delete
-            if self.focus: #If there are any bookmarks
-                remove_bookmark(self.focus.label)
-                self.deleted.append((self.focus_position, self.focus))
-                self.body.remove(self.focus)
+        if key in ('meta [', 'x') and self.focus:
+            remove_bookmark(self.focus.label)
+            self.deleted.append((self.focus_position, self.focus))
+            self.body.remove(self.focus)
         else:
             return super().keypress(size, key)
 
