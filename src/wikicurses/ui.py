@@ -45,8 +45,9 @@ class Bmarks(urwid.ListBox):
     def keypress(self, size, key):
         if key not in ('meta [', 'x'): #meta [ = delete
             return super().keypress(size, key)
-        remove_bookmark(self.focus.label)
-        self.body.remove(self.focus)
+        if self.focus: #If there are any bookmarks
+            remove_bookmark(self.focus.label)
+            self.body.remove(self.focus)
 
 def notify(text):
     mainwidget.footer = urwid.Text(text)
