@@ -16,6 +16,7 @@ class Settings:
     def __iter__(self):
         if not os.path.exists(self.file):
             yield from ()
+            return
         with open(self.file) as file:
             yield from json.load(file)
 
