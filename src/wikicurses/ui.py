@@ -1,5 +1,5 @@
 import urwid
-from wikicurses import formats
+from wikicurses import formats, add_bookmark, get_bookmarks
 from wikicurses.wiki import wiki
 #TODO: Turn this into a class?
 
@@ -30,6 +30,51 @@ class Toc(urwid.ListBox):
             loop.widget = mainwidget
             widgets.set_focus(index)
 
+class Bmarks(urwid.ListBox):
+    def __init__(self):
+        super().__init__(urwid.SimpleFocusListWalker([]))
+        for bookmark in get_bookmarks():
+            button = urwid.RadioButton(self.body, bookmark, state=False)
+            urwid.connect_signal(button, 'change', self._selectWidget, bookmark)
+
+    def _selectWidget(self, radio_button, new_state, bookmark):
+        if new_state:
+            loop.widget = mainwidget
+            setContent(wiki.search(bookmark))
+
+def notify(text):
+    mainwidget.footer = urwid.Text(text)
+
+class Ex(urwid.Edit):
+    def keypress(self, size, key):
+        if key == 'esc' or (key == 'backspace' and not self.edit_text):
+            self.exitexmode()
+            return
+        elif key != 'enter':
+            return super().keypress(size, key)
+        cmd = self.edit_text
+        self.exitexmode()
+
+        if cmd in ('q', 'quit'):
+            raise urwid.ExitMainLoop
+        if cmd == 'bmarks':
+            openOverlay(Bmarks(), "Bookmarks")
+        elif cmd == 'bmark':
+            add_bookmark(header.text)
+            notify("Bookmark Added")
+        elif cmd:
+            notify(cmd + ': Unknown Command')
+
+    def exitexmode(self):
+        self.set_caption('')
+        self.set_edit_text('')
+        mainwidget.set_focus('body')
+
+    def enterexmode(self):
+        mainwidget.set_focus('footer')
+        self.set_caption(':')
+
+
 def openOverlay(widget, title, height=('relative', 50), width=('relative', 50)):
     box = urwid.LineBox(widget, title)
     overlay = urwid.Overlay(box, mainwidget, 'center', width, 'middle', height)
@@ -37,8 +82,11 @@ def openOverlay(widget, title, height=('relative', 50), width=('relative', 50)):
 
 def keymapper(input):
     #TODO: Implement gg and G
+
     if input == 'q':
         raise  urwid.ExitMainLoop
+    elif input == ':':
+        mainwidget.footer.enterexmode()
     elif input == 'c':
         openOverlay(Toc(), "Table of Contents")
     elif input == 'o':
@@ -48,6 +96,11 @@ def keymapper(input):
     else:
        return False
     return True
+
+def input_filter(keys, raw):
+    if not isinstance(mainwidget.footer, urwid.Edit):
+        mainwidget.footer = Ex()
+    return keys
 
 def setContent(page):
     widgets.clear()
@@ -78,7 +131,7 @@ widgetnames = []
 pager = urwid.ListBox(widgets)
 
 header = urwid.Text('Wikicurses', align='center')
-mainwidget = urwid.Frame(pager, urwid.AttrMap(header, 'h1'))
+mainwidget = urwid.Frame(pager, urwid.AttrMap(header, 'h1'), Ex())
 
 urwid.command_map['k'] = 'cursor up'
 urwid.command_map['j'] = 'cursor down'
@@ -87,4 +140,4 @@ urwid.command_map['ctrl f'] = 'cursor page down'
 
 
 loop = urwid.MainLoop(mainwidget, palette=palette, handle_mouse=False,
-                     unhandled_input=keymapper)
+                     unhandled_input=keymapper, input_filter=input_filter)
