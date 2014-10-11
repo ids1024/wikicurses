@@ -10,6 +10,9 @@ ENDPAR, STARTPAR, ENDH = range(3)
 def parseExtract(html):
     parser = _ExtractHTMLParser()
     parser.feed(html)
+    for i in parser.sections:
+        if not parser.sections[i]:
+            del parser.sections[i]
     return parser.sections
 
 def parseFeature(html):
@@ -55,9 +58,6 @@ class _ExtractHTMLParser(HTMLParser):
 
     def handle_starttag(self, tag, attrs):
         if tag == 'h2':
-            #Remove previous section if empty
-            if not self.sections[self.cursection]:
-                del self.sections[self.cursection]
             self.cursection = ''
         if re.fullmatch("h[2-6]", tag):
             self.inh = int(tag[1:])
