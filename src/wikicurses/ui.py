@@ -53,13 +53,29 @@ class Bmarks(urwid.ListBox):
         else:
             return super().keypress(size, key)
 
+class Wikis(urwid.ListBox):
+    def __init__(self):
+        def selectWidget(radio_button, new_state, name):
+            if new_state:
+                loop.widget = mainwidget
+                openWiki(name)
+                setContent(wiki.search('Main page'))
+
+        super().__init__(urwid.SimpleFocusListWalker([]))
+        wikis = (i for i in conf if i not in ('general', 'DEFAULT'))
+        for i, name in enumerate(wikis):
+            iscurrent = wiki.siteurl == conf[name]['url']
+            urwid.RadioButton(self.body, name, iscurrent, selectWidget, name)
+            if iscurrent:
+                self.set_focus(i)
+
 class Ex(urwid.Edit):
     def keypress(self, size, key):
         if key == 'esc' or (key == 'backspace' and not self.edit_text):
             self.exitexmode()
             return
         elif key == 'tab':
-            cmds = sorted(('quit', 'bmark', 'bmarks'), key=len)
+            cmds = sorted(('quit', 'bmark', 'bmarks', 'wikis'), key=len)
             matches = [i for i in cmds if i.startswith(self.edit_text)]
             if not matches:
                 return
@@ -82,6 +98,8 @@ class Ex(urwid.Edit):
         elif cmd == 'bmark':
             bmarks.add(header.text)
             notify("Bookmark Added")
+        elif cmd == 'wikis':
+            openOverlay(Wikis(), "Wikis")
         elif cmd:
             notify(cmd + ': Unknown Command')
 
