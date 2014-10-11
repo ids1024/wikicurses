@@ -10,7 +10,7 @@ parser = argparse.ArgumentParser(
 
 parser.add_argument('search',
                     nargs = '?',
-                    default = '',
+                    default = 'Main page',
                     help = "page to search for")
 parser.add_argument('--wiki',
                     default = "http://en.wikipedia.org/w/api.php",
@@ -33,11 +33,10 @@ group.add_argument('-p', '--picture',
 args = parser.parse_args()
 ui.wiki = Wiki(args.wiki)
 
-if args.search:
-    ui.setContent(ui.wiki.search(args.search))
-else:
-    # Show featured by default
-    feed = args.featured or args.picture or args.today or 'featured'
+feed = args.featured or args.picture or args.today
+if feed:
     ui.setContent(ui.wiki.get_featured_feed(feed))
+else:
+    ui.setContent(ui.wiki.search(args.search))
 ui.loop.run()
 
