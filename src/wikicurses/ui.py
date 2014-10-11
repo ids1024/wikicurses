@@ -1,5 +1,5 @@
 import urwid
-from wikicurses import formats, Settings
+from wikicurses import formats, Settings, conf
 from wikicurses.wiki import Wiki
 
 class SearchBox(urwid.Edit):
@@ -124,9 +124,15 @@ def input_filter(keys, raw):
         mainwidget.footer = Ex()
     return keys
 
-def openWiki(url):
+def openWiki(name):
     global wiki
     global bmarks
+    if not name:
+        url = conf[conf['general']['default']]['url']
+    elif name in conf:
+        url = conf[name]['url']
+    else:
+        url = name
     wiki = Wiki(url)
     bmarks = Settings(url, 'bookmarks')
 
