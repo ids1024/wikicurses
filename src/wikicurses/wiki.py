@@ -6,7 +6,6 @@ from collections import OrderedDict
 
 from wikicurses.htmlparse import parseExtract, parseFeature
 
-image_url = "http://en.wikipedia.org/wiki/"
 base_url = "http://en.wikipedia.org/w/api.php?"
 
 class Wiki(object):
@@ -20,7 +19,7 @@ class Wiki(object):
     def search(self, titles):
         result = self._query(action="query", redirects=True, titles=titles, 
                     prop="extracts|info|extlinks|images|iwlinks",
-                    meta="siteinfo", siprop="interwikimap",
+                    meta="siteinfo", siprop="general|interwikimap",
                     inprop="url|displaytitle", format="json")
         return _Article(json.loads(result))
 
@@ -33,6 +32,9 @@ class _Article(object):
     def __init__(self, result):
         self.interwikimap = {i['prefix']: i['url'] 
                 for i in result['query']['interwikimap']}
+        self.articlepath = urllib.parse.urljoin( 
+                result['query']['general']['base'],
+                result['query']['general']['articlepath'])
         self.page = next(iter(result['query']['pages'].values()))
         self.title = self.page['title']
 
@@ -44,7 +46,7 @@ class _Article(object):
         sections.pop("External links", '')
         sections.pop("References", '')
 
-        images = (image_url + i['title'].replace(' ', '_')
+        images = (self.articlepath.replace('$1', i['title'].replace(' ', '_'))
                  for i in self.page.get('images', ()))
 
         extlinks = (i['*'] for i in self.page.get('extlinks', ()))
