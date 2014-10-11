@@ -60,6 +60,18 @@ class Ex(urwid.Edit):
         if key == 'esc' or (key == 'backspace' and not self.edit_text):
             self.exitexmode()
             return
+        elif key == 'tab':
+            cmds = sorted(('quit', 'bmark', 'bmarks'), key=len)
+            matches = [i for i in cmds if i.startswith(self.edit_text)]
+            if not matches:
+                return
+            if matches[0] == self.edit_text and len(matches)>1:
+                cmd = matches[1]
+            else:
+                cmd = matches[0]
+            self.set_edit_text(cmd)
+            self.edit_pos = len(cmd)
+            return
         elif key != 'enter':
             return super().keypress(size, key)
         cmd = self.edit_text
