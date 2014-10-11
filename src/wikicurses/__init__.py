@@ -26,6 +26,11 @@ def add_bookmark(title):
     bookmarks.add(title)
     save_bookmarks(list(bookmarks))
 
+def remove_bookmark(title):
+    bookmarks = set(get_bookmarks())
+    bookmarks.discard(title)
+    save_bookmarks(list(bookmarks))
+
 class BitEnum(int, Enum):
     def __new__(cls, *args):
         value = 1 << len(cls.__members__)

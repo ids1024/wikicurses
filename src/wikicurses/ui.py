@@ -1,5 +1,5 @@
 import urwid
-from wikicurses import formats, add_bookmark, get_bookmarks
+from wikicurses import formats, add_bookmark, remove_bookmark, get_bookmarks
 from wikicurses.wiki import wiki
 #TODO: Turn this into a class?
 
@@ -41,6 +41,12 @@ class Bmarks(urwid.ListBox):
         if new_state:
             loop.widget = mainwidget
             setContent(wiki.search(bookmark))
+
+    def keypress(self, size, key):
+        if key not in ('P', 'x'): #P = delete?
+            return super().keypress(size, key)
+        remove_bookmark(self.focus.label)
+        self.body.remove(self.focus)
 
 def notify(text):
     mainwidget.footer = urwid.Text(text)
