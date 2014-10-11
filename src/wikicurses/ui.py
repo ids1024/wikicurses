@@ -48,9 +48,6 @@ class Bmarks(urwid.ListBox):
             remove_bookmark(self.focus.label)
             self.body.remove(self.focus)
 
-def notify(text):
-    mainwidget.footer = urwid.Text(text)
-
 class Ex(urwid.Edit):
     def keypress(self, size, key):
         if key == 'esc' or (key == 'backspace' and not self.edit_text):
@@ -80,6 +77,8 @@ class Ex(urwid.Edit):
         mainwidget.set_focus('footer')
         self.set_caption(':')
 
+def notify(text):
+    mainwidget.footer = urwid.Text(text)
 
 def openOverlay(widget, title, height=('relative', 50), width=('relative', 50)):
     box = urwid.LineBox(widget, title)
