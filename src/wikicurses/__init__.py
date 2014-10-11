@@ -3,9 +3,6 @@ import json
 import pkgutil
 from enum import Enum
 
-_data = pkgutil.get_data('wikicurses', 'interwiki.list').decode()
-wikis = dict([i.split('|')[0:2] for i in _data.splitlines() if i[0]!='#'])
-
 default_configdir = os.environ['HOME'] + '/.config'
 configpath = os.environ.get('XDG_CONFIG_HOME', default_configdir) + '/wikicurses'
 

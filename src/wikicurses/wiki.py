@@ -5,7 +5,6 @@ import  xml.etree.ElementTree as ET
 from collections import OrderedDict
 
 from wikicurses.htmlparse import parseExtract, parseFeature
-from wikicurses import wikis
 
 image_url = "http://en.wikipedia.org/wiki/"
 base_url = "http://en.wikipedia.org/w/api.php?"
@@ -21,6 +20,7 @@ class Wiki(object):
     def search(self, titles):
         result = self._query(action="query", redirects=True, titles=titles, 
                     prop="extracts|info|extlinks|images|iwlinks",
+                    meta="siteinfo", siprop="interwikimap",
                     inprop="url|displaytitle", format="json")
         return _Article(json.loads(result))
 
@@ -31,6 +31,8 @@ class Wiki(object):
 
 class _Article(object):
     def __init__(self, result):
+        self.interwikimap = {i['prefix']: i['url'] 
+                for i in result['query']['interwikimap']}
         self.page = next(iter(result['query']['pages'].values()))
         self.title = self.page['title']
 
@@ -49,8 +51,9 @@ class _Article(object):
         #if an url starts with //, it can by http or https.  Use http.
         extlinks = ('http:' + i if i.startswith('//') else i for i in extlinks)
 
-        iwlinks = (wikis[i['prefix']].replace('$1', i['*'])
-                  for i in self.page.get('iwlinks', ()) if i['prefix'] in wikis)
+        iwlinks = (self.interwikimap[i['prefix']].replace('$1', i['*'])
+                  for i in self.page.get('iwlinks', ())
+                  if i['prefix'] in self.interwikimap)
 
         sections.update({
             'Images':'\n'.join(images) + '\n',
