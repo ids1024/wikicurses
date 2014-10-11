@@ -19,7 +19,7 @@ def save_bookmarks(bmarks):
     if not os.path.exists(configpath):
         os.mkdir(configpath)
     with open(bmarkfile, 'w') as file:
-        return json.dump(bmarks, file)
+        json.dump(bmarks, file)
 
 def add_bookmark(title):
     bookmarks = set(get_bookmarks())
