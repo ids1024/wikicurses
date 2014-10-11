@@ -37,3 +37,8 @@ j or Down: scroll down a line
 
 k or Up: scoll up a line
 
+q or :q(uit): exit
+
+:bmark: add bookmark
+
+:bmarks: view bookmarks
