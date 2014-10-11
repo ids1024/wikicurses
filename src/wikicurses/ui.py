@@ -40,13 +40,23 @@ class Bmarks(urwid.ListBox):
         for bookmark in get_bookmarks():
             button = urwid.RadioButton(self.body, bookmark, state=False)
             urwid.connect_signal(button, 'change', selectWidget, bookmark)
+        self.deleted = []
 
     def keypress(self, size, key):
-        if key not in ('meta [', 'x'): #meta [ = delete
+        if key == 'u': #Undo delete
+            if not self.deleted:
+                return
+            index, item = self.deleted.pop()
+            add_bookmark(item.label)
+            self.body.insert(index, item)
+            self.set_focus(index)
+        if key in ('meta [', 'x'): #meta [ = delete
+            if self.focus: #If there are any bookmarks
+                remove_bookmark(self.focus.label)
+                self.deleted.append((self.focus_position, self.focus))
+                self.body.remove(self.focus)
+        else:
             return super().keypress(size, key)
-        if self.focus: #If there are any bookmarks
-            remove_bookmark(self.focus.label)
-            self.body.remove(self.focus)
 
 class Ex(urwid.Edit):
     def keypress(self, size, key):
