@@ -59,6 +59,7 @@ class _Article(object):
         sections = parseExtract(html)
         sections.pop("External links", '')
         sections.pop("References", '')
+        sections.pop("Contents", '')
 
         images = (self.articlepath.replace('$1', i['title'].replace(' ', '_'))
                  for i in self.page.get('images', ()))

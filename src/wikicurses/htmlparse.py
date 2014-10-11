@@ -44,6 +44,8 @@ class _ExtractHTMLParser(HTMLParser):
 
         tformat = self.format
 
+        if self.inh and text in ('[', ']', 'edit'):
+            return
         if self.inh == 2:
             self.cursection += text
             return
