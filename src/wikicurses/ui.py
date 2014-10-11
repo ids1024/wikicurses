@@ -22,12 +22,11 @@ class Toc(urwid.ListBox):
                 widgets.set_focus(index)
 
         super().__init__(urwid.SimpleFocusListWalker([]))
-        current = next(j for i,j in reversed(widgetnames) if widgets.focus >= j)
-        for name, widget in widgetnames:
-            button = urwid.RadioButton(self.body, name, state=(current==widget))
-            urwid.connect_signal(button, 'change', selectWidget, widget)
-        #Focus selected button
-        self.set_focus(next(x for x, i in enumerate(self.body) if i.state))
+        for i, (name, index) in enumerate(widgetnames):
+            current = widgets.focus>=index
+            urwid.RadioButton(self.body, name, current, selectWidget, index)
+            if current:
+                self.set_focus(i)
 
 class Bmarks(urwid.ListBox):
     def __init__(self):
@@ -38,8 +37,7 @@ class Bmarks(urwid.ListBox):
 
         super().__init__(urwid.SimpleFocusListWalker([]))
         for bookmark in get_bookmarks():
-            button = urwid.RadioButton(self.body, bookmark, state=False)
-            urwid.connect_signal(button, 'change', selectWidget, bookmark)
+            urwid.RadioButton(self.body, bookmark, False, selectWidget, bookmark)
         self.deleted = []
 
     def keypress(self, size, key):
