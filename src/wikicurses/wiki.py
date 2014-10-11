@@ -11,16 +11,28 @@ base_url = "http://en.wikipedia.org/w/api.php"
 class Wiki(object):
     def __init__(self, url):
         self.siteurl = url
+        result = json.loads(self._query(action="query", meta="siteinfo",
+                siprop="extensions", format="json"))
+        extensions = (i["name"] for i in result["query"]["extensions"])
+        self.has_extract = "TextExtracts" in extensions
 
     def _query(self, **data):
         url = self.siteurl + '?' + urllib.parse.urlencode(data)
         return urllib.request.urlopen(url).read().decode('utf-8')
 
     def search(self, titles):
-        result = self._query(action="query", redirects=True, titles=titles, 
+        if self.has_extract:
+            result = self._query(action="query", redirects=True, titles=titles, 
                     prop="extracts|info|extlinks|images|iwlinks",
                     meta="siteinfo", siprop="general|interwikimap",
                     inprop="url|displaytitle", format="json")
+        else:
+            result = self._query(action="query", redirects=True, titles=titles, 
+                    prop="revisions|info|extlinks|images|iwlinks",
+                    rvprop="content", rvparse=True,
+                    meta="siteinfo", siprop="general|interwikimap",
+                    inprop="url|displaytitle", format="json")
+
         return _Article(json.loads(result))
 
     def get_featured_feed(self, feed):
@@ -40,9 +52,13 @@ class _Article(object):
 
     @property
     def content(self):
-        if 'extract' not in self.page:
+        if 'extract' in self.page:
+            html = self.page['extract']
+        elif 'revisions' in self.page:
+            html = self.page['revisions'][0]['*']
+        else:
             return {'':'Page Not Found.'}
-        sections = parseExtract(self.page['extract'])
+        sections = parseExtract(html)
         sections.pop("External links", '')
         sections.pop("References", '')
 
