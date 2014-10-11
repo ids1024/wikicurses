@@ -4,6 +4,7 @@ import argparse
 
 import wikicurses.ui as ui
 from wikicurses.wiki import Wiki
+from wikicurses import Settings
 
 parser = argparse.ArgumentParser(
         description="A simple curses interface for accessing Wikipedia.")
@@ -32,6 +33,7 @@ group.add_argument('-p', '--picture',
 
 args = parser.parse_args()
 ui.wiki = Wiki(args.wiki)
+ui.bmarks = Settings(args.wiki, 'bookmarks')
 
 feed = args.featured or args.picture or args.today
 if feed:
@@ -39,4 +41,3 @@ if feed:
 else:
     ui.setContent(ui.wiki.search(args.search))
 ui.loop.run()
-

@@ -1,14 +1,15 @@
 import os
 import json
-import pkgutil
+from urllib.parse import urlparse
 from enum import Enum
 
 default_configdir = os.environ['HOME'] + '/.config'
 configpath = os.environ.get('XDG_CONFIG_HOME', default_configdir) + '/wikicurses'
 
 class Settings:
-    def __init__(self, name):
-        self.file = configpath + '/' + name
+    def __init__(self, wiki, name):
+        self.configpath = configpath + '/' + urlparse(wiki).netloc
+        self.file = self.configpath + '/' + name
 
     def __iter__(self):
         if not os.path.exists(self.file):
@@ -18,8 +19,8 @@ class Settings:
             yield from json.load(file)
 
     def _save(self, bookmarks):
-        if not os.path.exists(configpath):
-            os.mkdir(configpath)
+        if not os.path.exists(self.configpath):
+            os.makedirs(self.configpath)
         with open(self.file, 'w') as file:
             json.dump(bookmarks, file)
 
@@ -32,8 +33,6 @@ class Settings:
         bookmarks = set(self)
         bookmarks.discard(bmark)
         self._save(list(bookmarks))
-
-bmarks = Settings('bookmarks')
 
 class BitEnum(int, Enum):
     def __new__(cls, *args):
