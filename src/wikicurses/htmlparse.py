@@ -38,8 +38,6 @@ class _ExtractHTMLParser(HTMLParser):
                 return
         elif text == ENDH:
             text = '\n'
-        elif not text.strip():
-            return
 
         tformat = self.format
 
