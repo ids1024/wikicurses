@@ -1,7 +1,6 @@
 import urwid
-from wikicurses import formats
-#TODO: Turn this into a class?
-
+from wikicurses import formats, Settings
+from wikicurses.wiki import Wiki
 
 class SearchBox(urwid.Edit):
     def keypress(self, size, key):
@@ -124,6 +123,12 @@ def input_filter(keys, raw):
     if not isinstance(mainwidget.footer, urwid.Edit):
         mainwidget.footer = Ex()
     return keys
+
+def openWiki(url):
+    global wiki
+    global bmarks
+    wiki = Wiki(url)
+    bmarks = Settings(url, 'bookmarks')
 
 def setContent(page):
     widgets.clear()
