@@ -47,7 +47,11 @@ class _ExtractHTMLParser(HTMLParser):
             return
         elif self.inh > 2:
             tformat = 'h'
-        self.sections[self.cursection].append((tformat, text))
+        section = self.sections[self.cursection]
+        if section and section[-1][0] == tformat:
+            section[-1] = (section[-1][0], section[-1][1] + text)
+        else:
+            section.append((tformat, text))
 
     def handle_starttag(self, tag, attrs):
         if tag == 'h2':
