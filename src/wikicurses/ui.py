@@ -16,31 +16,30 @@ class SearchBox(urwid.Edit):
 
 class Toc(urwid.ListBox):
     def __init__(self):
-        super().__init__(urwid.SimpleFocusListWalker([]))
+        def selectWidget(radio_button, new_state, index):
+            if new_state:
+                loop.widget = mainwidget
+                widgets.set_focus(index)
 
+        super().__init__(urwid.SimpleFocusListWalker([]))
         current = next(j for i,j in reversed(widgetnames) if widgets.focus >= j)
         for name, widget in widgetnames:
             button = urwid.RadioButton(self.body, name, state=(current==widget))
-            urwid.connect_signal(button, 'change', self._selectWidget, widget)
+            urwid.connect_signal(button, 'change', selectWidget, widget)
         #Focus selected button
         self.set_focus(next(x for x, i in enumerate(self.body) if i.state))
 
-    def _selectWidget(self, radio_button, new_state, index):
-        if new_state:
-            loop.widget = mainwidget
-            widgets.set_focus(index)
-
 class Bmarks(urwid.ListBox):
     def __init__(self):
+        def selectWidget(radio_button, new_state, bookmark):
+            if new_state:
+                loop.widget = mainwidget
+                setContent(wiki.search(bookmark))
+
         super().__init__(urwid.SimpleFocusListWalker([]))
         for bookmark in get_bookmarks():
             button = urwid.RadioButton(self.body, bookmark, state=False)
-            urwid.connect_signal(button, 'change', self._selectWidget, bookmark)
-
-    def _selectWidget(self, radio_button, new_state, bookmark):
-        if new_state:
-            loop.widget = mainwidget
-            setContent(wiki.search(bookmark))
+            urwid.connect_signal(button, 'change', selectWidget, bookmark)
 
     def keypress(self, size, key):
         if key not in ('meta [', 'x'): #meta [ = delete
