@@ -9,7 +9,7 @@ Usage
 -----
 ~~~bash
 $ wikicurses -h
-usage: wikicurses [-h] [-d | -f | -p] [search]
+usage: wikicurses [-h] [--wiki WIKI] [-d | -f | -p] [search]
 
 A simple curses interface for accessing Wikipedia.
 
@@ -18,9 +18,10 @@ positional arguments:
 
 optional arguments:
   -h, --help      show this help message and exit
+  --wiki WIKI     wiki api url
   -d, --today     list "On This Day" pages
   -f, --featured  show featured articles
-  -p, --picture   Show pictures of the day
+  -p, --picture   show pictures of the day
 ~~~
 
 Keybindings
