@@ -6,14 +6,14 @@ from collections import OrderedDict
 
 from wikicurses.htmlparse import parseExtract, parseFeature
 
-base_url = "http://en.wikipedia.org/w/api.php?"
+base_url = "http://en.wikipedia.org/w/api.php"
 
 class Wiki(object):
     def __init__(self, url):
         self.siteurl = url
 
     def _query(self, **data):
-        url = self.siteurl + urllib.parse.urlencode(data)
+        url = self.siteurl + '?' + urllib.parse.urlencode(data)
         return urllib.request.urlopen(url).read().decode('utf-8')
 
     def search(self, titles):
