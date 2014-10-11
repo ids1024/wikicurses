@@ -1,5 +1,5 @@
 import urwid
-from wikicurses import formats, add_bookmark, remove_bookmark, get_bookmarks
+from wikicurses import formats, bmarks
 from wikicurses.wiki import wiki
 #TODO: Turn this into a class?
 
@@ -36,7 +36,7 @@ class Bmarks(urwid.ListBox):
                 setContent(wiki.search(bookmark))
 
         super().__init__(urwid.SimpleFocusListWalker([]))
-        for bookmark in get_bookmarks():
+        for bookmark in bmarks:
             urwid.RadioButton(self.body, bookmark, False, selectWidget, bookmark)
         self.deleted = []
 
@@ -45,11 +45,11 @@ class Bmarks(urwid.ListBox):
             if not self.deleted:
                 return
             index, item = self.deleted.pop()
-            add_bookmark(item.label)
+            bmarks.add(item.label)
             self.body.insert(index, item)
             self.set_focus(index)
         if key in ('meta [', 'x') and self.focus:
-            remove_bookmark(self.focus.label)
+            bmarks.discard(self.focus.label)
             self.deleted.append((self.focus_position, self.focus))
             self.body.remove(self.focus)
         else:
@@ -70,7 +70,7 @@ class Ex(urwid.Edit):
         if cmd == 'bmarks':
             openOverlay(Bmarks(), "Bookmarks")
         elif cmd == 'bmark':
-            add_bookmark(header.text)
+            bmarks.add(header.text)
             notify("Bookmark Added")
         elif cmd:
             notify(cmd + ': Unknown Command')

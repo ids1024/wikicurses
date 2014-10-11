@@ -8,28 +8,34 @@ wikis = dict([i.split('|')[0:2] for i in _data.splitlines() if i[0]!='#'])
 
 default_configdir = os.environ['HOME'] + '/.config'
 configpath = os.environ.get('XDG_CONFIG_HOME', default_configdir) + '/wikicurses'
-bmarkfile = configpath + '/bookmarks'
-def get_bookmarks():
-    if not os.path.exists(bmarkfile):
-        return []
-    with open(bmarkfile) as file:
-        return json.load(file)
 
-def save_bookmarks(bmarks):
-    if not os.path.exists(configpath):
-        os.mkdir(configpath)
-    with open(bmarkfile, 'w') as file:
-        json.dump(bmarks, file)
+class Settings:
+    def __init__(self, name):
+        self.file = configpath + '/' + name
 
-def add_bookmark(title):
-    bookmarks = set(get_bookmarks())
-    bookmarks.add(title)
-    save_bookmarks(list(bookmarks))
+    def __iter__(self):
+        if not os.path.exists(self.file):
+            yield from ()
+        with open(self.file) as file:
+            yield from json.load(file)
 
-def remove_bookmark(title):
-    bookmarks = set(get_bookmarks())
-    bookmarks.discard(title)
-    save_bookmarks(list(bookmarks))
+    def _save(self, bookmarks):
+        if not os.path.exists(configpath):
+            os.mkdir(configpath)
+        with open(self.file, 'w') as file:
+            json.dump(bookmarks, file)
+
+    def add(self, bmark):
+        bookmarks = set(self)
+        bookmarks.add(bmark)
+        self._save(list(bookmarks))
+
+    def discard(self, bmark):
+        bookmarks = set(self)
+        bookmarks.discard(bmark)
+        self._save(list(bookmarks))
+
+bmarks = Settings('bookmarks')
 
 class BitEnum(int, Enum):
     def __new__(cls, *args):
