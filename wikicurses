@@ -3,7 +3,7 @@
 import argparse
 
 import wikicurses.ui as ui
-from wikicurses.wiki import wiki
+from wikicurses.wiki import Wiki
 
 parser = argparse.ArgumentParser(
         description="A simple curses interface for accessing Wikipedia.")
@@ -12,6 +12,9 @@ parser.add_argument('search',
                     nargs = '?',
                     default = '',
                     help = "page to search for")
+parser.add_argument('--wiki',
+                    default = "http://en.wikipedia.org/w/api.php",
+                    help='wiki api url')
 
 group = parser.add_mutually_exclusive_group()
 group.add_argument('-d', '--today',
@@ -25,14 +28,16 @@ group.add_argument('-f', '--featured',
 group.add_argument('-p', '--picture',
                     action = 'store_const',
                     const = 'potd',
-                    help='Show pictures of the day')
+                    help='show pictures of the day')
 
 args = parser.parse_args()
+ui.wiki = Wiki(args.wiki)
 
 if args.search:
-    ui.setContent(wiki.search(args.search))
+    ui.setContent(ui.wiki.search(args.search))
 else:
     # Show featured by default
     feed = args.featured or args.picture or args.today or 'featured'
-    ui.setContent(wiki.get_featured_feed(feed))
+    ui.setContent(ui.wiki.get_featured_feed(feed))
 ui.loop.run()
+

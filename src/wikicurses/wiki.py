@@ -6,8 +6,6 @@ from collections import OrderedDict
 
 from wikicurses.htmlparse import parseExtract, parseFeature
 
-base_url = "http://en.wikipedia.org/w/api.php"
-
 class Wiki(object):
     def __init__(self, url):
         self.siteurl = url
@@ -99,6 +97,3 @@ class _Featured(object):
                 text = parseFeature(description)
             sections[i.findtext('title')] = i.findtext('link') + '\n' + text
         return sections
-
-
-wiki = Wiki(base_url)

@@ -1,6 +1,5 @@
 import urwid
 from wikicurses import formats, bmarks
-from wikicurses.wiki import wiki
 #TODO: Turn this into a class?
 
 
