@@ -43,7 +43,7 @@ class Bmarks(urwid.ListBox):
             setContent(wiki.search(bookmark))
 
     def keypress(self, size, key):
-        if key not in ('P', 'x'): #P = delete?
+        if key not in ('meta [', 'x'): #meta [ = delete
             return super().keypress(size, key)
         remove_bookmark(self.focus.label)
         self.body.remove(self.focus)
