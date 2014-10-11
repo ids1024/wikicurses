@@ -45,11 +45,12 @@ class _ExtractHTMLParser(HTMLParser):
         tformat = self.format
 
         if self.inh == 2:
-            self.cursection = text
-            self.sections[text] = []
+            self.cursection += text
             return
         elif self.inh > 2:
             tformat = 'h'
+        if self.cursection not in self.sections:
+            self.sections[self.cursection] = []
         section = self.sections[self.cursection]
         if section and section[-1][0] == tformat:
             section[-1] = (section[-1][0], section[-1][1] + text)
