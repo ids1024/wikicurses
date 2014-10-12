@@ -37,6 +37,10 @@ class Wiki(object):
         result = self._query(action="featuredfeed", feed=feed)
         return _Featured(feed, ET.fromstring(result)[0])
 
+    def search_sugestions(self, name):
+        result = self._query(action="opensearch", search=name, format="json")
+        return json.loads(result)[1]
+
 
 class _Article(object):
     def __init__(self, result):

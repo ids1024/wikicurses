@@ -4,10 +4,22 @@ from wikicurses.wiki import Wiki
 
 class SearchBox(urwid.Edit):
     def keypress(self, size, key):
-        if key != 'enter':
+        if key == 'enter':
+            loop.widget = mainwidget
+            setContent(wiki.search(self.edit_text or 'Main page'))
+        elif key == 'tab':
+            matches = wiki.search_sugestions(self.edit_text)
+            if not matches:
+                return
+            if matches[0] == self.edit_text and len(matches)>1:
+                cmd = matches[1]
+            else:
+                cmd = matches[0]
+            self.set_edit_text(cmd)
+            self.edit_pos = len(cmd)
+        else:
             return super().keypress(size, key)
-        loop.widget = mainwidget
-        setContent(wiki.search(self.edit_text or 'Main page'))
+
 
 class SelectorBox(urwid.ListBox):
     def __init__(self):
