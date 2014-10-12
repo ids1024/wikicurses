@@ -65,11 +65,8 @@ class Toc(SelectorBox):
        widgets.set_focus(index)
 
 class Bmarks(SelectorBox):
-    def __init__(self):
-        super().__init__()
-        self.deleted = []
-
     def _items(self):
+        self.deleted = []
         return ((i, False, i) for i in bmarks)
 
     def _select(self, name):
