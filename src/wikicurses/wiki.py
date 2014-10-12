@@ -9,10 +9,17 @@ from wikicurses.htmlparse import parseExtract, parseFeature
 class Wiki(object):
     def __init__(self, url):
         self.siteurl = url
-        result = json.loads(self._query(action="query", meta="siteinfo",
-                siprop="extensions", format="json"))
-        extensions = (i["name"] for i in result["query"]["extensions"])
+        result = self._query(action="query", meta="siteinfo",
+                siprop="extensions|general|interwikimap", format="json")
+        query = json.loads(result)["query"]
+
+        extensions = (i["name"] for i in query["extensions"])
         self.has_extract = "TextExtracts" in extensions
+        self.interwikimap = {i['prefix']: i['url'] 
+                for i in query['interwikimap']}
+        self.articlepath = urllib.parse.urljoin( 
+                query['general']['base'],
+                query['general']['articlepath'])
 
     def _query(self, **data):
         url = self.siteurl + '?' + urllib.parse.urlencode(data)
@@ -22,16 +29,14 @@ class Wiki(object):
         if self.has_extract:
             result = self._query(action="query", redirects=True, titles=titles, 
                     prop="extracts|info|extlinks|images|iwlinks",
-                    meta="siteinfo", siprop="general|interwikimap",
                     inprop="url|displaytitle", format="json")
         else:
             result = self._query(action="query", redirects=True, titles=titles, 
                     prop="revisions|info|extlinks|images|iwlinks",
                     rvprop="content", rvparse=True,
-                    meta="siteinfo", siprop="general|interwikimap",
                     inprop="url|displaytitle", format="json")
 
-        return _Article(json.loads(result))
+        return _Article(self, json.loads(result))
 
     def get_featured_feed(self, feed):
         result = self._query(action="featuredfeed", feed=feed)
@@ -43,12 +48,8 @@ class Wiki(object):
 
 
 class _Article(object):
-    def __init__(self, result):
-        self.interwikimap = {i['prefix']: i['url'] 
-                for i in result['query']['interwikimap']}
-        self.articlepath = urllib.parse.urljoin( 
-                result['query']['general']['base'],
-                result['query']['general']['articlepath'])
+    def __init__(self, wiki, result):
+        self.wiki = wiki
         self.page = next(iter(result['query']['pages'].values()))
         self.title = self.page['title']
         self.exists = 'missing' not in self.page
@@ -66,16 +67,15 @@ class _Article(object):
         sections.pop("References", '')
         sections.pop("Contents", '')
 
-        images = (self.articlepath.replace('$1', i['title'].replace(' ', '_'))
+        images = (self.wiki.articlepath.replace('$1', i['title'].replace(' ', '_'))
                  for i in self.page.get('images', ()))
 
         extlinks = (i['*'] for i in self.page.get('extlinks', ()))
         #if an url starts with //, it can by http or https.  Use http.
         extlinks = ('http:' + i if i.startswith('//') else i for i in extlinks)
 
-        iwlinks = (self.interwikimap[i['prefix']].replace('$1', i['*'])
-                  for i in self.page.get('iwlinks', ())
-                  if i['prefix'] in self.interwikimap)
+        iwlinks = (self.wiki.interwikimap[i['prefix']].replace('$1', i['*'])
+                  for i in self.page.get('iwlinks', ()))
 
         sections.update({
             'Images':'\n'.join(images) + '\n',
