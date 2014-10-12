@@ -1,0 +1,81 @@
+.TH wikicurses 1 2014-10-11
+.SH NAME
+wikicurses \- curses interface for MediaWiki
+.SH SYNOPSIS
+wikicurses [\-h] [\-\-wiki WIKI] [\-d | \-f | \-p] [search]
+.SH CONTROLS
+.PP
+j or down
+.RS 4
+scroll down
+.RE
+.PP
+k or up
+.RS 4
+scroll up
+.RE
+.PP
+^b or pagedown
+.RS 4
+scroll down one page
+.RE
+.PP
+^f or pageup
+.RS 4
+scroll up one page
+.RE
+.PP
+c
+.RS 4
+open table of contents
+.RE
+.PP
+o
+.RS 4
+open search box
+.RE
+.PP
+:bmark
+.RS 4
+bookmark page
+.RE
+.PP
+:bmarks
+.RS 4
+open bookmarks
+.RE
+.PP
+:wikis
+.RS 4
+open list of configured wikis, see \fBwikicurses.conf\fR(5)
+.RE
+.SH OPTIONS
+.PP
+\fB\-h\fR
+.RS 4
+display help message
+.RE
+.PP
+\fB\-\-wiki <wiki>\fR
+.RS 4
+url or name of wiki to use
+.RE
+.PP
+\fB\-d\fR
+.RS 4
+list "On This Day" pages (Wikipedia onlu)
+.RE
+.PP
+\fB\-f\fR
+.RS 4
+show featured articles (Wikipedia only)
+.RE
+.PP
+\fB\-p\fR
+.RS 4
+show pictures of the day (Wikipedia only)
+.RE
+.SH SEE ALSO
+\fBwikicurses.conf\fR(5)
+.SH BUGS
+https://github.com/ids1024/wikicurses/issues

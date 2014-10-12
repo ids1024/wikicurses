@@ -11,6 +11,10 @@ setup(name='Wikicurses',
       url='http://github.com/ids1024/wikicurses/',
       packages = ['wikicurses'],
       package_dir={'wikicurses': 'src/wikicurses'},
-      data_files=[('/etc', ['wikicurses.conf'])],
+      data_files=[
+          ('/etc', ['wikicurses.conf']),
+          ('/usr/share/man/man1', ['wikicurses.1']),
+          ('/usr/share/man/man5', ['wikicurses.conf.5'])
+          ],
       scripts = ['wikicurses'],
      )

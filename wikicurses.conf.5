@@ -1,0 +1,30 @@
+.TH wikicurses 1 2014-10-11
+.SH NAME
+wikicurses \- curses interface for MediaWiki
+.SH SYNOPSIS
+/etc/wikicurses.conf
+
+~/.conf/wikicurses/config
+.SH DESCRIPTION
+The configuration file for wikicurses is devided into sections with the "general" section containing general settings.  All other sections specify individual wikis.
+.SH EXAMPLE
+.nf
+[general]
+default = Wikipedia
+
+[Wikipedia]
+url = http://en.wikipedia.org/w/api.php
+
+[ArchWiki]
+url = https://wiki.archlinux.org/api.php
+.SH OPTIONS
+.PP
+default
+.RS 4
+the name of the wiki to use by default
+.RE
+.PP
+url
+.RS 4
+the url to api.php on the MediaWiki site
+.RE
