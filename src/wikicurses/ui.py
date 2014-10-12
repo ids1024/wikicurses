@@ -5,6 +5,7 @@ from wikicurses.wiki import Wiki
 def tabComplete(text, matches):
     if not matches:
         return text
+    matches = sorted(matches, key=len)
     if matches[0] == text and len(matches)>1:
         match = matches[1]
     else:
@@ -105,7 +106,7 @@ class Ex(urwid.Edit):
             self.exitexmode()
             return
         elif key == 'tab':
-            cmds = sorted(('quit', 'bmark', 'bmarks', 'wikis'), key=len)
+            cmds = ('quit', 'bmark', 'bmarks', 'wikis')
             matches = [i for i in cmds if i.startswith(self.edit_text)]
             match = tabComplete(self.edit_text, matches)
             self.set_edit_text(match)
