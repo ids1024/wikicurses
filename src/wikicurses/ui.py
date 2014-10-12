@@ -2,6 +2,15 @@ import urwid
 from wikicurses import formats, Settings, conf
 from wikicurses.wiki import Wiki
 
+def tabComplete(text, matches):
+    if not matches:
+        return text
+    if matches[0] == text and len(matches)>1:
+        match = matches[1]
+    else:
+        match = matches[0]
+    return match
+
 class SearchBox(urwid.Edit):
     def keypress(self, size, key):
         if key == 'enter':
@@ -17,14 +26,9 @@ class SearchBox(urwid.Edit):
                     setContent(page)
         elif key == 'tab':
             matches = wiki.search_sugestions(self.edit_text)
-            if not matches:
-                return
-            if matches[0] == self.edit_text and len(matches)>1:
-                cmd = matches[1]
-            else:
-                cmd = matches[0]
-            self.set_edit_text(cmd)
-            self.edit_pos = len(cmd)
+            match = tabComplete(self.edit_text, matches)
+            self.set_edit_text(match)
+            self.edit_pos = len(match)
         else:
             return super().keypress(size, key)
 
@@ -103,14 +107,9 @@ class Ex(urwid.Edit):
         elif key == 'tab':
             cmds = sorted(('quit', 'bmark', 'bmarks', 'wikis'), key=len)
             matches = [i for i in cmds if i.startswith(self.edit_text)]
-            if not matches:
-                return
-            if matches[0] == self.edit_text and len(matches)>1:
-                cmd = matches[1]
-            else:
-                cmd = matches[0]
-            self.set_edit_text(cmd)
-            self.edit_pos = len(cmd)
+            match = tabComplete(self.edit_text, matches)
+            self.set_edit_text(match)
+            self.edit_pos = len(match)
             return
         elif key != 'enter':
             return super().keypress(size, key)
