@@ -66,18 +66,19 @@ class _Article(object):
         sections.pop("References", '')
         sections.pop("Contents", '')
 
-        images = (self.wiki.articlepath.replace('$1', 'File:' + i)
-                 for i in self.result['images'])
+        images = [self.wiki.articlepath.replace('$1', 'File:' + i)
+                 for i in self.result['images']]
         #if an url starts with //, it can by http or https.  Use http.
-        extlinks = ('http:' + i if i.startswith('//') else i
-                for i in self.result['externallinks'])
-        iwlinks = (i['url'] for i in self.result['iwlinks'])
+        extlinks = ['http:' + i if i.startswith('//') else i
+                for i in self.result['externallinks']]
+        iwlinks = [i['url'] for i in self.result['iwlinks']]
 
-        sections.update({
-            'Images':'\n'.join(images) + '\n',
-            'External links':'\n'.join(extlinks) + '\n',
-            'Interwiki links':'\n'.join(iwlinks) + '\n'
-            })
+        if images:
+            sections['Images'] = '\n'.join(images) + '\n'
+        if extlinks:
+            sections['External links'] = '\n'.join(extlinks) + '\n'
+        if iwlinks:
+            sections['Interwiki links'] = '\n'.join(iwlinks) + '\n'
         return sections
 
 
