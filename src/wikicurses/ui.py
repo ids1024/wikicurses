@@ -17,14 +17,12 @@ class SearchBox(urwid.Edit):
         if key == 'enter':
             loop.widget = mainwidget
             page = wiki.search(self.edit_text or 'Main page')
-            if page.exists:
-                setContent(page)
-            else:
+            if not page.exists:
                 results = wiki.search_sugestions(self.edit_text)
                 if results:
                     openOverlay(Results(results), 'Results')
-                else:
-                    setContent(page)
+                    return
+            setContent(page)
         elif key == 'tab':
             matches = wiki.search_sugestions(self.edit_text)
             match = tabComplete(self.edit_text, matches)
