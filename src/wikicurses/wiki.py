@@ -10,13 +10,11 @@ class Wiki(object):
     def __init__(self, url):
         self.siteurl = url
         result = self._query(action="query", meta="siteinfo",
-                siprop="extensions|general|interwikimap", format="json")
+                siprop="extensions|general", format="json")
         query = json.loads(result)["query"]
 
         extensions = (i["name"] for i in query["extensions"])
         self.has_extract = "TextExtracts" in extensions
-        self.interwikimap = {i['prefix']: i['url'] 
-                for i in query['interwikimap']}
         self.articlepath = urllib.parse.urljoin( 
                 query['general']['base'],
                 query['general']['articlepath'])
@@ -25,18 +23,22 @@ class Wiki(object):
         url = self.siteurl + '?' + urllib.parse.urlencode(data)
         return urllib.request.urlopen(url).read().decode('utf-8')
 
-    def search(self, titles):
+    def search(self, name):
+        prop = "images|externallinks|iwlinks|displaytitle"
+        html = ''
         if self.has_extract:
-            result = self._query(action="query", redirects=True, titles=titles, 
-                    prop="extracts|info|extlinks|images|iwlinks",
-                    inprop="url|displaytitle", format="json")
+            result = json.loads(self._query(action="query", redirects=True,
+                     titles=name, prop="extracts", format="json"))['query']
+            html = next(iter(result['pages'].values())).get('extract', '')
         else:
-            result = self._query(action="query", redirects=True, titles=titles, 
-                    prop="revisions|info|extlinks|images|iwlinks",
-                    rvprop="content", rvparse=True,
-                    inprop="url|displaytitle", format="json")
+            prop += '|text'
 
-        return _Article(self, json.loads(result))
+        result = json.loads(self._query(action="parse", page=name,
+                 format="json", redirects=True, prop=prop)).get('parse', {})
+        if 'text' in result:
+            html = result['text']['*']
+
+        return _Article(self, name, html, result)
 
     def get_featured_feed(self, feed):
         result = self._query(action="featuredfeed", feed=feed)
@@ -48,34 +50,29 @@ class Wiki(object):
 
 
 class _Article(object):
-    def __init__(self, wiki, result):
+    def __init__(self, wiki, search, html, result):
         self.wiki = wiki
-        self.page = next(iter(result['query']['pages'].values()))
-        self.title = self.page['title']
-        self.exists = 'missing' not in self.page
+        self.html = html
+        self.result = result
+        self.exists = result != {}
+        self.title = result.get('title', search)
 
     @property
     def content(self):
-        if 'extract' in self.page:
-            html = self.page['extract']
-        elif 'revisions' in self.page:
-            html = self.page['revisions'][0]['*']
-        else:
+        if not self.exists:
             return {'':'Page Not Found.'}
-        sections = parseExtract(html)
+        sections = parseExtract(self.html)
         sections.pop("External links", '')
         sections.pop("References", '')
         sections.pop("Contents", '')
 
-        images = (self.wiki.articlepath.replace('$1', i['title'].replace(' ', '_'))
-                 for i in self.page.get('images', ()))
+        images = (self.wiki.articlepath.replace('$1', 'File:' + i)
+                 for i in self.result['images'])
 
-        extlinks = (i['*'] for i in self.page.get('extlinks', ()))
+        extlinks = self.result['externallinks']
         #if an url starts with //, it can by http or https.  Use http.
         extlinks = ('http:' + i if i.startswith('//') else i for i in extlinks)
-
-        iwlinks = (self.wiki.interwikimap[i['prefix']].replace('$1', i['*'])
-                  for i in self.page.get('iwlinks', ()))
+        iwlinks = (i['url'] for i in self.result['iwlinks'])
 
         sections.update({
             'Images':'\n'.join(images) + '\n',
