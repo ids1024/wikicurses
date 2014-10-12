@@ -1,5 +1,6 @@
 import urwid
-from wikicurses import formats, Settings, conf
+from wikicurses import formats
+from wikicurses.settings import Settings, conf
 from wikicurses.wiki import Wiki
 
 def tabComplete(text, matches):
