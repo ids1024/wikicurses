@@ -51,6 +51,7 @@ class _Article(object):
                 result['query']['general']['articlepath'])
         self.page = next(iter(result['query']['pages'].values()))
         self.title = self.page['title']
+        self.exists = 'missing' not in self.page
 
     @property
     def content(self):

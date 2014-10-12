@@ -6,7 +6,15 @@ class SearchBox(urwid.Edit):
     def keypress(self, size, key):
         if key == 'enter':
             loop.widget = mainwidget
-            setContent(wiki.search(self.edit_text or 'Main page'))
+            page = wiki.search(self.edit_text or 'Main page')
+            if page.exists:
+                setContent(page)
+            else:
+                results = wiki.search_sugestions(self.edit_text)
+                if results:
+                    openOverlay(Results(results), 'Results')
+                else:
+                    setContent(page)
         elif key == 'tab':
             matches = wiki.search_sugestions(self.edit_text)
             if not matches:
@@ -33,6 +41,17 @@ class SelectorBox(urwid.ListBox):
             urwid.RadioButton(self.body, name, selected, selectButton, parameter)
             if selected:
                 self.set_focus(i)
+
+class Results(SelectorBox):
+    def __init__(self, results):
+        self.results = results
+        super().__init__()
+
+    def _items(self):
+        return ((i, False, i) for i in self.results)
+
+    def _select(self, title):
+        setContent(wiki.search(title))
 
 class Toc(SelectorBox):
     def _items(self):
