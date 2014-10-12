@@ -10,7 +10,7 @@ parser.add_argument('search',
                     nargs = '?',
                     default = 'Main page',
                     help = "page to search for")
-parser.add_argument('--wiki', help='wiki api url')
+parser.add_argument('-w', '--wiki', help='wiki api url')
 
 group = parser.add_mutually_exclusive_group()
 group.add_argument('-d', '--today',
