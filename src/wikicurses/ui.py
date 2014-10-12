@@ -7,10 +7,7 @@ class SearchBox(urwid.Edit):
         if key != 'enter':
             return super().keypress(size, key)
         loop.widget = mainwidget
-        if self.edit_text:
-            setContent(wiki.search(self.edit_text))
-        else:
-            setContent(wiki.get_featured_feed('featured'))
+        setContent(wiki.search(self.edit_text or 'Main page'))
 
 class SelectorBox(urwid.ListBox):
     def __init__(self):
