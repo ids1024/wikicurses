@@ -68,10 +68,9 @@ class _Article(object):
 
         images = (self.wiki.articlepath.replace('$1', 'File:' + i)
                  for i in self.result['images'])
-
-        extlinks = self.result['externallinks']
         #if an url starts with //, it can by http or https.  Use http.
-        extlinks = ('http:' + i if i.startswith('//') else i for i in extlinks)
+        extlinks = ('http:' + i if i.startswith('//') else i
+                for i in self.result['externallinks'])
         iwlinks = (i['url'] for i in self.result['iwlinks'])
 
         sections.update({
