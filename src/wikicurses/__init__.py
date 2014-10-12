@@ -1,8 +1,4 @@
-from enum import Enum
+from enum import IntEnum
 
-class BitEnum(int, Enum):
-    def __new__(cls, *args):
-        value = 1 << len(cls.__members__)
-        return int.__new__(cls, value)
-
-formats = BitEnum("formats", "i b blockquote")
+class formats(IntEnum):
+    i, b, blockquote = (1<<i for i in range(3))
