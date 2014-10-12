@@ -4,108 +4,116 @@ wikicurses \- curses interface for MediaWiki
 .SH SYNOPSIS
 wikicurses [\-h] [\-\-wiki WIKI] [\-d | \-f | \-p] [search]
 .SH CONTROLS
+.SS General
 .PP
 j or down
 .RS 4
-scroll down
+Scroll down
 .RE
 .PP
 k or up
 .RS 4
-scroll up
+Scroll up
 .RE
 .PP
 ^b or pagedown
 .RS 4
-scroll down one page
+Scroll down one page
 .RE
 .PP
 ^f or pageup
 .RS 4
-scroll up one page
+Scroll up one page
 .RE
+.SS Pager
 .PP
 c
 .RS 4
-open table of contents
+Open table of contents
 .RE
 .PP
 o
 .RS 4
-open search box
+Open search box
 .RE
 .PP
 q or :q[uit]
 .RS 4
-exit
+Exit
 .RE
 .PP
 :bmark
 .RS 4
-bookmark page
+Bookmark page
 .RE
 .PP
 :bmarks
 .RS 4
-open bookmarks
+Open bookmarks
 .RE
 .PP
 :wikis
 .RS 4
-open list of configured wikis, see \fBwikicurses.conf\fR(5)
+Open list of configured wikis, see \fBwikicurses.conf\fR(5)
 .RE
 .SS Bookmarks Menu
 .PP
 x or delete
 .RS 4
-delete selected bookmark
+Delete selected bookmark
 .RE
 .PP
 u
 .RS 4
-undo deletion
+Undo deletion
+.RE
+.SS Search
+.PP
+tab
+.RS 4
+Tab completion for page title
 .RE
 .SH OPTIONS
 .PP
 \fB\-h,\fR \-\-help
 .RS 4
-display help message
+Display help message
 .RE
 .PP
 \fB\-w,\fR \-\-wiki <wiki>
 .RS 4
-url or name of wiki to use
+Url or name of wiki to use
 .RE
 .PP
 \fB\-d,\fR \-\-today
 .RS 4
-list "On This Day" pages (Wikipedia only)
+List "On This Day" pages (Wikipedia only)
 .RE
 .PP
 \fB\-f,\fR \-\-featured
 .RS 4
-show featured articles (Wikipedia only)
+Show featured articles (Wikipedia only)
 .RE
 .PP
 \fB\-p,\fR \-\-picture
 .RS 4
-show pictures of the day (Wikipedia only)
+Show pictures of the day (Wikipedia only)
 .RE
 .SH EXAMPLES
 .PP
 wikicurses Wiki
 .RS 4
-look up "Wiki" on the default wiki
+Look up "Wiki" on the default wiki
 .RE
 .PP
 wikicurses -w ArchWiki Dwm
 .RS 4
-look up "Dwm" on the Archlinux Wiki, where "ArchWiki" is configured in \fbwikicurses.conf\fr(5)
+Look up "Dwm" on the Archlinux Wiki, where "ArchWiki" is configured in \fbwikicurses.conf\fr(5)
 .RE
 .PP
 wikicurses -w http://en.wiktionary.org/w/api.php penguin
 .RS 4
-look up "penguin" on Wiktionary
+Look up "penguin" on Wiktionary
 .RE
 .SH SEE ALSO
 \fBwikicurses.conf\fR(5)
