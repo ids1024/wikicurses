@@ -104,19 +104,20 @@ class Ex(urwid.Edit):
     def keypress(self, size, key):
         if key == 'esc' or (key == 'backspace' and not self.edit_text):
             self.exitexmode()
-            return
         elif key == 'tab':
             cmds = ('quit', 'bmark', 'bmarks', 'wikis')
             matches = [i for i in cmds if i.startswith(self.edit_text)]
             match = tabComplete(self.edit_text, matches)
             self.set_edit_text(match)
             self.edit_pos = len(match)
-            return
-        elif key != 'enter':
+        elif key == 'enter':
+            cmd = self.edit_text
+            self.exitexmode()
+            self.processCmd(cmd)
+        else:
             return super().keypress(size, key)
-        cmd = self.edit_text
-        self.exitexmode()
 
+    def processCmd(self, cmd):
         if cmd in ('q', 'quit'):
             raise urwid.ExitMainLoop
         if cmd == 'bmarks':
