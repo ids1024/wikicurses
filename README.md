@@ -1,6 +1,6 @@
 Wikicurses
 ==========
 
-A simple curses interface for accessing Wikipedia.
+A simple curses interface for MediaWiki sites such as Wikipedia.
 
 This was originally a fork of [cliwiki](https://github.com/AnirudhBhat/cliWiki.py).
