@@ -12,31 +12,36 @@ class SearchBox(urwid.Edit):
         else:
             setContent(wiki.get_featured_feed('featured'))
 
-class Toc(urwid.ListBox):
+class SelectorBox(urwid.ListBox):
     def __init__(self):
-        def selectWidget(radio_button, new_state, index):
+        def selectButton(radio_button, new_state, parameter):
             if new_state:
                 loop.widget = mainwidget
-                widgets.set_focus(index)
+                self._select(parameter)
 
         super().__init__(urwid.SimpleFocusListWalker([]))
-        for i, (name, index) in enumerate(widgetnames):
-            current = widgets.focus>=index
-            urwid.RadioButton(self.body, name, current, selectWidget, index)
-            if current:
+        for i, (name, selected, parameter) in enumerate(self._items()):
+            urwid.RadioButton(self.body, name, selected, selectButton, parameter)
+            if selected:
                 self.set_focus(i)
 
-class Bmarks(urwid.ListBox):
-    def __init__(self):
-        def selectWidget(radio_button, new_state, bookmark):
-            if new_state:
-                loop.widget = mainwidget
-                setContent(wiki.search(bookmark))
+class Toc(SelectorBox):
+    def _items(self):
+        return ((name, widgets.focus>=ind, ind) for name, ind in widgetnames)
+    
+    def _select(self, index):
+       widgets.set_focus(index)
 
-        super().__init__(urwid.SimpleFocusListWalker([]))
-        for bookmark in bmarks:
-            urwid.RadioButton(self.body, bookmark, False, selectWidget, bookmark)
+class Bmarks(SelectorBox):
+    def __init__(self):
+        super().__init__()
         self.deleted = []
+
+    def _items(self):
+        return ((i, False, i) for i in bmarks)
+
+    def _select(self, name):
+        setContent(wiki.search(name))
 
     def keypress(self, size, key):
         if key == 'u': #Undo delete
@@ -53,21 +58,15 @@ class Bmarks(urwid.ListBox):
         else:
             return super().keypress(size, key)
 
-class Wikis(urwid.ListBox):
-    def __init__(self):
-        def selectWidget(radio_button, new_state, name):
-            if new_state:
-                loop.widget = mainwidget
-                openWiki(name)
-                setContent(wiki.search('Main page'))
-
-        super().__init__(urwid.SimpleFocusListWalker([]))
+class Wikis(SelectorBox):
+    def _items(self):
         wikis = (i for i in conf if i not in ('general', 'DEFAULT'))
-        for i, name in enumerate(wikis):
-            iscurrent = wiki.siteurl == conf[name]['url']
-            urwid.RadioButton(self.body, name, iscurrent, selectWidget, name)
-            if iscurrent:
-                self.set_focus(i)
+        for name in wikis:
+            yield name, wiki.siteurl == conf[name]['url'], name
+
+    def _select(self, name):
+        openWiki(name)
+        setContent(wiki.search('Main page'))
 
 class Ex(urwid.Edit):
     def keypress(self, size, key):
