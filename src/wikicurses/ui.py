@@ -44,14 +44,13 @@ class Bmarks(SelectorBox):
         setContent(wiki.search(name))
 
     def keypress(self, size, key):
-        if key == 'u': #Undo delete
-            if not self.deleted:
-                return
+        #Undo Delete
+        if key == 'u' and self.deleted:
             index, item = self.deleted.pop()
             bmarks.add(item.label)
             self.body.insert(index, item)
             self.set_focus(index)
-        if key in ('meta [', 'x') and self.focus:
+        elif key in ('meta [', 'x') and self.focus:
             bmarks.discard(self.focus.label)
             self.deleted.append((self.focus_position, self.focus))
             self.body.remove(self.focus)
