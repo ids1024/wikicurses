@@ -14,7 +14,8 @@ setup(name='Wikicurses',
       data_files=[
           ('/etc', ['wikicurses.conf']),
           ('/usr/share/man/man1', ['wikicurses.1']),
-          ('/usr/share/man/man5', ['wikicurses.conf.5'])
+          ('/usr/share/man/man5', ['wikicurses.conf.5']),
+          ('/usr/share/zsh/site-functions', ['_wikicurses'])
           ],
       scripts = ['wikicurses'],
      )

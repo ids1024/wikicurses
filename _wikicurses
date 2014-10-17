@@ -1,0 +1,23 @@
+#compdef wikicurses
+
+_wikicurses_wiki() {
+	IFS=$'\n'
+	wikis=($(wikicurses --complete wiki $words[CURRENT] 2>/dev/null))
+	_wanted wikis expl "wikis" compadd "${(@)wikis}"
+}
+
+_wikicurses_name() {
+	IFS=$'\n'
+	pages=($(wikicurses --complete search $words[CURRENT] 2>/dev/null))
+	_wanted pages expl "pages" compadd "${(@)pages}"
+}
+
+_wikicurses() {
+	_arguments -s : \
+		{-h,--help}'[Display help message]'\
+		{-w,--wiki}'[Url or name of wiki to use]:wikis:_wikicurses_wiki'\
+		{-d,--today}'[List "On This Day" pages (Wikipedia only)]'\
+		{-f,--featured}'[Show featured articles (Wikipedia only)]'\
+		{-p,--picture}'[Show pictures of the day (Wikipedia only)]'\
+		'*:pages:_wikicurses_name'
+}

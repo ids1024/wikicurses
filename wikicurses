@@ -1,7 +1,9 @@
 #! /usr/bin/env python3
 
+import sys
 import argparse
 import wikicurses.ui as ui
+from wikicurses.settings import conf
 
 parser = argparse.ArgumentParser(
         description="A simple curses interface for accessing Wikipedia.")
@@ -11,6 +13,10 @@ parser.add_argument('search',
                     default = 'Main page',
                     help = "page to search for")
 parser.add_argument('-w', '--wiki', help='wiki api url')
+#For shell completion functions
+parser.add_argument('--complete',
+                    action = 'store',
+                    help = argparse.SUPPRESS)
 
 group = parser.add_mutually_exclusive_group()
 group.add_argument('-d', '--today',
@@ -28,6 +34,14 @@ group.add_argument('-p', '--picture',
 
 args = parser.parse_args()
 ui.openWiki(args.wiki)
+
+if args.complete:
+    if args.complete == 'search':
+        sugestions = ui.wiki.search_sugestions(args.search)
+    elif args.complete == 'wiki':
+        sugestions = (i for i in conf if i not in ('general', 'DEFAULT'))
+    print(*sugestions, sep='\n')
+    sys.exit()
 
 feed = args.featured or args.picture or args.today
 if feed:
