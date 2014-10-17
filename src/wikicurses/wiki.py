@@ -31,7 +31,7 @@ class Wiki(object):
 
     def search(self, name):
         self.get_siteinfo()
-        prop = "images|externallinks|iwlinks|displaytitle"
+        prop = "images|externallinks|iwlinks|displaytitle|properties"
         html = ''
         if self.has_extract:
             result = json.loads(self._query(action="query", redirects=True,
@@ -65,12 +65,16 @@ class Wiki(object):
 
 
 class _Article(object):
+    properties = {}
+
     def __init__(self, wiki, search, html, result):
         self.wiki = wiki
         self.html = html
         self.result = result
         self.exists = result != {}
         self.title = result.get('title', search)
+        if 'properties' in result:
+            self.properties = {i['name']: i['*'] for i in result['properties']}
 
     @property
     def content(self):
@@ -99,6 +103,7 @@ class _Article(object):
 
 class _Featured(object):
     exists = True
+    properties = {}
 
     def __init__(self, feed, result):
         self.feed = feed

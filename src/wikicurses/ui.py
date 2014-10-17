@@ -26,7 +26,6 @@ class SearchBox(urwid.Edit):
         else:
             return super().keypress(size, key)
 
-
 class SelectorBox(urwid.ListBox):
     def __init__(self):
         def selectButton(radio_button, new_state, parameter):
