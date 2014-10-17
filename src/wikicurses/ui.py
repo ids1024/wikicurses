@@ -17,13 +17,7 @@ class SearchBox(urwid.Edit):
     def keypress(self, size, key):
         if key == 'enter':
             loop.widget = mainwidget
-            page = wiki.search(self.edit_text or 'Main page')
-            if not page.exists:
-                results = wiki.search_sugestions(self.edit_text)
-                if results:
-                    openOverlay(Results(results), 'Results')
-                    return
-            setContent(page)
+            setContent(wiki.search(self.edit_text or 'Main page'))
         elif key == 'tab':
             matches = wiki.search_sugestions(self.edit_text)
             match = tabComplete(self.edit_text, matches)
@@ -178,6 +172,12 @@ def openWiki(name):
     bmarks = Settings(url, 'bookmarks')
 
 def setContent(page):
+    if not page.exists:
+        results = wiki.search_sugestions(page.title)
+        if results:
+            openOverlay(Results(results), 'Results')
+            return
+
     widgets.clear()
     widgetnames.clear()
     header.set_text(page.title)

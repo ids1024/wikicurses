@@ -83,6 +83,8 @@ class _Article(object):
 
 
 class _Featured(object):
+    exists = True
+
     def __init__(self, feed, result):
         self.feed = feed
         self.result = result
