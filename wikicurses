@@ -33,15 +33,17 @@ group.add_argument('-p', '--picture',
                     help='show pictures of the day')
 
 args = parser.parse_args()
-ui.openWiki(args.wiki)
 
 if args.complete:
     if args.complete == 'search':
+        ui.openWiki(args.wiki)
         sugestions = ui.wiki.search_sugestions(args.search)
     elif args.complete == 'wiki':
         sugestions = (i for i in conf if i not in ('general', 'DEFAULT'))
     print(*sugestions, sep='\n')
     sys.exit()
+
+ui.openWiki(args.wiki)
 
 feed = args.featured or args.picture or args.today
 if feed:
