@@ -1,6 +1,6 @@
 import urwid
 from wikicurses import formats
-from wikicurses.settings import Settings, conf
+from wikicurses import settings
 from wikicurses.wiki import Wiki
 
 def tabComplete(text, matches):
@@ -17,9 +17,9 @@ class SearchBox(urwid.Edit):
     def keypress(self, size, key):
         if key == 'enter':
             loop.widget = mainwidget
-            setContent(wiki.search(self.edit_text or 'Main page'))
+            setContent(settings.wiki.search(self.edit_text or 'Main page'))
         elif key == 'tab':
-            matches = wiki.search_sugestions(self.edit_text)
+            matches = settings.wiki.search_sugestions(self.edit_text)
             match = tabComplete(self.edit_text, matches)
             self.set_edit_text(match)
             self.edit_pos = len(match)
@@ -49,7 +49,7 @@ class Results(SelectorBox):
         return ((i, False, i) for i in self.results)
 
     def _select(self, title):
-        setContent(wiki.search(title))
+        setContent(settings.wiki.search(title))
 
 class Toc(SelectorBox):
     def _items(self):
@@ -61,20 +61,20 @@ class Toc(SelectorBox):
 class Bmarks(SelectorBox):
     def _items(self):
         self.deleted = []
-        return ((i, False, i) for i in bmarks)
+        return ((i, False, i) for i in settings.bmarks)
 
     def _select(self, name):
-        setContent(wiki.search(name))
+        setContent(settings.wiki.search(name))
 
     def keypress(self, size, key):
         #Undo Delete
         if key == 'u' and self.deleted:
             index, item = self.deleted.pop()
-            bmarks.add(item.label)
+            settings.bmarks.add(item.label)
             self.body.insert(index, item)
             self.set_focus(index)
         elif key in ('meta [', 'x') and self.focus:
-            bmarks.discard(self.focus.label)
+            settings.bmarks.discard(self.focus.label)
             self.deleted.append((self.focus_position, self.focus))
             self.body.remove(self.focus)
         else:
@@ -82,20 +82,20 @@ class Bmarks(SelectorBox):
 
 class Wikis(SelectorBox):
     def _items(self):
-        wikis = (i for i in conf if i not in ('general', 'DEFAULT'))
+        wikis = (i for i in settings.conf if i not in ('general', 'DEFAULT'))
         for name in wikis:
-            yield name, wiki.siteurl == conf[name]['url'], name
+            yield name, settings.wiki.siteurl == settings.conf[name]['url'], name
 
     def _select(self, name):
-        openWiki(name)
-        setContent(wiki.search('Main page'))
+        settings.openWiki(name)
+        setContent(settings.wiki.search('Main page'))
 
 class Feeds(SelectorBox):
     def _items(self):
-        return ((i, False, i) for i in wiki.list_featured_feeds())
+        return ((i, False, i) for i in settings.wiki.list_featured_feeds())
 
     def _select(self, feed):
-        setContent(wiki.get_featured_feed(feed))
+        setContent(settings.wiki.get_featured_feed(feed))
 
 class Ex(urwid.Edit):
     def keypress(self, size, key):
@@ -120,7 +120,7 @@ class Ex(urwid.Edit):
         if cmd == 'bmarks':
             openOverlay(Bmarks(), "Bookmarks")
         elif cmd == 'bmark':
-            bmarks.add(header.text)
+            settings.bmarks.add(header.text)
             notify("Bookmark Added")
         elif cmd == 'wikis':
             openOverlay(Wikis(), "Wikis")
@@ -168,21 +168,9 @@ def input_filter(keys, raw):
         mainwidget.footer = Ex()
     return keys
 
-def openWiki(name):
-    global wiki
-    global bmarks
-    if not name:
-        url = conf[conf['general']['default']]['url']
-    elif name in conf:
-        url = conf[name]['url']
-    else:
-        url = name
-    wiki = Wiki(url)
-    bmarks = Settings(url, 'bookmarks')
-
 def setContent(page):
     if not page.exists:
-        results = wiki.search_sugestions(page.title)
+        results = settings.wiki.search_sugestions(page.title)
         if results:
             openOverlay(Results(results), 'Results')
             return

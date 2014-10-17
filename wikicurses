@@ -3,7 +3,7 @@
 import sys
 import argparse
 import wikicurses.ui as ui
-from wikicurses.settings import conf
+from wikicurses import settings
 
 parser = argparse.ArgumentParser(
         description="A simple curses interface for accessing Wikipedia.")
@@ -21,20 +21,20 @@ parser.add_argument('--complete',
 parser.add_argument('-f', '--feed', help = 'view featured feed')
 
 args = parser.parse_args()
-ui.openWiki(args.wiki)
+settings.openWiki(args.wiki)
 
 if args.complete:
     if args.complete == 'search':
-        sugestions = ui.wiki.search_sugestions(args.search)
+        sugestions = settings.wiki.search_sugestions(args.search)
     elif args.complete == 'feed':
-        sugestions = ui.wiki.list_featured_feeds()
+        sugestions = settings.wiki.list_featured_feeds()
     elif args.complete == 'wiki':
-        sugestions = (i for i in conf if i not in ('general', 'DEFAULT'))
+        sugestions = (i for i in settings.conf if i not in ('general', 'DEFAULT'))
     print(*sugestions, sep='\n')
     sys.exit()
 
 if args.feed:
-    ui.setContent(ui.wiki.get_featured_feed(args.feed))
+    ui.setContent(settings.wiki.get_featured_feed(args.feed))
 else:
-    ui.setContent(ui.wiki.search(args.search))
+    ui.setContent(settings.wiki.search(args.search))
 ui.loop.run()
