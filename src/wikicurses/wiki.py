@@ -47,6 +47,14 @@ class Wiki(object):
 
         return _Article(self, name, html, result)
 
+    def list_featured_feeds(self):
+         result = json.loads(self._query(action="paraminfo",
+             modules="featuredfeed", format="json"))["paraminfo"]
+         if not result["modules"]:
+             return []
+         return next(i for i in result["modules"][0]["parameters"]
+                 if i["name"]=="feed")["type"]
+
     def get_featured_feed(self, feed):
         result = self._query(action="featuredfeed", feed=feed)
         return _Featured(feed, ET.fromstring(result)[0])

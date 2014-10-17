@@ -18,19 +18,7 @@ parser.add_argument('--complete',
                     action = 'store',
                     help = argparse.SUPPRESS)
 
-group = parser.add_mutually_exclusive_group()
-group.add_argument('-d', '--today',
-                    action = 'store_const',
-                    const = 'onthisday',
-                    help='list "On This Day" pages')
-group.add_argument('-f', '--featured',
-                    action = 'store_const',
-                    const = 'featured',
-                    help = 'show featured articles')
-group.add_argument('-p', '--picture',
-                    action = 'store_const',
-                    const = 'potd',
-                    help='show pictures of the day')
+parser.add_argument('-f', '--feed', help = 'view featured feed')
 
 args = parser.parse_args()
 ui.openWiki(args.wiki)
@@ -38,14 +26,15 @@ ui.openWiki(args.wiki)
 if args.complete:
     if args.complete == 'search':
         sugestions = ui.wiki.search_sugestions(args.search)
+    elif args.complete == 'feed':
+        sugestions = ui.wiki.list_featured_feeds()
     elif args.complete == 'wiki':
         sugestions = (i for i in conf if i not in ('general', 'DEFAULT'))
     print(*sugestions, sep='\n')
     sys.exit()
 
-feed = args.featured or args.picture or args.today
-if feed:
-    ui.setContent(ui.wiki.get_featured_feed(feed))
+if args.feed:
+    ui.setContent(ui.wiki.get_featured_feed(args.feed))
 else:
     ui.setContent(ui.wiki.search(args.search))
 ui.loop.run()

@@ -90,12 +90,19 @@ class Wikis(SelectorBox):
         openWiki(name)
         setContent(wiki.search('Main page'))
 
+class Feeds(SelectorBox):
+    def _items(self):
+        return ((i, False, i) for i in wiki.list_featured_feeds())
+
+    def _select(self, feed):
+        setContent(wiki.get_featured_feed(feed))
+
 class Ex(urwid.Edit):
     def keypress(self, size, key):
         if key == 'esc' or (key == 'backspace' and not self.edit_text):
             self.exitexmode()
         elif key == 'tab':
-            cmds = ('quit', 'bmark', 'bmarks', 'wikis')
+            cmds = ('quit', 'bmark', 'bmarks', 'wikis', 'feeds')
             matches = [i for i in cmds if i.startswith(self.edit_text)]
             match = tabComplete(self.edit_text, matches)
             self.set_edit_text(match)
@@ -117,6 +124,8 @@ class Ex(urwid.Edit):
             notify("Bookmark Added")
         elif cmd == 'wikis':
             openOverlay(Wikis(), "Wikis")
+        elif cmd == 'feeds':
+            openOverlay(Feeds(), "Feeds")
         elif cmd:
             notify(cmd + ': Unknown Command')
 
