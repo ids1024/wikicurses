@@ -9,6 +9,11 @@ from wikicurses.htmlparse import parseExtract, parseFeature
 class Wiki(object):
     def __init__(self, url):
         self.siteurl = url
+        self.have_siteinfo = False
+
+    def get_siteinfo(self):
+        if self.have_siteinfo:
+            return
         result = self._query(action="query", meta="siteinfo",
                 siprop="extensions|general", format="json")
         query = json.loads(result)["query"]
@@ -18,12 +23,14 @@ class Wiki(object):
         self.articlepath = urllib.parse.urljoin( 
                 query['general']['base'],
                 query['general']['articlepath'])
+        self.have_siteinfo = True
 
     def _query(self, **data):
         url = self.siteurl + '?' + urllib.parse.urlencode(data)
         return urllib.request.urlopen(url).read().decode('utf-8')
 
     def search(self, name):
+        self.get_siteinfo()
         prop = "images|externallinks|iwlinks|displaytitle"
         html = ''
         if self.has_extract:
