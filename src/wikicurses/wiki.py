@@ -115,10 +115,6 @@ class _Featured(object):
         sections = OrderedDict()
         for i in self.result.findall('item'):
             description = i.findtext('description')
-            if self.feed == 'onthisday':
-                htmls = re.findall("<li>(.*?)</li>", description, flags=re.DOTALL)
-                text = '\n'.join(map(parseFeature, htmls))
-            else:
-                text = parseFeature(description)
+            text = parseFeature(description)
             sections[i.findtext('title')] = i.findtext('link') + '\n' + text
         return sections
