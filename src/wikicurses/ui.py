@@ -15,6 +15,7 @@ def tabComplete(text, matches):
     return match
 
 class SearchBox(urwid.Edit):
+    title = "Search"
     def keypress(self, size, key):
         if key == 'enter':
             loop.widget = mainwidget
@@ -41,6 +42,7 @@ class SelectorBox(urwid.ListBox):
                 self.set_focus(i)
 
 class Results(SelectorBox):
+    title = "Results"
     def __init__(self, results):
         self.results = results
         super().__init__()
@@ -52,6 +54,7 @@ class Results(SelectorBox):
         setContent(settings.wiki.search(title))
 
 class Toc(SelectorBox):
+    title = "Table of Contents"
     def _items(self):
         return ((name, widgets.focus>=ind, ind) for name, ind in widgetnames)
     
@@ -59,6 +62,7 @@ class Toc(SelectorBox):
        widgets.set_focus(index)
 
 class Bmarks(SelectorBox):
+    title = "Bookmarks"
     def _items(self):
         self.deleted = []
         return ((i, False, i) for i in settings.bmarks)
@@ -81,6 +85,7 @@ class Bmarks(SelectorBox):
             return super().keypress(size, key)
 
 class Wikis(SelectorBox):
+    title = "Wikis"
     def _items(self):
         wikis = (i for i in settings.conf if i not in ('general', 'DEFAULT'))
         for name, url in settings.wikis().items():
@@ -91,6 +96,7 @@ class Wikis(SelectorBox):
         setContent(settings.wiki.search('Main page'))
 
 class Feeds(SelectorBox):
+    title = "Feeds"
     def _items(self):
         return ((i, False, i) for i in settings.wiki.list_featured_feeds())
 
@@ -98,6 +104,7 @@ class Feeds(SelectorBox):
         setContent(settings.wiki.get_featured_feed(feed))
 
 class Disambig(urwid.ListBox):
+    title = "Disambiguation"
     def __init__(self, html):
         def selectButton(radio_button, new_state, title):
             if new_state:
@@ -149,16 +156,16 @@ def processCmd(cmd, *args):
     if cmd in ('q', 'quit'):
         raise urwid.ExitMainLoop
     if cmd == 'bmarks':
-        openOverlay(Bmarks(), "Bookmarks")
+        openOverlay(Bmarks())
     elif cmd == 'bmark':
         settings.bmarks.add(header.text)
         notify("Bookmark Added")
     elif cmd == 'wikis':
-        openOverlay(Wikis(), "Wikis")
+        openOverlay(Wikis())
     elif cmd == 'feeds':
-        openOverlay(Feeds(), "Feeds")
+        openOverlay(Feeds())
     elif cmd == 'contents':
-        openOverlay(Toc(), "Table of Contents")
+        openOverlay(Toc())
     elif cmd == 'open':
         if args:
             setContent(settings.wiki.search(' '.join(args)))
@@ -170,8 +177,8 @@ def processCmd(cmd, *args):
 def notify(text):
     mainwidget.footer = urwid.Text(text)
 
-def openOverlay(widget, title, height=('relative', 50), width=('relative', 50)):
-    box = urwid.LineBox(widget, title)
+def openOverlay(widget, title=None, height=('relative', 50), width=('relative', 50)):
+    box = urwid.LineBox(widget, title or widget.title)
     overlay = urwid.Overlay(box, mainwidget, 'center', width, 'middle', height)
     loop.widget = overlay
 
@@ -198,10 +205,10 @@ def setContent(page):
     if not page.exists:
         results = settings.wiki.search_sugestions(page.title)
         if results:
-            openOverlay(Results(results), 'Results')
+            openOverlay(Results(results))
             return
     elif 'disambiguation' in page.properties:
-        openOverlay(Disambig(page.result['text']['*']), 'Disambiguation')
+        openOverlay(Disambig(page.result['text']['*']))
         return
 
     widgets.clear()
