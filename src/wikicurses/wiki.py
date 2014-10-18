@@ -109,12 +109,8 @@ class _Featured(object):
         self.feed = feed
         self.result = result
         self.title = result.find('title').text
-
-    @property
-    def content(self):
-        sections = OrderedDict()
+        self.content = OrderedDict()
         for i in self.result.findall('item'):
             description = i.findtext('description')
             text = parseFeature(description)
-            sections[i.findtext('title')] = i.findtext('link') + '\n' + text
-        return sections
+            self.content[i.findtext('title')] = i.findtext('link') + '\n' + text
