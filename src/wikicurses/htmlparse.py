@@ -23,7 +23,8 @@ def parseFeature(html):
 def parseDisambig(html):
     parser = _DisambigHTMLParser()
     parser.feed(html)
-    parser.sections.pop('', '')
+    if not parser.sections['']:
+        parser.sections.pop('', '')
     parser.sections.pop('Contents', '')
     parser.sections.pop('See also', '')
     return parser.sections

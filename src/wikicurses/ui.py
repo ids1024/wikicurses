@@ -109,7 +109,8 @@ class Disambig(urwid.ListBox):
         buttons = []
 
         for title, items in sections.items():
-            self.body.append(urwid.Text(['\n', ('h', title)], align='center'))
+            if title:
+                self.body.append(urwid.Text(['\n', ('h', title)], align='center'))
             for name, text in items:
                 if name:
                     button = urwid.RadioButton(buttons, text, False,
