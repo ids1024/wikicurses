@@ -18,7 +18,7 @@ class SearchBox(urwid.Edit):
     def keypress(self, size, key):
         if key == 'enter':
             loop.widget = mainwidget
-            setContent(settings.wiki.search(self.edit_text or 'Main page'))
+            setcontent(settings.wiki.search(self.edit_text or 'main page'))
         elif key == 'tab':
             matches = settings.wiki.search_sugestions(self.edit_text)
             match = tabComplete(self.edit_text, matches)
@@ -124,19 +124,19 @@ class Ex(urwid.Edit):
         if key == 'esc' or (key == 'backspace' and not self.edit_text):
             self.exitexmode()
         elif key == 'tab':
-            cmds = ('quit', 'bmark', 'bmarks', 'wikis', 'feeds')
+            cmds = ('quit', 'bmark', 'bmarks', 'wikis', 'feeds', 'open')
             matches = [i for i in cmds if i.startswith(self.edit_text)]
             match = tabComplete(self.edit_text, matches)
             self.set_edit_text(match)
             self.edit_pos = len(match)
         elif key == 'enter':
-            cmd = self.edit_text
+            words = self.edit_text.split(' ')
             self.exitexmode()
-            self.processCmd(cmd)
+            self.processCmd(*words)
         else:
             return super().keypress(size, key)
 
-    def processCmd(self, cmd):
+    def processCmd(self, cmd, *args):
         if cmd in ('q', 'quit'):
             raise urwid.ExitMainLoop
         if cmd == 'bmarks':
@@ -148,6 +148,11 @@ class Ex(urwid.Edit):
             openOverlay(Wikis(), "Wikis")
         elif cmd == 'feeds':
             openOverlay(Feeds(), "Feeds")
+        elif cmd == 'open':
+            if args:
+                setContent(settings.wiki.search(' '.join(args)))
+            else:
+                openOverlay(urwid.ListBox([SearchBox()]), "Search", height=3)
         elif cmd:
             notify(cmd + ': Unknown Command')
 
