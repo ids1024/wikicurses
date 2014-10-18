@@ -42,7 +42,7 @@ class _ExtractHTMLParser(HTMLParser):
         if text == ENDPAR:
             if self.format&formats.blockquote:
                 return
-            text = '\n\n'
+            text = '\n'
         elif text == STARTPAR:
             if self.format&formats.blockquote:
                 text = '\n> '
