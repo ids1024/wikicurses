@@ -83,8 +83,8 @@ class Bmarks(SelectorBox):
 class Wikis(SelectorBox):
     def _items(self):
         wikis = (i for i in settings.conf if i not in ('general', 'DEFAULT'))
-        for name in wikis:
-            yield name, settings.wiki.siteurl == settings.conf[name]['url'], name
+        for name, url in settings.wikis().items():
+            yield name, settings.wiki.siteurl == url, name
 
     def _select(self, name):
         settings.openWiki(name)

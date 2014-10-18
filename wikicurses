@@ -29,7 +29,7 @@ if args.complete:
     elif args.complete == 'feed':
         sugestions = settings.wiki.list_featured_feeds()
     elif args.complete == 'wiki':
-        sugestions = (i for i in settings.conf if i not in ('general', 'DEFAULT'))
+        sugestions = settings.wikis().keys()
     print(*sugestions, sep='\n')
     sys.exit()
 

@@ -50,3 +50,7 @@ def openWiki(name):
         url = name
     wiki = Wiki(url)
     bmarks = Settings(url, 'bookmarks')
+
+def wikis():
+    exclude = ('general', 'DEFAULT', 'keymap')
+    return {k: v['url'] for k, v in conf.items() if k not in exclude}
