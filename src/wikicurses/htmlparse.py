@@ -75,7 +75,7 @@ class _ExtractHTMLParser(HTMLParser):
     def handle_starttag(self, tag, attrs):
         if tag == 'h2':
             #Remove extra trailing newlines from last section
-            if len(self.sections) > 0:
+            if self.sections and self.sections[self.cursection]:
                 sec = self.sections[self.cursection]
                 sec[-1] = (sec[-1][0], sec[-1][1].rstrip() + '\n')
             self.cursection = ''
