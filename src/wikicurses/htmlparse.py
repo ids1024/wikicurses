@@ -20,6 +20,14 @@ def parseFeature(html):
     parser.feed(html)
     return parser.text
 
+def parseDisambig(html):
+    parser = _DisambigHTMLParser()
+    parser.feed(html)
+    parser.sections.pop('', '')
+    parser.sections.pop('Contents', '')
+    parser.sections.pop('See also', '')
+    return parser.sections
+
 class _ExtractHTMLParser(HTMLParser):
     cursection = ''
     inh = 0
@@ -90,3 +98,50 @@ class _FeatureHTMLParser(HTMLParser):
     text = ''
     def handle_data(self, data):
         self.text += data
+
+class _DisambigHTMLParser(HTMLParser):
+    cursection = ''
+    inh2 = False
+    ina = False
+    inli = False
+    format = 0
+    li = ''
+    a = ''
+
+    def __init__(self):
+        self.sections = OrderedDict({'':[]})
+        super().__init__(self)
+
+    def handle_starttag(self, tag, attrs):
+        if tag == 'h2':
+            self.cursection = ''
+            self.inh2 = True
+        elif tag == 'li':
+            if self.inli:
+                self.sections[self.cursection].append((self.a, self.li.strip()))
+                self.li = ''
+                self.a = ''
+            self.inli = True
+        elif tag == 'a' and self.inli:
+            self.ina = True
+
+    def handle_endtag(self, tag):
+        if tag == 'h2':
+            self.inh2 = False
+            self.sections[self.cursection] = []
+        elif tag == 'li':
+            self.inli = False
+            if self.li:
+                self.sections[self.cursection].append((self.a, self.li.strip()))
+                self.li = ''
+                self.a = ''
+        elif tag == 'a' and self.ina:
+            self.ina = False
+
+    def handle_data(self, data):
+        if self.inh2 and data not in ('[', ']', 'edit'):
+            self.cursection += data
+        if self.ina:
+            self.a += data
+        if self.inli:
+            self.li += data

@@ -2,6 +2,7 @@ import urwid
 from wikicurses import formats
 from wikicurses import settings
 from wikicurses.wiki import Wiki
+from wikicurses.htmlparse import parseDisambig
 
 def tabComplete(text, matches):
     if not matches:
@@ -96,6 +97,27 @@ class Feeds(SelectorBox):
     def _select(self, feed):
         setContent(settings.wiki.get_featured_feed(feed))
 
+class Disambig(urwid.ListBox):
+    def __init__(self, html):
+        def selectButton(radio_button, new_state, title):
+            if new_state:
+                loop.widget = mainwidget
+                setContent(settings.wiki.search(title))
+
+        sections = parseDisambig(html)
+        super().__init__(urwid.SimpleFocusListWalker([]))
+        buttons = []
+
+        for title, items in sections.items():
+            self.body.append(urwid.Text(['\n', ('h', title)], align='center'))
+            for name, text in items:
+                if name:
+                    button = urwid.RadioButton(buttons, text, False,
+                            selectButton, name)
+                    self.body.append(button)
+                else:
+                    self.body.append(urwid.Text(text))
+
 class Ex(urwid.Edit):
     def keypress(self, size, key):
         if key == 'esc' or (key == 'backspace' and not self.edit_text):
@@ -173,6 +195,9 @@ def setContent(page):
         if results:
             openOverlay(Results(results), 'Results')
             return
+    elif 'disambiguation' in page.properties:
+        openOverlay(Disambig(page.result['text']['*']), 'Disambiguation')
+        return
 
     widgets.clear()
     widgetnames.clear()

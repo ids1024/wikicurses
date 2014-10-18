@@ -31,18 +31,18 @@ class Wiki(object):
 
     def search(self, name):
         self.get_siteinfo()
-        prop = "images|externallinks|iwlinks|displaytitle|properties"
         html = ''
-        if self.has_extract:
-            result = json.loads(self._query(action="query", redirects=True,
-                     titles=name, prop="extracts", format="json"))['query']
-            html = next(iter(result['pages'].values())).get('extract', '')
-        else:
-            prop += '|text'
 
         result = json.loads(self._query(action="parse", page=name,
-                 format="json", redirects=True, prop=prop)).get('parse', {})
-        if 'text' in result:
+                 prop="images|externallinks|iwlinks|displaytitle|properties|text",
+                 format="json", redirects=True,)).get('parse', {})
+
+        if self.has_extract:
+            exresult = json.loads(self._query(action="query", redirects=True,
+                     titles=name, prop="extracts", format="json"))['query']
+            html = next(iter(exresult['pages'].values())).get('extract', '')
+
+        elif 'text' in result:
             html = result['text']['*']
 
         return _Article(self, name, html, result)
