@@ -155,17 +155,14 @@ cmds = ('quit', 'bmark', 'bmarks', 'wikis', 'feeds', 'open', 'contents')
 def processCmd(cmd, *args):
     if cmd in ('q', 'quit'):
         raise urwid.ExitMainLoop
-    if cmd == 'bmarks':
-        openOverlay(Bmarks())
     elif cmd == 'bmark':
         settings.bmarks.add(header.text)
         notify("Bookmark Added")
-    elif cmd == 'wikis':
-        openOverlay(Wikis())
-    elif cmd == 'feeds':
-        openOverlay(Feeds())
-    elif cmd == 'contents':
-        openOverlay(Toc())
+    elif cmd in ('bmarks' ,'wikis', 'feeds', 'contents'):
+        openOverlay({'bmarks':Bmarks,
+                     'wikis':Wikis,
+                     'feeds':Feeds,
+                     'contents':Toc}[cmd]())
     elif cmd == 'open':
         if args:
             setContent(settings.wiki.search(' '.join(args)))
