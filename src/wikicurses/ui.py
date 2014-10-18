@@ -145,11 +145,6 @@ class Ex(urwid.Edit):
         self.set_caption(':')
 
 cmds = ('quit', 'bmark', 'bmarks', 'wikis', 'feeds', 'open', 'contents')
-cmdmap = {
-        'q': 'quit',
-        'c': 'contents',
-        'o': 'open'
-         }
 def processCmd(cmd, *args):
     if cmd in ('q', 'quit'):
         raise urwid.ExitMainLoop
@@ -183,9 +178,10 @@ def openOverlay(widget, title, height=('relative', 50), width=('relative', 50)):
 def keymapper(input):
     #TODO: Implement gg and G
 
+    cmdmap = settings.conf['keymap']
     if input == ':':
         mainwidget.footer.enterexmode()
-    elif input in cmdmap:
+    elif input in cmdmap and cmdmap[input]:
         processCmd(cmdmap[input])
     elif input == 'esc':
         loop.widget = mainwidget
