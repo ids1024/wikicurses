@@ -18,7 +18,7 @@ class SearchBox(urwid.Edit):
     def keypress(self, size, key):
         if key == 'enter':
             loop.widget = mainwidget
-            setcontent(settings.wiki.search(self.edit_text or 'main page'))
+            setContent(settings.wiki.search(self.edit_text or 'Main page'))
         elif key == 'tab':
             matches = settings.wiki.search_sugestions(self.edit_text)
             match = tabComplete(self.edit_text, matches)
@@ -124,7 +124,6 @@ class Ex(urwid.Edit):
         if key == 'esc' or (key == 'backspace' and not self.edit_text):
             self.exitexmode()
         elif key == 'tab':
-            cmds = ('quit', 'bmark', 'bmarks', 'wikis', 'feeds', 'open')
             matches = [i for i in cmds if i.startswith(self.edit_text)]
             match = tabComplete(self.edit_text, matches)
             self.set_edit_text(match)
@@ -132,29 +131,9 @@ class Ex(urwid.Edit):
         elif key == 'enter':
             words = self.edit_text.split(' ')
             self.exitexmode()
-            self.processCmd(*words)
+            processCmd(*words)
         else:
             return super().keypress(size, key)
-
-    def processCmd(self, cmd, *args):
-        if cmd in ('q', 'quit'):
-            raise urwid.ExitMainLoop
-        if cmd == 'bmarks':
-            openOverlay(Bmarks(), "Bookmarks")
-        elif cmd == 'bmark':
-            settings.bmarks.add(header.text)
-            notify("Bookmark Added")
-        elif cmd == 'wikis':
-            openOverlay(Wikis(), "Wikis")
-        elif cmd == 'feeds':
-            openOverlay(Feeds(), "Feeds")
-        elif cmd == 'open':
-            if args:
-                setContent(settings.wiki.search(' '.join(args)))
-            else:
-                openOverlay(urwid.ListBox([SearchBox()]), "Search", height=3)
-        elif cmd:
-            notify(cmd + ': Unknown Command')
 
     def exitexmode(self):
         self.set_caption('')
@@ -164,6 +143,29 @@ class Ex(urwid.Edit):
     def enterexmode(self):
         mainwidget.set_focus('footer')
         self.set_caption(':')
+
+cmds = ('quit', 'bmark', 'bmarks', 'wikis', 'feeds', 'open', 'contents')
+def processCmd(cmd, *args):
+    if cmd in ('q', 'quit'):
+        raise urwid.ExitMainLoop
+    if cmd == 'bmarks':
+        openOverlay(Bmarks(), "Bookmarks")
+    elif cmd == 'bmark':
+        settings.bmarks.add(header.text)
+        notify("Bookmark Added")
+    elif cmd == 'wikis':
+        openOverlay(Wikis(), "Wikis")
+    elif cmd == 'feeds':
+        openOverlay(Feeds(), "Feeds")
+    elif cmd == 'contents':
+        openOverlay(Toc(), "Table of Contents")
+    elif cmd == 'open':
+        if args:
+            setContent(settings.wiki.search(' '.join(args)))
+        else:
+            openOverlay(urwid.ListBox([SearchBox()]), "Search", height=3)
+    elif cmd:
+        notify(cmd + ': Unknown Command')
 
 def notify(text):
     mainwidget.footer = urwid.Text(text)
@@ -176,14 +178,16 @@ def openOverlay(widget, title, height=('relative', 50), width=('relative', 50)):
 def keymapper(input):
     #TODO: Implement gg and G
 
-    if input == 'q':
-        raise  urwid.ExitMainLoop
-    elif input == ':':
+    cmdmap = {
+            'q': 'quit',
+            'c': 'contents',
+            'o': 'open'
+             }
+
+    if input == ':':
         mainwidget.footer.enterexmode()
-    elif input == 'c':
-        openOverlay(Toc(), "Table of Contents")
-    elif input == 'o':
-        openOverlay(urwid.ListBox([SearchBox()]), "Search", height=3)
+    elif input in cmdmap:
+        processCmd(cmdmap[input])
     elif input == 'esc':
         loop.widget = mainwidget
     else:
