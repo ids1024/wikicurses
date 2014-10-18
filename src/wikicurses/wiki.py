@@ -3,7 +3,7 @@ import urllib.request
 import re
 import  xml.etree.ElementTree as ET
 from collections import OrderedDict
-
+from functools import lru_cache
 from wikicurses.htmlparse import parseExtract, parseFeature
 
 class Wiki(object):
@@ -25,9 +25,13 @@ class Wiki(object):
                 query['general']['articlepath'])
         self.have_siteinfo = True
 
+    @lru_cache(256)
     def _query(self, **data):
         url = self.siteurl + '?' + urllib.parse.urlencode(data)
         return urllib.request.urlopen(url).read().decode('utf-8')
+
+    def clearcache(self):
+        self._query.cache_clear()
 
     def search(self, name):
         self.get_siteinfo()
