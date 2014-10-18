@@ -65,6 +65,10 @@ class _ExtractHTMLParser(HTMLParser):
         section = self.sections[self.cursection]
         if section and section[-1][0] == tformat:
             section[-1] = (section[-1][0], section[-1][1] + text)
+        elif len(section) == 0:
+            if not text.lstrip():
+                return
+            section.append((tformat, text.lstrip()))
         else:
             section.append((tformat, text))
 
