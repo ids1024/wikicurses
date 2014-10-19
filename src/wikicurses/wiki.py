@@ -6,6 +6,7 @@ from collections import OrderedDict
 from functools import lru_cache
 from wikicurses.htmlparse import parseExtract, parseFeature
 
+@lru_cache(16)
 class Wiki(object):
     def __init__(self, url):
         self.siteurl = url
