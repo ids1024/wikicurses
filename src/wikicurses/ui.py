@@ -36,7 +36,12 @@ class SelectorBox(urwid.ListBox):
                 self._select(parameter)
 
         super().__init__(urwid.SimpleFocusListWalker([]))
-        for i, (name, selected, parameter) in enumerate(self._items()):
+        for i, item in enumerate(self._items()):
+            if isinstance(item, tuple):
+                name, selected, parameter = item
+            else:
+                parameter = name = item
+                selected = False
             urwid.RadioButton(self.body, name, selected, selectButton, parameter)
             if selected:
                 self.set_focus(i)
@@ -48,7 +53,7 @@ class Results(SelectorBox):
         super().__init__()
 
     def _items(self):
-        return ((i, False, i) for i in self.results)
+        return self.results
 
     def _select(self, title):
         setContent(settings.wiki.search(title))
@@ -65,7 +70,7 @@ class Bmarks(SelectorBox):
     title = "Bookmarks"
     def _items(self):
         self.deleted = []
-        return ((i, False, i) for i in settings.bmarks)
+        return settings.bmarks
 
     def _select(self, name):
         setContent(settings.wiki.search(name))
@@ -97,7 +102,7 @@ class Wikis(SelectorBox):
 class Feeds(SelectorBox):
     title = "Feeds"
     def _items(self):
-        return ((i, False, i) for i in settings.wiki.list_featured_feeds())
+        return settings.wiki.list_featured_feeds()
 
     def _select(self, feed):
         setContent(settings.wiki.get_featured_feed(feed))
