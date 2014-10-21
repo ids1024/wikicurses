@@ -53,7 +53,7 @@ class _ExtractHTMLParser(HTMLParser):
 
         tformat = self.format
 
-        if self.inh and text in ('[', ']', 'edit'):
+        if self.inh and text in ('[', ']', 'edit', 'Edit'):
             return
         if self.inh == 2:
             self.cursection += text
@@ -148,7 +148,7 @@ class _DisambigHTMLParser(HTMLParser):
             self.ina = False
 
     def handle_data(self, data):
-        if self.inh2 and data not in ('[', ']', 'edit'):
+        if self.inh2 and data not in ('[', ']', 'edit', 'Edit'):
             self.cursection += data
         if self.ina:
             self.a += data
