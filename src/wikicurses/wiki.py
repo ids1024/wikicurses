@@ -10,11 +10,8 @@ from wikicurses.htmlparse import parseExtract, parseFeature
 class Wiki(object):
     def __init__(self, url):
         self.siteurl = url
-        self.have_siteinfo = False
 
     def get_siteinfo(self):
-        if self.have_siteinfo:
-            return
         result = self._query(action="query", meta="siteinfo",
                 siprop="extensions|general", format="json")
         query = json.loads(result)["query"]
@@ -24,7 +21,6 @@ class Wiki(object):
         self.articlepath = urllib.parse.urljoin( 
                 query['general']['base'],
                 query['general']['articlepath'])
-        self.have_siteinfo = True
 
     @lru_cache(256)
     def _query(self, **data):
