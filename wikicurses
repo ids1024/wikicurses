@@ -37,4 +37,8 @@ if args.feed:
     ui.setContent(settings.wiki.get_featured_feed(args.feed))
 else:
     ui.setContent(settings.wiki.search(args.search))
-ui.loop.run()
+
+try:
+    ui.loop.run()
+except KeyboardInterrupt:
+    pass
