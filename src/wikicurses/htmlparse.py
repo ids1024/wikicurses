@@ -9,7 +9,7 @@ ENDPAR, STARTPAR, ENDH = range(3)
 
 def parseExtract(html):
     parser = _ExtractHTMLParser()
-    parser.feed(html)
+    parser.feed(html.replace('\t', ' '))
     for i in parser.sections:
         if not parser.sections[i]:
             del parser.sections[i]
