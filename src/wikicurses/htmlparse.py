@@ -39,10 +39,8 @@ class _ExtractHTMLParser(HTMLParser):
 
     def add_text(self, text, tformat=None):
         tformat = tformat or self.format
-
-        if self.cursection not in self.sections:
-            self.sections[self.cursection] = []
         sec = self.sections[self.cursection]
+
         if sec and sec[-1][0] == tformat:
             sec[-1] = (sec[-1][0], sec[-1][1] + text)
         elif len(sec) == 0:
@@ -54,7 +52,7 @@ class _ExtractHTMLParser(HTMLParser):
     def handle_starttag(self, tag, attrs):
         if tag == 'h2':
             #Remove extra trailing newlines from last section
-            if self.sections and self.sections[self.cursection]:
+            if self.sections[self.cursection]:
                 sec = self.sections[self.cursection]
                 sec[-1] = (sec[-1][0], sec[-1][1].rstrip() + '\n')
             self.cursection = ''
@@ -68,6 +66,8 @@ class _ExtractHTMLParser(HTMLParser):
             self.format|=formats[tag]
 
     def handle_endtag(self, tag):
+        if tag == 'h2':
+            self.sections[self.cursection] = []
         if re.fullmatch("h[2-6]", tag):
             self.inh = 0
             self.add_text('\n')
