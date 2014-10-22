@@ -109,15 +109,19 @@ class _DisambigHTMLParser(HTMLParser):
         self.sections = OrderedDict({'':[]})
         super().__init__(self)
 
+    def add_link(self):
+        if self.li:
+            self.sections[self.cursection].append((self.a, self.li.strip()))
+            self.li = ''
+            self.a = ''
+
     def handle_starttag(self, tag, attrs):
         if tag == 'h2':
             self.cursection = ''
             self.inh2 = True
         elif tag == 'li':
             if self.inli:
-                self.sections[self.cursection].append((self.a, self.li.strip()))
-                self.li = ''
-                self.a = ''
+                self.add_link()
             self.inli = True
         elif tag == 'a' and self.inli:
             self.ina = True
@@ -127,11 +131,8 @@ class _DisambigHTMLParser(HTMLParser):
             self.inh2 = False
             self.sections[self.cursection] = []
         elif tag == 'li':
+            self.add_link()
             self.inli = False
-            if self.li:
-                self.sections[self.cursection].append((self.a, self.li.strip()))
-                self.li = ''
-                self.a = ''
         elif tag == 'a' and self.ina:
             self.ina = False
 
