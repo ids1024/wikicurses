@@ -79,9 +79,11 @@ class _ExtractHTMLParser(HTMLParser):
             self.format&=~formats[tag]
 
     def handle_data(self, data):
-        if self.inh == 2:
+        if self.inh and data in ('[', ']', 'edit', 'Edit'):
+            pass
+        elif self.inh == 2:
             self.cursection += data
-        elif not (self.inh and data in ('[', ']', 'edit', 'Edit')):
+        else:
             tformat = 'h' if (self.inh > 2) else self.format
             self.add_text(data, tformat)
 
