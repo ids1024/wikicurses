@@ -60,6 +60,8 @@ class _ExtractHTMLParser(HTMLParser):
             self.inh = int(tag[1:])
         elif tag == 'p' and self.format&formats.blockquote:
             self.add_text('> ')
+        elif tag == 'br':
+            self.add_text('\n')
         elif tag == 'li':
             self.add_text("- ")
         elif tag in (i.name for i in formats):
