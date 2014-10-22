@@ -82,9 +82,6 @@ class _Article(object):
         if not self.exists:
             return {'':'Page Not Found.'}
         sections = parseExtract(self.html)
-        sections.pop("External links", '')
-        sections.pop("References", '')
-        sections.pop("Contents", '')
 
         images = [self.wiki.articlepath.replace('$1', 'File:' + i)
                  for i in self.result['images']]

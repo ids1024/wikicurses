@@ -12,6 +12,9 @@ def parseExtract(html):
     for i in parser.sections:
         if not parser.sections[i]:
             del parser.sections[i]
+    parser.sections.pop("External links", '')
+    parser.sections.pop("References", '')
+    parser.sections.pop("Contents", '')
     return parser.sections
 
 def parseFeature(html):
