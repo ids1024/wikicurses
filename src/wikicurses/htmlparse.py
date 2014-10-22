@@ -5,11 +5,10 @@ from html.parser import HTMLParser
 
 from wikicurses import formats
 
-ENDPAR, STARTPAR, ENDH = range(3)
-
 def parseExtract(html):
     parser = _ExtractHTMLParser()
-    parser.feed(html.replace('\t', ' '))
+    html = re.sub('\n+', '\n', html).replace('\t', ' ')
+    parser.feed(html)
     for i in parser.sections:
         if not parser.sections[i]:
             del parser.sections[i]
@@ -38,39 +37,19 @@ class _ExtractHTMLParser(HTMLParser):
         self.sections = OrderedDict({'':[]})
         super().__init__(self)
 
-    def add_text(self, text):
-        if text == ENDPAR:
-            if self.format&formats.blockquote:
-                return
-            text = '\n'
-        elif text == STARTPAR:
-            if self.format&formats.blockquote:
-                text = '\n> '
-            else:
-                return
-        elif text == ENDH:
-            text = '\n'
+    def add_text(self, text, tformat=None):
+        tformat = tformat or self.format
 
-        tformat = self.format
-
-        if self.inh and text in ('[', ']', 'edit', 'Edit'):
-            return
-        if self.inh == 2:
-            self.cursection += text
-            return
-        elif self.inh > 2:
-            tformat = 'h'
         if self.cursection not in self.sections:
             self.sections[self.cursection] = []
-        section = self.sections[self.cursection]
-        if section and section[-1][0] == tformat:
-            section[-1] = (section[-1][0], section[-1][1] + text)
-        elif len(section) == 0:
-            if not text.lstrip():
-                return
-            section.append((tformat, text.lstrip()))
+        sec = self.sections[self.cursection]
+        if sec and sec[-1][0] == tformat:
+            sec[-1] = (sec[-1][0], sec[-1][1] + text)
+        elif len(sec) == 0:
+            if text.lstrip():
+                sec.append((tformat, text.lstrip()))
         else:
-            section.append((tformat, text))
+            sec.append((tformat, text))
 
     def handle_starttag(self, tag, attrs):
         if tag == 'h2':
@@ -81,8 +60,8 @@ class _ExtractHTMLParser(HTMLParser):
             self.cursection = ''
         if re.fullmatch("h[2-6]", tag):
             self.inh = int(tag[1:])
-        elif tag == 'p':
-            self.add_text(STARTPAR)
+        elif tag == 'p' and self.format&formats.blockquote:
+            self.add_text('> ')
         elif tag == 'li':
             self.add_text("- ")
         elif tag in (i.name for i in formats):
@@ -91,16 +70,18 @@ class _ExtractHTMLParser(HTMLParser):
     def handle_endtag(self, tag):
         if re.fullmatch("h[2-6]", tag):
             self.inh = 0
-            self.add_text(ENDH)
-        elif tag == 'p':
-            self.add_text(ENDPAR)
+            self.add_text('\n')
+        elif tag == 'p' and not self.format&formats.blockquote:
+            self.add_text('\n')
         elif tag in (i.name for i in formats):
             self.format&=~formats[tag]
-        if tag == 'blockquote':
-            self.add_text(ENDPAR)
 
     def handle_data(self, data):
-        self.add_text(re.sub('\n+', '\n', data))
+        if self.inh == 2:
+            self.cursection += data
+        elif not (self.inh and data in ('[', ']', 'edit', 'Edit')):
+            tformat = 'h' if (self.inh > 2) else self.format
+            self.add_text(data, tformat)
 
 
 class _FeatureHTMLParser(HTMLParser):
