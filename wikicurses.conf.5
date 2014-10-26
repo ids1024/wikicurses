@@ -1,4 +1,4 @@
-.TH wikicurses.conf 5 2014-10-12
+.TH wikicurses.conf 5 2014-10-25
 .SH NAME
 wikicurses \- curses interface for MediaWiki
 .SH SYNOPSIS
@@ -19,6 +19,8 @@ o = open
 
 [Wikipedia]
 url = http://en.wikipedia.org/w/api.php
+username = johndoe
+password = 1234
 
 [ArchWiki]
 url = https://wiki.archlinux.org/api.php
@@ -32,7 +34,7 @@ The name of the wiki to use by default
 .SS keymap
 This section configures the keyboard bindings of wikicurses, in the format "key=command". Command can be any ex command supported by wikicurses.
 .SS Other Sections
-Other sections are treated as wiki entries.
+Other sections are treated as wiki entries. The url is the url for api.php on the wiki. The username and password are required for editing.
 .PP
 url
 .RS 4
