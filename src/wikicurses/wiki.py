@@ -80,8 +80,10 @@ class Wiki(object):
                 title=title, basetimestamp=verify[0], starttimestamp=verify[1],
                 md5=md5sum, token=self.csrftoken, summary=summary, minor=minor,
                 format='json'))['edit']
+        self.search.cache_clear()
         return result['result']
 
+    @lru_cache(16)
     def search(self, name):
         self.get_siteinfo()
         html = ''
@@ -100,6 +102,7 @@ class Wiki(object):
 
         return _Article(self, name, html, result)
 
+    @lru_cache(1)
     def list_featured_feeds(self):
          result = json.loads(self._query(action="paraminfo",
              modules="featuredfeed", format="json"))["paraminfo"]
@@ -108,10 +111,12 @@ class Wiki(object):
          return next(i for i in result["modules"][0]["parameters"]
                  if i["name"]=="feed")["type"]
 
+    @lru_cache(16)
     def get_featured_feed(self, feed):
         result = self._query(action="featuredfeed", feed=feed)
         return _Featured(feed, ET.fromstring(result)[0])
 
+    @lru_cache(16)
     def search_sugestions(self, name):
         result = self._query(action="opensearch", search=name, format="json")
         return json.loads(result)[1]
