@@ -4,10 +4,14 @@ import http.cookiejar
 import re
 import time
 import hashlib
+import sys
 import  xml.etree.ElementTree as ET
 from collections import OrderedDict
 from functools import lru_cache
 from wikicurses.htmlparse import parseExtract, parseFeature
+
+useragent = "Wikicurses/0.1 (https://github.com/ids1024/wikicurses)"\
+            " Python-urllib/%d.%d" % sys.version_info[0:2]
 
 class Wiki(object):
     csrftoken = None
@@ -35,11 +39,12 @@ class Wiki(object):
             if value is False:
                 params.pop(name)
         data =  urllib.parse.urlencode(params)
+        headers = {'User-Agent':useragent}
         if post:
-            request = urllib.request.urlopen(self.siteurl, data.encode())
+            request = urllib.request.Request(self.siteurl, data.encode(), headers)
         else:
-            request = urllib.request.urlopen(self.siteurl + '?' + data)
-        return request.read().decode('utf-8')
+            request = urllib.request.Request(self.siteurl + '?' + data, None, headers)
+        return urllib.request.urlopen(request).read().decode('utf-8')
 
     def login(self):
         result = json.loads(self._query(post=True, action='login',
