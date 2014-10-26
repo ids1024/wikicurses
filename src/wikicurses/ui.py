@@ -198,6 +198,7 @@ def processCmd(cmd, *args):
 
         with open(tmpname) as file:
             newtext = file.read()
+        os.unlink(tmpname)
 
         if newtext == text:
             notify('Edit Canceled: No Change')
