@@ -122,6 +122,14 @@ class Wiki(object):
         result = self._query(action="opensearch", search=name, format="json")
         return json.loads(result)[1]
 
+    def clear_cache(self):
+        Wiki.cache_clear()
+        self.get_siteinfo.cache_clear()
+        self.search.cache_clear()
+        self.list_featured_feeds.cache_clear()
+        self.get_featured_feed.cache_clear()
+        self.search_sugestions.cache_clear()
+
 
 class _Article(object):
     properties = {}

@@ -158,7 +158,8 @@ class Ex(urwid.Edit):
         mainwidget.set_focus('footer')
         self.set_caption(':')
 
-cmds = ('quit', 'bmark', 'bmarks', 'wikis', 'feeds', 'open', 'contents', 'edit')
+cmds = ('quit', 'bmark', 'bmarks', 'wikis', 'feeds',
+        'open', 'contents', 'edit', 'clearcache')
 def processCmd(cmd, *args):
     if cmd in ('q', 'quit'):
         raise urwid.ExitMainLoop
@@ -175,6 +176,8 @@ def processCmd(cmd, *args):
             setContent(settings.wiki.search(' '.join(args)))
         else:
             openOverlay(urwid.ListBox([SearchBox()]), "Search", height=3)
+    elif cmd == 'clearcache':
+        settings.wiki.clear_cache()
     elif cmd == 'edit':
         title = header.text
         init = settings.wiki.init_edit(title)
