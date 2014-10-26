@@ -27,7 +27,11 @@ class Wiki(object):
                 query['general']['base'],
                 query['general']['articlepath'])
 
-    def _query(self, post=False, **params):
+    def _query(self, post=False, **kargs):
+        params = kargs.copy()
+        for name, value in kargs.items():
+            if value is False:
+                params.pop(name)
         data =  urllib.parse.urlencode(params)
         if post:
             request = urllib.request.urlopen(self.siteurl, data.encode())
@@ -62,11 +66,12 @@ class Wiki(object):
         starttime = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
         return (rev['*'], (rev['timestamp'], starttime))
 
-    def commit_edit(self, title, text, verify):
+    def commit_edit(self, title, text, summary, minor, verify):
         md5sum = hashlib.md5(text.encode()).hexdigest()
         result = json.loads(self._query(post=True, action='edit', text=text,
                 title=title, basetimestamp=verify[0], starttimestamp=verify[1],
-                md5=md5sum, token=self.csrftoken, format='json'))['edit']
+                md5=md5sum, token=self.csrftoken, summary=summary, minor=minor,
+                format='json'))['edit']
         return result['result']
 
     def search(self, name):

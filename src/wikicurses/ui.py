@@ -206,8 +206,16 @@ def processCmd(cmd, *args):
             notify('Edit Canceled: No Change')
             return
 
-        settings.wiki.commit_edit(title, newtext, verify)
-        setContent(settings.wiki.search(title))
+        summary = urwid.Edit('Summary: ')
+        minor = urwid.CheckBox('Minor Edit')
+        def submit(button):
+            loop.widget = mainwidget
+            settings.wiki.commit_edit(title, newtext, summary.edit_text,
+                    minor.get_state(), verify)
+            setContent(settings.wiki.search(title))
+        listbox = urwid.ListBox([summary, minor, urwid.Button('Submit', submit)])
+        openOverlay(listbox, 'Edit', 5)
+
     elif cmd:
         notify(cmd + ': Unknown Command')
 
