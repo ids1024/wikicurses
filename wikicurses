@@ -42,3 +42,6 @@ try:
     ui.loop.run()
 except KeyboardInterrupt:
     pass
+
+if settings.wiki.csrftoken:
+    settings.wiki.logout()

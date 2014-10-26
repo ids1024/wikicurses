@@ -1,4 +1,7 @@
 import urwid
+import tempfile
+import subprocess
+import os
 from wikicurses import formats
 from wikicurses import settings
 from wikicurses.wiki import Wiki
@@ -155,7 +158,7 @@ class Ex(urwid.Edit):
         mainwidget.set_focus('footer')
         self.set_caption(':')
 
-cmds = ('quit', 'bmark', 'bmarks', 'wikis', 'feeds', 'open', 'contents')
+cmds = ('quit', 'bmark', 'bmarks', 'wikis', 'feeds', 'open', 'contents', 'edit')
 def processCmd(cmd, *args):
     if cmd in ('q', 'quit'):
         raise urwid.ExitMainLoop
@@ -172,6 +175,39 @@ def processCmd(cmd, *args):
             setContent(settings.wiki.search(' '.join(args)))
         else:
             openOverlay(urwid.ListBox([SearchBox()]), "Search", height=3)
+    elif cmd == 'edit':
+        #TODO: Commit msg
+        title = header.text
+        init = settings.wiki.init_edit(title)
+        if not init:
+            notify('Unable to Edit: Page Not Found')
+            return
+
+        if not settings.wiki.csrftoken: #If not logged in
+            username = settings.conf['general']['username']
+            password = settings.conf['general']['password']
+            error = settings.wiki.login(username, password)
+            if error:
+                notify('Login Failed: ' + error)
+                return
+
+        text, verify = init
+        with tempfile.NamedTemporaryFile('w', delete=False) as file:
+            file.write(text)
+            tmpname = file.name
+
+        editor = os.environ.get('EDITOR', 'vim')
+        subprocess.call([editor, tmpname])
+
+        with open(tmpname) as file:
+            newtext = file.read()
+
+        if newtext == text:
+            notify('Edit Canceled: No Change')
+            return
+
+        settings.wiki.commit_edit(title, newtext, verify)
+        setContent(settings.wiki.search(title))
     elif cmd:
         notify(cmd + ': Unknown Command')
 

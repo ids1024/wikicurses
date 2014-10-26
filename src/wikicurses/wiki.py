@@ -1,16 +1,21 @@
 import json
 import urllib.request
+import http.cookiejar
 import re
+import time
+import hashlib
 import  xml.etree.ElementTree as ET
 from collections import OrderedDict
 from functools import lru_cache
 from wikicurses.htmlparse import parseExtract, parseFeature
 
-@lru_cache(16)
 class Wiki(object):
+    csrftoken = None
+
     def __init__(self, url):
         self.siteurl = url
 
+    @lru_cache(1)
     def get_siteinfo(self):
         result = self._query(action="query", meta="siteinfo",
                 siprop="extensions|general", format="json")
@@ -22,13 +27,47 @@ class Wiki(object):
                 query['general']['base'],
                 query['general']['articlepath'])
 
-    @lru_cache(256)
-    def _query(self, **data):
-        url = self.siteurl + '?' + urllib.parse.urlencode(data)
-        return urllib.request.urlopen(url).read().decode('utf-8')
+    def _query(self, post=False, **params):
+        data =  urllib.parse.urlencode(params)
+        if post:
+            request = urllib.request.urlopen(self.siteurl, data.encode())
+        else:
+            request = urllib.request.urlopen(self.siteurl + '?' + data)
+        return request.read().decode('utf-8')
 
-    def clearcache(self):
-        self._query.cache_clear()
+    def login(self, username, password):
+        result = json.loads(self._query(post=True, action='login', lgname=username,
+                lgpassword=password, format='json'))['login']
+        if result['result'] == 'NeedToken':
+            result = json.loads(self._query(post=True, action='login',
+                lgname=username, lgpassword=password, lgtoken=result['token'],
+                format='json'))['login']
+
+        if result['result'] != 'Success': #Error
+            return result['result']
+        self.csrftoken = json.loads(self._query(post=True, action='query',
+            meta='tokens', format='json'))['query']['tokens']['csrftoken']
+
+    def logout(self):
+        self._query(action='logout', format='json')
+        self.csrftoken = None
+
+    def init_edit(self, title):
+        result = json.loads(self._query(action='query', prop='revisions',
+            rvprop='timestamp|content', titles=title, format='json'))['query']
+        if "missing" in result:
+            return
+
+        rev = next(iter(result['pages'].values()))['revisions'][0]
+        starttime = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
+        return (rev['*'], (rev['timestamp'], starttime))
+
+    def commit_edit(self, title, text, verify):
+        md5sum = hashlib.md5(text.encode()).hexdigest()
+        result = json.loads(self._query(post=True, action='edit', text=text,
+                title=title, basetimestamp=verify[0], starttimestamp=verify[1],
+                md5=md5sum, token=self.csrftoken, format='json'))['edit']
+        return result['result']
 
     def search(self, name):
         self.get_siteinfo()
@@ -112,3 +151,8 @@ class _Featured(object):
             description = i.findtext('description')
             text = parseFeature(description)
             self.content[i.findtext('title')] = i.findtext('link') + '\n' + text
+
+            
+cookiejar = http.cookiejar.CookieJar()
+opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cookiejar))
+urllib.request.install_opener(opener)
