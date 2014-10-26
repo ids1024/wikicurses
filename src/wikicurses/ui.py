@@ -176,7 +176,6 @@ def processCmd(cmd, *args):
         else:
             openOverlay(urwid.ListBox([SearchBox()]), "Search", height=3)
     elif cmd == 'edit':
-        #TODO: Commit msg
         title = header.text
         init = settings.wiki.init_edit(title)
         if not init:
@@ -184,9 +183,7 @@ def processCmd(cmd, *args):
             return
 
         if not settings.wiki.csrftoken: #If not logged in
-            username = settings.conf['general']['username']
-            password = settings.conf['general']['password']
-            error = settings.wiki.login(username, password)
+            error = settings.wiki.login()
             if error:
                 notify('Login Failed: ' + error)
                 return

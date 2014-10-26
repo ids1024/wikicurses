@@ -43,12 +43,15 @@ def openWiki(name):
     global wiki
     global bmarks
     if not name:
-        url = conf[conf['general']['default']]['url']
-    elif name in conf:
+        name = conf['general']['default']
+    if name in conf:
         url = conf[name]['url']
+        username = conf[name].get('username')
+        password = conf[name].get('password')
     else:
         url = name
-    wiki = Wiki(url)
+        username = password = ''
+    wiki = Wiki(url, username, password)
     bmarks = Settings(url, 'bookmarks')
 
 def wikis():

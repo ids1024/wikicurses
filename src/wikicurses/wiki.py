@@ -12,8 +12,10 @@ from wikicurses.htmlparse import parseExtract, parseFeature
 class Wiki(object):
     csrftoken = None
 
-    def __init__(self, url):
+    def __init__(self, url, username, password):
         self.siteurl = url
+        self.username = username
+        self.password = password
 
     @lru_cache(1)
     def get_siteinfo(self):
@@ -39,13 +41,14 @@ class Wiki(object):
             request = urllib.request.urlopen(self.siteurl + '?' + data)
         return request.read().decode('utf-8')
 
-    def login(self, username, password):
-        result = json.loads(self._query(post=True, action='login', lgname=username,
-                lgpassword=password, format='json'))['login']
+    def login(self):
+        result = json.loads(self._query(post=True, action='login',
+                lgname=self.username, lgpassword=self.password,
+                format='json'))['login']
         if result['result'] == 'NeedToken':
             result = json.loads(self._query(post=True, action='login',
-                lgname=username, lgpassword=password, lgtoken=result['token'],
-                format='json'))['login']
+                lgname=self.username, lgpassword=self.password,
+                lgtoken=result['token'], format='json'))['login']
 
         if result['result'] != 'Success': #Error
             return result['result']
