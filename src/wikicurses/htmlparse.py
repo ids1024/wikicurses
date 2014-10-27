@@ -6,11 +6,24 @@ from html.parser import HTMLParser
 from wikicurses import formats
 
 class UrwidMarkupHandler(list):
+    def __init__(self):
+        self._list = []
+
     def add(self, text, attribute):
         if self and self[-1][0] == attribute:
-            self[-1] = (attribute, self[-1][1] + text)
+            self[-1][1] += text
         else:
-            self.append((attribute, text))
+            self._list.append([attribute, text])
+
+    def __iter__(self):
+        for i in self._list:
+            yield tuple(i)
+
+    def __len__(self):
+        return len(self._list)
+
+    def __getitem__(self, key):
+        return self._list[name]
 
 def parseExtract(html):
     parser = _ExtractHTMLParser()
@@ -58,7 +71,7 @@ class _ExtractHTMLParser(HTMLParser):
             #Remove extra trailing newlines from last section
             if self.sections[self.cursection]:
                 sec = self.sections[self.cursection]
-                sec[-1] = (sec[-1][0], sec[-1][1].rstrip() + '\n')
+                sec[-1][1] = sec[-1][1].rstrip() + '\n'
             self.cursection = ''
         if re.fullmatch("h[2-6]", tag):
             self.inh = int(tag[1:])
