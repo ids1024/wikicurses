@@ -5,6 +5,13 @@ from html.parser import HTMLParser
 
 from wikicurses import formats
 
+class UrwidMarkupHandler(list):
+    def add(self, text, attribute):
+        if self and self[-1][0] == attribute:
+            self[-1] = (attribute, self[-1][1] + text)
+        else:
+            self.append((attribute, text))
+
 def parseExtract(html):
     parser = _ExtractHTMLParser()
     html = re.sub('\n+', '\n', html).replace('\t', ' ')
@@ -37,20 +44,14 @@ class _ExtractHTMLParser(HTMLParser):
     format = 0
 
     def __init__(self):
-        self.sections = OrderedDict({'':[]})
+        self.sections = OrderedDict({'':UrwidMarkupHandler()})
         super().__init__(self)
 
     def add_text(self, text, tformat=None):
-        tformat = tformat or self.format
         sec = self.sections[self.cursection]
-
-        if sec and sec[-1][0] == tformat:
-            sec[-1] = (sec[-1][0], sec[-1][1] + text)
-        elif len(sec) == 0:
-            if text.lstrip():
-                sec.append((tformat, text.lstrip()))
-        else:
-            sec.append((tformat, text))
+        if not sec:
+            text = text.lstrip()
+        sec.add(text, tformat or self.format)
 
     def handle_starttag(self, tag, attrs):
         if tag == 'h2':
@@ -72,7 +73,7 @@ class _ExtractHTMLParser(HTMLParser):
 
     def handle_endtag(self, tag):
         if tag == 'h2':
-            self.sections[self.cursection] = []
+            self.sections[self.cursection] = UrwidMarkupHandler()
         if re.fullmatch("h[2-6]", tag):
             self.inh = 0
             self.add_text('\n')

@@ -267,7 +267,7 @@ def setContent(page):
             widgetnames.append((title, widgets.index(h2)))
         else:
             widgetnames.append((page.title, 0))
-        widgets.append(urwid.Text(content))
+        widgets.append(urwid.Text(list(content)))
 
 
 palette = [('h1', 'bold', 'dark blue'),

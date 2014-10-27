@@ -146,7 +146,7 @@ class _Article(object):
     @property
     def content(self):
         if not self.exists:
-            return {'':'Page Not Found.'}
+            return {'':['Page Not Found.']}
         sections = parseExtract(self.html)
 
         images = [self.wiki.articlepath.replace('$1', 'File:' + i)
