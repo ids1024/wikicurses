@@ -16,14 +16,13 @@ class UrwidMarkupHandler(list):
             self._list.append([attribute, text])
 
     def __iter__(self):
-        for i in self._list:
-            yield tuple(i)
+        return map(tuple, self._list)
 
     def __len__(self):
         return len(self._list)
 
     def __getitem__(self, key):
-        return self._list[name]
+        return self._list[key]
 
 def parseExtract(html):
     parser = _ExtractHTMLParser()
@@ -62,15 +61,13 @@ class _ExtractHTMLParser(HTMLParser):
 
     def add_text(self, text, tformat=None):
         sec = self.sections[self.cursection]
-        if not sec:
-            text = text.lstrip()
         sec.add(text, tformat or self.format)
 
     def handle_starttag(self, tag, attrs):
         if tag == 'h2':
             #Remove extra trailing newlines from last section
-            if self.sections[self.cursection]:
-                sec = self.sections[self.cursection]
+            sec = self.sections[self.cursection]
+            if sec:
                 sec[-1][1] = sec[-1][1].rstrip() + '\n'
             self.cursection = ''
         if re.fullmatch("h[2-6]", tag):
@@ -102,6 +99,8 @@ class _ExtractHTMLParser(HTMLParser):
             self.cursection += data
         else:
             tformat = 'h' if (self.inh > 2) else self.format
+            if not self.sections[self.cursection]:
+                data = data.lstrip()
             self.add_text(data, tformat)
 
 
