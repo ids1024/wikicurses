@@ -192,16 +192,13 @@ def processCmd(cmd, *args):
                 return
 
         text, verify = init
-        with tempfile.NamedTemporaryFile('w', delete=False) as file:
-            file.write(text)
-            tmpname = file.name
-
         editor = os.environ.get('EDITOR', 'vim')
-        subprocess.call([editor, tmpname])
-
-        with open(tmpname) as file:
+        with tempfile.NamedTemporaryFile('r+') as file:
+            file.write(text)
+            file.flush()
+            file.seek(0)
+            subprocess.call([editor, file.name])
             newtext = file.read()
-        os.unlink(tmpname)
 
         if newtext == text:
             notify('Edit Canceled: No Change')
