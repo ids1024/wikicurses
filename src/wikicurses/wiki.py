@@ -48,14 +48,12 @@ class Wiki(object):
         return urllib.request.urlopen(request).read().decode('utf-8')
 
     def login(self):
-        result = json.loads(self._query(post=True, action='login',
-                lgname=self.username, lgpassword=self.password,
-                format='json'))['login']
+        query = {'post':True, 'action':'login', 'format': 'json',
+                'lgname':self.username, 'lgpassword':self.password}
+        result = json.loads(self._query(**query))['login']
         if result['result'] == 'NeedToken':
-            result = json.loads(self._query(post=True, action='login',
-                lgname=self.username, lgpassword=self.password,
-                lgtoken=result['token'], format='json'))['login']
-
+            query['lgtoken'] = result['token']
+            result = json.loads(self._query(**query))['login']
         if result['result'] != 'Success': #Error
             return result['result']
         self.csrftoken = json.loads(self._query(post=True, action='query',
