@@ -41,10 +41,13 @@ class Wiki(object):
                 del params[name]
         data =  urllib.parse.urlencode(params)
         headers = {'User-Agent':useragent}
+        url = self.siteurl
         if post:
-            request = urllib.request.Request(self.siteurl, data.encode(), headers)
-        else:
-            request = urllib.request.Request(self.siteurl + '?' + data, None, headers)
+            data = data.encode()
+        if not post:
+            url += '?' + data
+            data = None
+        request = urllib.request.Request(url, data, headers)
         return urllib.request.urlopen(request).read().decode('utf-8')
 
     def login(self):
