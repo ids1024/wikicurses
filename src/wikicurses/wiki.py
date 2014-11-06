@@ -38,7 +38,7 @@ class Wiki(object):
         params = kargs.copy()
         for name, value in kargs.items():
             if value is False:
-                params.pop(name)
+                del params[name]
         data =  urllib.parse.urlencode(params)
         headers = {'User-Agent':useragent}
         if post:
