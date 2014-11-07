@@ -163,24 +163,18 @@ def edit(title):
     if not init:
         notify('Unable to Edit: Page Not Found')
         return
-
-    if not settings.wiki.csrftoken: #If not logged in
-        error = settings.wiki.login()
-        if error:
-            notify('Login Failed: ' + error)
-            return
-
     text, verify = init
-    with tempfile.NamedTemporaryFile('w', delete=False) as file:
+    error = settings.wiki.login()
+    if error:
+        notify('Login Failed: ' + error)
+        return
+
+    with tempfile.NamedTemporaryFile('w+') as file:
         file.write(text)
-        tmpname = file.name
-
-    editor = os.environ.get('EDITOR', 'vim')
-    subprocess.call([editor, tmpname])
-
-    with open(tmpname) as file:
+        file.flush()
+        subprocess.call([os.environ.get('EDITOR', 'vim'), file.name])
+        file.seek(0)
         newtext = file.read()
-    os.unlink(tmpname)
 
     if newtext == text:
         notify('Edit Canceled: No Change')

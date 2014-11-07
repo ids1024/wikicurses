@@ -49,6 +49,8 @@ class Wiki(object):
         return urllib.request.urlopen(url, data).read().decode('utf-8')
 
     def login(self):
+        if self.csrftoken: #Already logged in
+            return
         query = {'post':True, 'action':'login', 'format': 'json',
                 'lgname':self.username, 'lgpassword':self.password}
         result = json.loads(self._query(**query))['login']
