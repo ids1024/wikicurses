@@ -40,15 +40,13 @@ class Wiki(object):
             if value is False:
                 del params[name]
         data =  urllib.parse.urlencode(params)
-        headers = {'User-Agent':useragent}
         url = self.siteurl
         if post:
             data = data.encode()
         if not post:
             url += '?' + data
             data = None
-        request = urllib.request.Request(url, data, headers)
-        return urllib.request.urlopen(request).read().decode('utf-8')
+        return urllib.request.urlopen(url, data).read().decode('utf-8')
 
     def login(self):
         query = {'post':True, 'action':'login', 'format': 'json',
@@ -183,4 +181,5 @@ class _Featured(object):
             
 cookiejar = http.cookiejar.CookieJar()
 opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cookiejar))
+opener.addheaders = [('User-agent', useragent)]
 urllib.request.install_opener(opener)
