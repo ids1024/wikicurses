@@ -158,6 +158,44 @@ class Ex(urwid.Edit):
         mainwidget.set_focus('footer')
         self.set_caption(':')
 
+def edit(title):
+    init = settings.wiki.init_edit(title)
+    if not init:
+        notify('Unable to Edit: Page Not Found')
+        return
+
+    if not settings.wiki.csrftoken: #If not logged in
+        error = settings.wiki.login()
+        if error:
+            notify('Login Failed: ' + error)
+            return
+
+    text, verify = init
+    with tempfile.NamedTemporaryFile('w', delete=False) as file:
+        file.write(text)
+        tmpname = file.name
+
+    editor = os.environ.get('EDITOR', 'vim')
+    subprocess.call([editor, tmpname])
+
+    with open(tmpname) as file:
+        newtext = file.read()
+    os.unlink(tmpname)
+
+    if newtext == text:
+        notify('Edit Canceled: No Change')
+        return
+
+    summary = urwid.Edit('Summary: ')
+    minor = urwid.CheckBox('Minor Edit')
+    def submit(button):
+        loop.widget = mainwidget
+        settings.wiki.commit_edit(title, newtext, summary.edit_text,
+                minor.get_state(), verify)
+        setContent(settings.wiki.search(title))
+    listbox = urwid.ListBox([summary, minor, urwid.Button('Submit', submit)])
+    openOverlay(listbox, 'Edit', 5)
+
 cmds = ('quit', 'bmark', 'bmarks', 'wikis', 'feeds',
         'open', 'contents', 'edit', 'clearcache')
 def processCmd(cmd, *args):
@@ -179,44 +217,7 @@ def processCmd(cmd, *args):
     elif cmd == 'clearcache':
         settings.wiki.clear_cache()
     elif cmd == 'edit':
-        title = header.text
-        init = settings.wiki.init_edit(title)
-        if not init:
-            notify('Unable to Edit: Page Not Found')
-            return
-
-        if not settings.wiki.csrftoken: #If not logged in
-            error = settings.wiki.login()
-            if error:
-                notify('Login Failed: ' + error)
-                return
-
-        text, verify = init
-        with tempfile.NamedTemporaryFile('w', delete=False) as file:
-            file.write(text)
-            tmpname = file.name
-
-        editor = os.environ.get('EDITOR', 'vim')
-        subprocess.call([editor, tmpname])
-
-        with open(tmpname) as file:
-            newtext = file.read()
-        os.unlink(tmpname)
-
-        if newtext == text:
-            notify('Edit Canceled: No Change')
-            return
-
-        summary = urwid.Edit('Summary: ')
-        minor = urwid.CheckBox('Minor Edit')
-        def submit(button):
-            loop.widget = mainwidget
-            settings.wiki.commit_edit(title, newtext, summary.edit_text,
-                    minor.get_state(), verify)
-            setContent(settings.wiki.search(title))
-        listbox = urwid.ListBox([summary, minor, urwid.Button('Submit', submit)])
-        openOverlay(listbox, 'Edit', 5)
-
+        edit(header.text)
     elif cmd:
         notify(cmd + ': Unknown Command')
 
