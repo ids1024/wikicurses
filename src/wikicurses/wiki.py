@@ -34,9 +34,9 @@ class Wiki(object):
                 query['general']['base'],
                 query['general']['articlepath'])
 
-    def _query(self, post=False, **kargs):
-        params = kargs.copy()
-        for name, value in kargs.items():
+    def _query(self, post=False, **kwargs):
+        params = kwargs.copy()
+        for name, value in kwargs.items():
             if value is False:
                 del params[name]
         data =  urllib.parse.urlencode(params)
@@ -53,8 +53,7 @@ class Wiki(object):
                 'lgname':self.username, 'lgpassword':self.password}
         result = json.loads(self._query(**query))['login']
         if result['result'] == 'NeedToken':
-            query['lgtoken'] = result['token']
-            result = json.loads(self._query(**query))['login']
+            result = json.loads(self._query(lgtoken=result['token'], **query))['login']
         if result['result'] != 'Success': #Error
             return result['result']
         self.csrftoken = json.loads(self._query(post=True, action='query',
