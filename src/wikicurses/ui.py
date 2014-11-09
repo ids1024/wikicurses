@@ -28,6 +28,8 @@ class SearchBox(urwid.Edit):
             match = tabComplete(self.edit_text, matches)
             self.set_edit_text(match)
             self.edit_pos = len(match)
+        elif key == 'esc':
+            loop.widget = mainwidget
         else:
             return super().keypress(size, key)
 
@@ -53,6 +55,12 @@ class SelectorBox(urwid.ListBox):
                 selectButton, parameter))
             if selected:
                 self.set_focus(i)
+
+    def keypress(self, size, key):
+        if key == 'esc':
+            loop.widget = mainwidget
+        else:
+            return super().keypress(size, key)
 
 class Results(SelectorBox):
     title = "Results"
@@ -156,6 +164,20 @@ class Ex(urwid.Edit):
         mainwidget.set_focus('footer')
         self.set_caption(':')
 
+class Pager(urwid.ListBox):
+    def keypress(self, size, key):
+        #TODO: Implement gg and G
+        if not isinstance(mainwidget.footer, urwid.Edit):
+            mainwidget.footer = Ex()
+
+        cmdmap = settings.conf['keymap']
+        if key == ':':
+            mainwidget.footer.enterexmode()
+        elif key in cmdmap and cmdmap[key]:
+            processCmd(cmdmap[key])
+        else:
+            return super().keypress(size, key)
+
 def edit(title):
     init = settings.wiki.init_edit(title)
     if not init:
@@ -223,25 +245,6 @@ def openOverlay(widget, title=None, height=('relative', 50), width=('relative', 
     overlay = urwid.Overlay(box, mainwidget, 'center', width, 'middle', height)
     loop.widget = overlay
 
-def keymapper(input):
-    #TODO: Implement gg and G
-
-    cmdmap = settings.conf['keymap']
-    if input == ':':
-        mainwidget.footer.enterexmode()
-    elif input in cmdmap and cmdmap[input]:
-        processCmd(cmdmap[input])
-    elif input == 'esc':
-        loop.widget = mainwidget
-    else:
-       return False
-    return True
-
-def input_filter(keys, raw):
-    if not isinstance(mainwidget.footer, urwid.Edit):
-        mainwidget.footer = Ex()
-    return keys
-
 def setContent(page):
     if not page.exists:
         results = settings.wiki.search_sugestions(page.title)
@@ -277,7 +280,7 @@ for x in range(1, sum(formats) + 1):
 
 widgets = urwid.SimpleFocusListWalker([])
 widgetnames = []
-pager = urwid.ListBox(widgets)
+pager = Pager(widgets)
 
 header = urwid.Text('Wikicurses', align='center')
 mainwidget = urwid.Frame(pager, urwid.AttrMap(header, 'h1'), Ex())
@@ -288,5 +291,4 @@ urwid.command_map['ctrl b'] = 'cursor page up'
 urwid.command_map['ctrl f'] = 'cursor page down'
 
 
-loop = urwid.MainLoop(mainwidget, palette=palette, handle_mouse=False,
-                     unhandled_input=keymapper, input_filter=input_filter)
+loop = urwid.MainLoop(mainwidget, palette=palette, handle_mouse=False)
