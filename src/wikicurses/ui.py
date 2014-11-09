@@ -22,7 +22,7 @@ class SearchBox(urwid.Edit):
     def keypress(self, size, key):
         if key == 'enter':
             loop.widget = mainwidget
-            setContent(self.edit_text or 'Main page')
+            pager.open(self.edit_text or 'Main page')
         elif key == 'tab':
             matches = pager.wiki.search_sugestions(self.edit_text)
             match = tabComplete(self.edit_text, matches)
@@ -72,7 +72,7 @@ class Results(SelectorBox):
         return self.results
 
     def _select(self, title):
-        setContent(title)
+        pager.open(title)
 
 class Toc(SelectorBox):
     title = "Table of Contents"
@@ -89,7 +89,7 @@ class Bmarks(SelectorBox):
         return pager.wiki.bmarks
 
     def _select(self, name):
-        setContent(name)
+        pager.Open(name)
 
     def keypress(self, size, key):
         #Undo Delete
@@ -113,7 +113,7 @@ class Wikis(SelectorBox):
 
     def _select(self, name):
         pager.openWiki(name)
-        setContent('Main page')
+        pager.open('Main page')
 
 class Feeds(SelectorBox):
     title = "Feeds"
@@ -121,7 +121,7 @@ class Feeds(SelectorBox):
         return pager.wiki.list_featured_feeds()
 
     def _select(self, feed):
-        setContent(feed, True)
+        pager.open(feed, True)
 
 class Disambig(SelectorBox):
     title = "Disambiguation"
@@ -137,7 +137,7 @@ class Disambig(SelectorBox):
                 yield (text, False, name) if name else urwid.Text(text)
 
     def _select(self, name):
-        setContent(name)
+        pager.open(name)
 
 class Ex(urwid.Edit):
     def keypress(self, size, key):
@@ -193,7 +193,32 @@ class Pager(urwid.ListBox):
             url = name
             username = password = ''
         self.wiki = Wiki(url, username, password)
-        
+
+    def open(self, title, featured=False):
+        if featured:
+            page = self.wiki.get_featured_feed(title)
+        else:
+            page = self.wiki.search(title)
+        if not page.exists:
+            results = self.wiki.search_sugestions(page.title)
+            if results:
+                openOverlay(Results(results))
+                return
+        elif 'disambiguation' in page.properties:
+            openOverlay(Disambig(page.result['text']['*']))
+            return
+        self.body.clear()
+        self.widgetnames.clear()
+        header.set_text(page.title)
+        for title, content in page.content.items():
+            if title:
+                h2 = urwid.Text([('h2', title), '\n'], align="center")
+                self.body.append(h2)
+                self.widgetnames.append((title, pager.body.index(h2)))
+            else:
+                self.widgetnames.append((page.title, 0))
+            self.body.append(urwid.Text(list(content)))
+
 
 def edit(title):
     init = pager.wiki.init_edit(title)
@@ -221,7 +246,7 @@ def edit(title):
         loop.widget = mainwidget
         pager.wiki.commit_edit(title, newtext, summary.edit_text,
                 minor.get_state(), verify)
-        setContent(title)
+        pager.open(title)
     summary = urwid.Edit('Summary: ')
     minor = urwid.CheckBox('Minor Edit')
     submit_button = urwid.Button('Submit', submit)
@@ -242,7 +267,7 @@ def processCmd(cmd, *args):
                      'contents':Toc}[cmd]())
     elif cmd == 'open':
         if args:
-            setContent(' '.join(args))
+            pager.open(' '.join(args))
         else:
             openOverlay(SearchBox())
     elif cmd == 'clearcache':
@@ -261,32 +286,6 @@ def openOverlay(widget, title=None, height=('relative', 50), width=('relative', 
     box = urwid.LineBox(widget, title or widget.title)
     overlay = urwid.Overlay(box, mainwidget, 'center', width, 'middle', height)
     loop.widget = overlay
-
-def setContent(title, featured=False):
-    if featured:
-        page = pager.wiki.get_featured_feed(title)
-    else:
-        page = pager.wiki.search(title)
-    if not page.exists:
-        results = pager.wiki.search_sugestions(page.title)
-        if results:
-            openOverlay(Results(results))
-            return
-    elif 'disambiguation' in page.properties:
-        openOverlay(Disambig(page.result['text']['*']))
-        return
-
-    pager.body.clear()
-    pager.widgetnames.clear()
-    header.set_text(page.title)
-    for title, content in page.content.items():
-        if title:
-            h2 = urwid.Text([('h2', title), '\n'], align="center")
-            pager.body.append(h2)
-            pager.widgetnames.append((title, pager.body.index(h2)))
-        else:
-            pager.widgetnames.append((page.title, 0))
-        pager.body.append(urwid.Text(list(content)))
 
 
 palette = [('h1', 'bold', 'dark blue'),

@@ -35,9 +35,9 @@ if args.complete:
 
 try:
     if args.feed:
-        ui.setContent(args.feed, True)
+        ui.pager.open(args.feed, True)
     else:
-        ui.setContent(args.search)
+        ui.pager.open(args.search)
     ui.loop.run()
 except KeyboardInterrupt:
     pass
