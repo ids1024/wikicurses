@@ -62,17 +62,6 @@ class SelectorBox(urwid.ListBox):
         else:
             return super().keypress(size, key)
 
-class Results(SelectorBox):
-    def __init__(self, results):
-        self.results = results
-        super().__init__()
-
-    def _items(self):
-        return self.results
-
-    def _select(self, title):
-        pager.open(title)
-
 class Toc(SelectorBox):
     title = "Table of Contents"
     def _items(self):
@@ -122,21 +111,6 @@ class Feeds(SelectorBox):
     def _select(self, feed):
         pager.open(feed, True)
 
-class Disambig(SelectorBox):
-    def __init__(self, html):
-        self.sections = parseDisambig(html)
-        super().__init__()
-
-    def _items(self):
-        for title, items in self.sections.items():
-            if title:
-                yield urwid.Text(['\n', ('h', title)], align='center')
-            for name, text in items:
-                yield (text, False, name) if name else urwid.Text(text)
-
-    def _select(self, name):
-        pager.open(name)
-
 class Ex(urwid.Edit):
     def keypress(self, size, key):
         if key == 'esc' or (key == 'backspace' and not self.edit_text):
@@ -162,11 +136,7 @@ class Ex(urwid.Edit):
         mainwidget.set_focus('footer')
         self.set_caption(':')
 
-class Pager(urwid.ListBox):
-    def __init__(self):
-        super().__init__(urwid.SimpleFocusListWalker([]))
-        self.widgetnames = []
-
+class StandardKeyBinds:
     def keypress(self, size, key):
         #TODO: Implement gg and G
         if not isinstance(mainwidget.footer, urwid.Edit):
@@ -179,6 +149,37 @@ class Pager(urwid.ListBox):
             processCmd(cmdmap[key])
         else:
             return super().keypress(size, key)
+
+class Disambig(StandardKeyBinds, SelectorBox):
+    def __init__(self, html):
+        self.sections = parseDisambig(html)
+        super().__init__()
+
+    def _items(self):
+        for title, items in self.sections.items():
+            if title:
+                yield urwid.Text(['\n', ('h', title)], align='center')
+            for name, text in items:
+                yield (text, False, name) if name else urwid.Text(text)
+
+    def _select(self, name):
+        pager.open(name)
+
+class Results(StandardKeyBinds, SelectorBox):
+    def __init__(self, results):
+        self.results = results
+        super().__init__()
+
+    def _items(self):
+        return self.results
+
+    def _select(self, title):
+        pager.open(title)
+
+class Pager(StandardKeyBinds, urwid.ListBox):
+    def __init__(self):
+        super().__init__(urwid.SimpleFocusListWalker([]))
+        self.widgetnames = []
 
     def openWiki(self, name):
         if not name:
