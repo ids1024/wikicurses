@@ -77,7 +77,7 @@ class Bmarks(SelectorBox):
         return pager.wiki.bmarks
 
     def _select(self, name):
-        pager.Open(name)
+        pager.open(name)
 
     def keypress(self, size, key):
         #Undo Delete
