@@ -25,9 +25,9 @@ ui.pager.openWiki(args.wiki)
 
 if args.complete:
     if args.complete == 'search':
-        sugestions = settings.wiki.search_sugestions(args.search)
+        sugestions = ui.pager.wiki.search_sugestions(args.search)
     elif args.complete == 'feed':
-        sugestions = settings.wiki.list_featured_feeds()
+        sugestions = ui.pager.wiki.list_featured_feeds()
     elif args.complete == 'wiki':
         sugestions = settings.wikis().keys()
     print(*sugestions, sep='\n')
@@ -35,9 +35,9 @@ if args.complete:
 
 try:
     if args.feed:
-        ui.setContent(settings.wiki.get_featured_feed(args.feed))
+        ui.setContent(args.feed, True)
     else:
-        ui.setContent(ui.pager.wiki.search(args.search))
+        ui.setContent(args.search)
     ui.loop.run()
 except KeyboardInterrupt:
     pass

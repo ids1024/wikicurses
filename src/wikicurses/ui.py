@@ -22,7 +22,7 @@ class SearchBox(urwid.Edit):
     def keypress(self, size, key):
         if key == 'enter':
             loop.widget = mainwidget
-            setContent(pager.wiki.search(self.edit_text or 'Main page'))
+            setContent(self.edit_text or 'Main page')
         elif key == 'tab':
             matches = pager.wiki.search_sugestions(self.edit_text)
             match = tabComplete(self.edit_text, matches)
@@ -72,7 +72,7 @@ class Results(SelectorBox):
         return self.results
 
     def _select(self, title):
-        setContent(pager.wiki.search(title))
+        setContent(title)
 
 class Toc(SelectorBox):
     title = "Table of Contents"
@@ -89,7 +89,7 @@ class Bmarks(SelectorBox):
         return pager.wiki.bmarks
 
     def _select(self, name):
-        setContent(pager.wiki.search(name))
+        setContent(name)
 
     def keypress(self, size, key):
         #Undo Delete
@@ -113,7 +113,7 @@ class Wikis(SelectorBox):
 
     def _select(self, name):
         pager.openWiki(name)
-        setContent(pager.wiki.search('Main page'))
+        setContent('Main page')
 
 class Feeds(SelectorBox):
     title = "Feeds"
@@ -121,7 +121,7 @@ class Feeds(SelectorBox):
         return pager.wiki.list_featured_feeds()
 
     def _select(self, feed):
-        setContent(pager.wiki.get_featured_feed(feed))
+        setContent(feed, True)
 
 class Disambig(SelectorBox):
     title = "Disambiguation"
@@ -137,7 +137,7 @@ class Disambig(SelectorBox):
                 yield (text, False, name) if name else urwid.Text(text)
 
     def _select(self, name):
-        setContent(pager.wiki.search(name))
+        setContent(name)
 
 class Ex(urwid.Edit):
     def keypress(self, size, key):
@@ -221,7 +221,7 @@ def edit(title):
         loop.widget = mainwidget
         pager.wiki.commit_edit(title, newtext, summary.edit_text,
                 minor.get_state(), verify)
-        setContent(pager.wiki.search(title))
+        setContent(title)
     summary = urwid.Edit('Summary: ')
     minor = urwid.CheckBox('Minor Edit')
     submit_button = urwid.Button('Submit', submit)
@@ -242,7 +242,7 @@ def processCmd(cmd, *args):
                      'contents':Toc}[cmd]())
     elif cmd == 'open':
         if args:
-            setContent(pager.wiki.search(' '.join(args)))
+            setContent(' '.join(args))
         else:
             openOverlay(SearchBox())
     elif cmd == 'clearcache':
@@ -262,7 +262,11 @@ def openOverlay(widget, title=None, height=('relative', 50), width=('relative', 
     overlay = urwid.Overlay(box, mainwidget, 'center', width, 'middle', height)
     loop.widget = overlay
 
-def setContent(page):
+def setContent(title, featured=False):
+    if featured:
+        page = pager.wiki.get_featured_feed(title)
+    else:
+        page = pager.wiki.search(title)
     if not page.exists:
         results = pager.wiki.search_sugestions(page.title)
         if results:
