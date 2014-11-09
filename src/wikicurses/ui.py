@@ -39,13 +39,18 @@ class SelectorBox(urwid.ListBox):
                 self._select(parameter)
 
         super().__init__(urwid.SimpleFocusListWalker([]))
+        buttons = []
         for i, item in enumerate(self._items()):
-            if isinstance(item, tuple):
+            if isinstance(item, urwid.Widget):
+                self.body.append(item)
+                continue
+            elif isinstance(item, tuple):
                 name, selected, parameter = item
             else:
                 parameter = name = item
                 selected = False
-            urwid.RadioButton(self.body, name, selected, selectButton, parameter)
+            self.body.append(urwid.RadioButton(buttons, name, selected,
+                selectButton, parameter))
             if selected:
                 self.set_focus(i)
 
@@ -110,28 +115,21 @@ class Feeds(SelectorBox):
     def _select(self, feed):
         setContent(settings.wiki.get_featured_feed(feed))
 
-class Disambig(urwid.ListBox):
+class Disambig(SelectorBox):
     title = "Disambiguation"
     def __init__(self, html):
-        def selectButton(radio_button, new_state, title):
-            if new_state:
-                loop.widget = mainwidget
-                setContent(settings.wiki.search(title))
+        self.sections = parseDisambig(html)
+        super().__init__()
 
-        sections = parseDisambig(html)
-        super().__init__(urwid.SimpleFocusListWalker([]))
-        buttons = []
-
-        for title, items in sections.items():
+    def _items(self):
+        for title, items in self.sections.items():
             if title:
-                self.body.append(urwid.Text(['\n', ('h', title)], align='center'))
+                yield urwid.Text(['\n', ('h', title)], align='center')
             for name, text in items:
-                if name:
-                    button = urwid.RadioButton(buttons, text, False,
-                            selectButton, name)
-                    self.body.append(button)
-                else:
-                    self.body.append(urwid.Text(text))
+                yield (text, False, name) if name else urwid.Text(text)
+
+    def _select(self, name):
+        setContent(settings.wiki.search(name))
 
 class Ex(urwid.Edit):
     def keypress(self, size, key):
