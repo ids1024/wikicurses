@@ -180,15 +180,15 @@ def edit(title):
         notify('Edit Canceled: No Change')
         return
 
-    summary = urwid.Edit('Summary: ')
-    minor = urwid.CheckBox('Minor Edit')
     def submit(button):
         loop.widget = mainwidget
         settings.wiki.commit_edit(title, newtext, summary.edit_text,
                 minor.get_state(), verify)
         setContent(settings.wiki.search(title))
-    listbox = urwid.ListBox([summary, minor, urwid.Button('Submit', submit)])
-    openOverlay(listbox, 'Edit', 5)
+    summary = urwid.Edit('Summary: ')
+    minor = urwid.CheckBox('Minor Edit')
+    submit_button = urwid.Button('Submit', submit)
+    openOverlay(urwid.Pile([summary, minor, submit_button]), 'Edit', 'pack')
 
 cmds = ('quit', 'bmark', 'bmarks', 'wikis', 'feeds',
         'open', 'contents', 'edit', 'clearcache')
@@ -207,7 +207,7 @@ def processCmd(cmd, *args):
         if args:
             setContent(settings.wiki.search(' '.join(args)))
         else:
-            openOverlay(urwid.ListBox([SearchBox()]), "Search", height=3)
+            openOverlay(SearchBox())
     elif cmd == 'clearcache':
         settings.wiki.clear_cache()
     elif cmd == 'edit':
@@ -219,6 +219,8 @@ def notify(text):
     mainwidget.footer = urwid.Text(text)
 
 def openOverlay(widget, title=None, height=('relative', 50), width=('relative', 50)):
+    if widget._sizing == {'flow'}:
+        height = 'pack'
     box = urwid.LineBox(widget, title or widget.title)
     overlay = urwid.Overlay(box, mainwidget, 'center', width, 'middle', height)
     loop.widget = overlay
