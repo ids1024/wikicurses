@@ -63,7 +63,6 @@ class SelectorBox(urwid.ListBox):
             return super().keypress(size, key)
 
 class Results(SelectorBox):
-    title = "Results"
     def __init__(self, results):
         self.results = results
         super().__init__()
@@ -124,7 +123,6 @@ class Feeds(SelectorBox):
         pager.open(feed, True)
 
 class Disambig(SelectorBox):
-    title = "Disambiguation"
     def __init__(self, html):
         self.sections = parseDisambig(html)
         super().__init__()
@@ -195,6 +193,7 @@ class Pager(urwid.ListBox):
         self.wiki = Wiki(url, username, password)
 
     def open(self, title, featured=False):
+        mainwidget.body = self
         if featured:
             page = self.wiki.get_featured_feed(title)
         else:
@@ -202,10 +201,12 @@ class Pager(urwid.ListBox):
         if not page.exists:
             results = self.wiki.search_sugestions(page.title)
             if results:
-                openOverlay(Results(results))
+                header.set_text('Results for ' + title)
+                mainwidget.body = Results(results)
                 return
         elif 'disambiguation' in page.properties:
-            openOverlay(Disambig(page.result['text']['*']))
+            header.set_text(page.title + ': Disambiguation')
+            mainwidget.body = Disambig(page.result['text']['*'])
             return
         self.body.clear()
         self.widgetnames.clear()
