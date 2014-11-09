@@ -3,7 +3,6 @@ import json
 from urllib.parse import urlparse
 from configparser import ConfigParser
 from enum import Enum
-from wikicurses.wiki import Wiki
 
 default_configdir = os.environ['HOME'] + '/.config'
 configpath = os.environ.get('XDG_CONFIG_HOME', default_configdir) + '/wikicurses'
@@ -37,21 +36,6 @@ class Settings:
         bookmarks = set(self)
         bookmarks.discard(bmark)
         self._save(list(bookmarks))
-
-def openWiki(name):
-    global wiki
-    global bmarks
-    if not name:
-        name = conf['general']['default']
-    if name in conf:
-        url = conf[name]['url']
-        username = conf[name].get('username')
-        password = conf[name].get('password')
-    else:
-        url = name
-        username = password = ''
-    wiki = Wiki(url, username, password)
-    bmarks = Settings(url, 'bookmarks')
 
 def wikis():
     exclude = ('general', 'DEFAULT', 'keymap')

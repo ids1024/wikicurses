@@ -9,6 +9,7 @@ import  xml.etree.ElementTree as ET
 from collections import OrderedDict
 from functools import lru_cache
 from wikicurses.htmlparse import parseExtract, parseFeature
+from wikicurses.settings import Settings
 
 useragent = "Wikicurses/0.1 (https://github.com/ids1024/wikicurses)"\
             " Python-urllib/%d.%d" % sys.version_info[0:2]
@@ -21,6 +22,7 @@ class Wiki(object):
         self.siteurl = url
         self.username = username
         self.password = password
+        self.bmarks = Settings(url, 'bookmarks')
 
     @lru_cache(1)
     def get_siteinfo(self):

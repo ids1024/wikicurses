@@ -21,7 +21,7 @@ parser.add_argument('--complete',
 parser.add_argument('-f', '--feed', help = 'view featured feed')
 
 args = parser.parse_args()
-settings.openWiki(args.wiki)
+ui.pager.openWiki(args.wiki)
 
 if args.complete:
     if args.complete == 'search':
@@ -37,7 +37,7 @@ try:
     if args.feed:
         ui.setContent(settings.wiki.get_featured_feed(args.feed))
     else:
-        ui.setContent(settings.wiki.search(args.search))
+        ui.setContent(ui.pager.wiki.search(args.search))
     ui.loop.run()
 except KeyboardInterrupt:
     pass
