@@ -21,13 +21,13 @@ parser.add_argument('--complete',
 parser.add_argument('-f', '--feed', help = 'view featured feed')
 
 args = parser.parse_args()
-ui.pager.openWiki(args.wiki)
+ui.openWiki(args.wiki)
 
 if args.complete:
     if args.complete == 'search':
-        sugestions = ui.pager.wiki.search_sugestions(args.search)
+        sugestions = ui.wiki.search_sugestions(args.search)
     elif args.complete == 'feed':
-        sugestions = ui.pager.wiki.list_featured_feeds()
+        sugestions = ui.wiki.list_featured_feeds()
     elif args.complete == 'wiki':
         sugestions = settings.wikis().keys()
     print(*sugestions, sep='\n')
@@ -35,9 +35,9 @@ if args.complete:
 
 try:
     if args.feed:
-        ui.pager.open(args.feed, True)
+        ui.openPage(args.feed, True)
     else:
-        ui.pager.open(args.search)
+        ui.openPage(args.search)
     ui.loop.run()
 except KeyboardInterrupt:
     pass

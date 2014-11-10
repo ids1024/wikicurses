@@ -22,9 +22,9 @@ class SearchBox(urwid.Edit):
     def keypress(self, size, key):
         if key == 'enter':
             loop.widget = mainwidget
-            pager.open(self.edit_text or 'Main page')
+            openPage(self.edit_text or 'Main page')
         elif key == 'tab':
-            matches = pager.wiki.search_sugestions(self.edit_text)
+            matches = wiki.search_sugestions(self.edit_text)
             match = tabComplete(self.edit_text, matches)
             self.set_edit_text(match)
             self.edit_pos = len(match)
@@ -65,29 +65,29 @@ class SelectorBox(urwid.ListBox):
 class Toc(SelectorBox):
     title = "Table of Contents"
     def _items(self):
-        return ((name, pager.body.focus>=ind, ind) for name, ind in pager.widgetnames)
+        return ((name, mainwidget.body.body.focus>=ind, ind) for name, ind in mainwidget.body.widgetnames)
     
     def _select(self, index):
-       pager.widgets.set_focus(index)
+       mainwidget.body.body.set_focus(index)
 
 class Bmarks(SelectorBox):
     title = "Bookmarks"
     def _items(self):
         self.deleted = []
-        return pager.wiki.bmarks
+        return wiki.bmarks
 
     def _select(self, name):
-        pager.open(name)
+        openPage(name)
 
     def keypress(self, size, key):
         #Undo Delete
         if key == 'u' and self.deleted:
             index, item = self.deleted.pop()
-            pager.wiki.bmarks.add(item.label)
+            wiki.bmarks.add(item.label)
             self.body.insert(index, item)
             self.set_focus(index)
         elif key in ('meta [', 'x') and self.focus:
-            pager.wiki.bmarks.discard(self.focus.label)
+            wiki.bmarks.discard(self.focus.label)
             self.deleted.append((self.focus_position, self.focus))
             self.body.remove(self.focus)
         else:
@@ -97,19 +97,19 @@ class Wikis(SelectorBox):
     title = "Wikis"
     def _items(self):
         for name, url in settings.wikis().items():
-            yield name, pager.wiki.siteurl == url, name
+            yield name, wiki.siteurl == url, name
 
     def _select(self, name):
-        pager.openWiki(name)
-        pager.open('Main page')
+        openWiki(name)
+        openPage('Main page')
 
 class Feeds(SelectorBox):
     title = "Feeds"
     def _items(self):
-        return pager.wiki.list_featured_feeds()
+        return wiki.list_featured_feeds()
 
     def _select(self, feed):
-        pager.open(feed, True)
+        openPage(feed, True)
 
 class Ex(urwid.Edit):
     def keypress(self, size, key):
@@ -137,6 +137,7 @@ class Ex(urwid.Edit):
         self.set_caption(':')
 
 class StandardKeyBinds:
+    widgetnames = []
     def keypress(self, size, key):
         #TODO: Implement gg and G
         if not isinstance(mainwidget.footer, urwid.Edit):
@@ -151,6 +152,7 @@ class StandardKeyBinds:
             return super().keypress(size, key)
 
 class Disambig(StandardKeyBinds, SelectorBox):
+    widgetnames = []
     def __init__(self, html):
         self.sections = parseDisambig(html)
         super().__init__()
@@ -163,7 +165,7 @@ class Disambig(StandardKeyBinds, SelectorBox):
                 yield (text, False, name) if name else urwid.Text(text)
 
     def _select(self, name):
-        pager.open(name)
+        openPage(name)
 
 class Results(StandardKeyBinds, SelectorBox):
     def __init__(self, results):
@@ -174,61 +176,59 @@ class Results(StandardKeyBinds, SelectorBox):
         return self.results
 
     def _select(self, title):
-        pager.open(title)
+        openPage(title)
 
 class Pager(StandardKeyBinds, urwid.ListBox):
-    def __init__(self):
+    def __init__(self, page):
         super().__init__(urwid.SimpleFocusListWalker([]))
         self.widgetnames = []
-
-    def openWiki(self, name):
-        if not name:
-            name = settings.conf['general']['default']
-        if name in settings.conf:
-            url = settings.conf[name]['url']
-            username = settings.conf[name].get('username')
-            password = settings.conf[name].get('password')
-        else:
-            url = name
-            username = password = ''
-        self.wiki = Wiki(url, username, password)
-
-    def open(self, title, featured=False):
-        mainwidget.body = self
-        if featured:
-            page = self.wiki.get_featured_feed(title)
-        else:
-            page = self.wiki.search(title)
-        if not page.exists:
-            results = self.wiki.search_sugestions(page.title)
-            if results:
-                header.set_text('Results for ' + title)
-                mainwidget.body = Results(results)
-                return
-        elif 'disambiguation' in page.properties:
-            header.set_text(page.title + ': Disambiguation')
-            mainwidget.body = Disambig(page.result['text']['*'])
-            return
-        self.body.clear()
-        self.widgetnames.clear()
-        header.set_text(page.title)
         for title, content in page.content.items():
             if title:
                 h2 = urwid.Text([('h2', title), '\n'], align="center")
                 self.body.append(h2)
-                self.widgetnames.append((title, pager.body.index(h2)))
+                self.widgetnames.append((title, self.body.index(h2)))
             else:
                 self.widgetnames.append((page.title, 0))
             self.body.append(urwid.Text(list(content)))
 
+def openPage(title, featured=False):
+    if featured:
+        page = wiki.get_featured_feed(title)
+    else:
+        page = wiki.search(title)
+    if not page.exists:
+        results = wiki.search_sugestions(page.title)
+        if results:
+            header.set_text('Results for ' + title)
+            mainwidget.body = Results(results)
+    elif 'disambiguation' in page.properties:
+        header.set_text(page.title + ': Disambiguation')
+        mainwidget.body = Disambig(page.result['text']['*'])
+
+    else:
+        header.set_text(page.title)
+        mainwidget.body = Pager(page)
+
+def openWiki(name):
+    global wiki
+    if not name:
+        name = settings.conf['general']['default']
+    if name in settings.conf:
+        url = settings.conf[name]['url']
+        username = settings.conf[name].get('username')
+        password = settings.conf[name].get('password')
+    else:
+        url = name
+        username = password = ''
+    wiki = Wiki(url, username, password)
 
 def edit(title):
-    init = pager.wiki.init_edit(title)
+    init = wiki.init_edit(title)
     if not init:
         notify('Unable to Edit: Page Not Found')
         return
     text, verify = init
-    error = pager.wiki.login()
+    error = wiki.login()
     if error:
         notify('Login Failed: ' + error)
         return
@@ -246,9 +246,9 @@ def edit(title):
 
     def submit(button):
         loop.widget = mainwidget
-        pager.wiki.commit_edit(title, newtext, summary.edit_text,
+        wiki.commit_edit(title, newtext, summary.edit_text,
                 minor.get_state(), verify)
-        pager.open(title)
+        openPage(title)
     summary = urwid.Edit('Summary: ')
     minor = urwid.CheckBox('Minor Edit')
     submit_button = urwid.Button('Submit', submit)
@@ -260,7 +260,7 @@ def processCmd(cmd, *args):
     if cmd in ('q', 'quit'):
         raise urwid.ExitMainLoop
     elif cmd == 'bmark':
-        pager.wiki.bmarks.add(header.text)
+        wiki.bmarks.add(header.text)
         notify("Bookmark Added")
     elif cmd in ('bmarks' ,'wikis', 'feeds', 'contents'):
         openOverlay({'bmarks':Bmarks,
@@ -269,11 +269,11 @@ def processCmd(cmd, *args):
                      'contents':Toc}[cmd]())
     elif cmd == 'open':
         if args:
-            pager.open(' '.join(args))
+            openPage(' '.join(args))
         else:
             openOverlay(SearchBox())
     elif cmd == 'clearcache':
-        pager.wiki.clear_cache()
+        wiki.clear_cache()
     elif cmd == 'edit':
         edit(header.text)
     elif cmd:
@@ -305,7 +305,6 @@ urwid.command_map['j'] = 'cursor down'
 urwid.command_map['ctrl b'] = 'cursor page up'
 urwid.command_map['ctrl f'] = 'cursor page down'
 
-pager = Pager()
 header = urwid.Text('Wikicurses', align='center')
-mainwidget = urwid.Frame(pager, urwid.AttrMap(header, 'h1'), Ex())
+mainwidget = urwid.Frame(None, urwid.AttrMap(header, 'h1'), Ex())
 loop = urwid.MainLoop(mainwidget, palette=palette, handle_mouse=False)
