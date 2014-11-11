@@ -65,7 +65,8 @@ class SelectorBox(urwid.ListBox):
 class Toc(SelectorBox):
     title = "Table of Contents"
     def _items(self):
-        return ((name, mainwidget.body.body.focus>=ind, ind) for name, ind in mainwidget.body.widgetnames)
+        for name, ind in mainwidget.body.widgetnames:
+            yield name, mainwidget.body.body.focus>=ind, ind
     
     def _select(self, index):
        mainwidget.body.body.set_focus(index)
