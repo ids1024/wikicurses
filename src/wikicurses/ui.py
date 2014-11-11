@@ -21,7 +21,7 @@ class SearchBox(urwid.Edit):
     title = "Search"
     def keypress(self, size, key):
         if key == 'enter':
-            loop.widget = mainwidget
+            closeOverlay()
             openPage(self.edit_text or 'Main page')
         elif key == 'tab':
             matches = wiki.search_sugestions(self.edit_text)
@@ -29,7 +29,7 @@ class SearchBox(urwid.Edit):
             self.set_edit_text(match)
             self.edit_pos = len(match)
         elif key == 'esc':
-            loop.widget = mainwidget
+            closeOverlay()
         else:
             return super().keypress(size, key)
 
@@ -37,7 +37,7 @@ class SelectorBox(urwid.ListBox):
     def __init__(self):
         def selectButton(radio_button, new_state, parameter):
             if new_state:
-                loop.widget = mainwidget
+                closeOverlay()
                 self._select(parameter)
 
         super().__init__(urwid.SimpleFocusListWalker([]))
@@ -58,7 +58,7 @@ class SelectorBox(urwid.ListBox):
 
     def keypress(self, size, key):
         if key == 'esc':
-            loop.widget = mainwidget
+            closeOverlay()
         else:
             return super().keypress(size, key)
 
@@ -251,7 +251,7 @@ def edit(title):
         return
 
     def submit(button):
-        loop.widget = mainwidget
+        closeOverlay()
         wiki.commit_edit(title, newtext, summary.edit_text,
                 minor.get_state(), verify)
         openPage(title)
@@ -294,6 +294,9 @@ def openOverlay(widget, title=None, height=('relative', 50), width=('relative', 
     box = urwid.LineBox(widget, title or widget.title)
     overlay = urwid.Overlay(box, mainwidget, 'center', width, 'middle', height)
     loop.widget = overlay
+
+def closeOverlay():
+    loop.widget = mainwidget
 
 
 palette = [('h1', 'bold', 'dark blue'),
