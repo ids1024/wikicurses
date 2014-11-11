@@ -138,13 +138,18 @@ class Ex(urwid.Edit):
 
 class StandardKeyBinds:
     def keypress(self, size, key):
-        #TODO: Implement gg and G
         if not isinstance(mainwidget.footer, urwid.Edit):
             mainwidget.footer = Ex()
 
         cmdmap = settings.conf['keymap']
         if key == ':':
             mainwidget.footer.enterexmode()
+        elif key == 'g':
+            self.set_focus(0)
+            self.render(size)
+        elif key == 'G':
+            self.set_focus(len(self.body)-1)
+            self.render(size)
         elif key in cmdmap and cmdmap[key]:
             processCmd(cmdmap[key])
         else:
