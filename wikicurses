@@ -33,11 +33,9 @@ if args.complete:
     print(*sugestions, sep='\n')
     sys.exit()
 
+callback = lambda x,y: ui.openPage(args.feed or args.search, bool(args.feed))
+ui.loop.set_alarm_in(0, callback) #Open page once loop is started
 try:
-    if args.feed:
-        ui.openPage(args.feed, True)
-    else:
-        ui.openPage(args.search)
     ui.loop.run()
 except KeyboardInterrupt:
     pass
