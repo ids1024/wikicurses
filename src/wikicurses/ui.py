@@ -137,7 +137,6 @@ class Ex(urwid.Edit):
         self.set_caption(':')
 
 class StandardKeyBinds:
-    widgetnames = []
     def keypress(self, size, key):
         #TODO: Implement gg and G
         if not isinstance(mainwidget.footer, urwid.Edit):
@@ -168,6 +167,7 @@ class Disambig(StandardKeyBinds, SelectorBox):
         openPage(name)
 
 class Results(StandardKeyBinds, SelectorBox):
+    widgetnames = []
     def __init__(self, results):
         self.results = results
         super().__init__()
