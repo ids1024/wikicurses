@@ -144,10 +144,10 @@ class StandardKeyBinds:
         cmdmap = settings.conf['keymap']
         if key == ':':
             mainwidget.footer.enterexmode()
-        elif key == 'g':
+        elif key in ('g', 'home'):
             self.set_focus(0)
             self.render(size)
-        elif key == 'G':
+        elif key in ('G', 'end'):
             self.set_focus(len(self.body)-1)
             self.render(size)
         elif key in cmdmap and cmdmap[key]:
