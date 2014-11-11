@@ -306,6 +306,6 @@ urwid.command_map['ctrl b'] = 'cursor page up'
 urwid.command_map['ctrl f'] = 'cursor page down'
 
 header = urwid.Text('Wikicurses', align='center')
-loading = urwid.ListBox([urwid.Text('Loading...')])
+loading = urwid.Filler(urwid.Text('Loading...'), 'top')
 mainwidget = urwid.Frame(loading, urwid.AttrMap(header, 'h1'), Ex())
 loop = urwid.MainLoop(mainwidget, palette=palette, handle_mouse=False)
