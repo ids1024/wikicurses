@@ -7,4 +7,6 @@ This was originally a fork of [cliwiki](https://github.com/AnirudhBhat/cliWiki.p
 
 Dependencies
 ------------
-- [Beautiful Soup 4](http://www.crummy.com/software/BeautifulSoup/)
+- [Python 3](http://www.python.org)
+- [Urwid](http://www.urwid.org)
+- [Beautiful Soup 4](http://www.crummy.com/software/BeautifulSoup)
