@@ -83,6 +83,7 @@ class _ExtractHTMLParser(HTMLParser):
 
     def handle_endtag(self, tag):
         if tag == 'h2':
+            self.cursection = self.cursection.strip()
             self.sections[self.cursection] = UrwidMarkupHandler()
         if re.fullmatch("h[2-6]", tag):
             self.inh = 0
