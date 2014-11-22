@@ -58,22 +58,23 @@ class _ExtractHTMLParser(HTMLParser):
 
     def __init__(self):
         self.sections = OrderedDict({'':UrwidMarkupHandler()})
-        self.sec = self.sections['']
         super().__init__(self)
 
     def add_text(self, text, tformat=None):
-        self.sec.add(text, tformat or self.format)
+        sec = self.sections[self.cursection]
+        sec.add(text, tformat or self.format)
 
     def handle_starttag(self, tag, attrs):
         attrs = dict(attrs)
         classes = attrs.get('class', '').split(' ')
         if tag == 'h2':
             #Remove extra trailing newlines from last section
-            if self.sec:
-                self.sec[-1][1] = self.sec[-1][1].rstrip() + '\n'
+            sec = self.sections[self.cursection]
+            if sec:
+                sec[-1][1] = sec[-1][1].rstrip() + '\n'
+            self.cursection = ''
         if re.fullmatch("h[2-6]", tag):
             self.inh = int(tag[1:])
-            self.cursection = ''
         elif tag == 'table' \
                 and ('wiki-sidebar' in classes or 'infobox' in classes):
             self.insidebar = True
@@ -87,15 +88,10 @@ class _ExtractHTMLParser(HTMLParser):
             self.format|=formats[tag]
 
     def handle_endtag(self, tag):
-        if re.fullmatch("h[2-6]", tag):
+        if tag == 'h2':
             self.cursection = self.cursection.strip()
-            self.cursection = self.cursection.partition('[edit]')[0]
-            self.cursection = self.cursection.partition('[Edit]')[0]
-            if tag == 'h2':
-                self.sections[self.cursection] = UrwidMarkupHandler()
-                self.sec = self.sections[self.cursection]
-            else:
-                self.add_text(self.cursection)
+            self.sections[self.cursection] = UrwidMarkupHandler()
+        if re.fullmatch("h[2-6]", tag):
             self.inh = 0
             self.add_text('\n')
         elif tag == 'table':
@@ -106,13 +102,15 @@ class _ExtractHTMLParser(HTMLParser):
             self.format&=~formats[tag]
 
     def handle_data(self, data):
+        if self.inh and data in ('[', ']', 'edit', 'Edit'):
+            pass
         if self.insidebar:
             pass
-        elif self.inh:
+        elif self.inh == 2:
             self.cursection += data
         else:
             tformat = 'h' if (self.inh > 2) else self.format
-            if not self.sec:
+            if not self.sections[self.cursection]:
                 data = data.lstrip()
             self.add_text(data, tformat)
 
