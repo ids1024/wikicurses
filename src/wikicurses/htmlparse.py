@@ -2,6 +2,7 @@ import re
 
 from collections import OrderedDict
 from html.parser import HTMLParser
+from bs4 import BeautifulSoup
 
 from wikicurses import formats
 
@@ -37,18 +38,24 @@ def parseExtract(html):
     return parser.sections
 
 def parseFeature(html):
-    parser = _FeatureHTMLParser()
-    parser.feed(html)
-    return parser.text
+    return BeautifulSoup(html).text
 
 def parseDisambig(html):
-    parser = _DisambigHTMLParser()
-    parser.feed(html)
-    if not parser.sections['']:
-        parser.sections.pop('', '')
-    parser.sections.pop('Contents', '')
-    parser.sections.pop('See also', '')
-    return parser.sections
+    sections = OrderedDict()
+    soup = BeautifulSoup(html)
+    for i in soup.find_all('h2'):
+        if i.text in ('Contents', 'See also'):
+            continue
+        items = []
+        for j in i.next_siblings:
+            if j.name == 'h2':
+                break
+            if isinstance(j, str):
+                continue
+            for item in j.find_all('li'):
+                items.append((item.a.text, item.text))
+        sections[i.text] = items
+    return sections
 
 class _ExtractHTMLParser(HTMLParser):
     cursection = ''
@@ -113,57 +120,3 @@ class _ExtractHTMLParser(HTMLParser):
             if not self.sections[self.cursection]:
                 data = data.lstrip()
             self.add_text(data, tformat)
-
-
-class _FeatureHTMLParser(HTMLParser):
-    text = ''
-    def handle_data(self, data):
-        self.text += data
-
-class _DisambigHTMLParser(HTMLParser):
-    cursection = ''
-    inh2 = False
-    ina = False
-    inli = False
-    format = 0
-    li = ''
-    a = ''
-
-    def __init__(self):
-        self.sections = OrderedDict({'':[]})
-        super().__init__(self)
-
-    def add_link(self):
-        if self.li:
-            self.sections[self.cursection].append((self.a, self.li.strip()))
-            self.li = ''
-            self.a = ''
-
-    def handle_starttag(self, tag, attrs):
-        if tag == 'h2':
-            self.cursection = ''
-            self.inh2 = True
-        elif tag == 'li':
-            if self.inli:
-                self.add_link()
-            self.inli = True
-        elif tag == 'a' and self.inli:
-            self.ina = True
-
-    def handle_endtag(self, tag):
-        if tag == 'h2':
-            self.inh2 = False
-            self.sections[self.cursection] = []
-        elif tag == 'li':
-            self.add_link()
-            self.inli = False
-        elif tag == 'a' and self.ina:
-            self.ina = False
-
-    def handle_data(self, data):
-        if self.inh2 and data not in ('[', ']', 'edit', 'Edit'):
-            self.cursection += data
-        if self.ina:
-            self.a += data
-        if self.inli:
-            self.li += data
