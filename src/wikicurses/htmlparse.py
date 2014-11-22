@@ -104,7 +104,7 @@ class _ExtractHTMLParser(HTMLParser):
     def handle_data(self, data):
         if self.inh and data in ('[', ']', 'edit', 'Edit'):
             pass
-        if self.insidebar:
+        elif self.insidebar:
             pass
         elif self.inh == 2:
             self.cursection += data
