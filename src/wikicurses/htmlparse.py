@@ -5,7 +5,7 @@ from html.parser import HTMLParser
 
 from wikicurses import formats
 
-class UrwidMarkupHandler(list):
+class UrwidMarkupHandler:
     def __init__(self):
         self._list = []
 
