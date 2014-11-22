@@ -88,7 +88,9 @@ class _ExtractHTMLParser(HTMLParser):
 
     def handle_endtag(self, tag):
         if re.fullmatch("h[2-6]", tag):
-            self.cursection = re.sub('(\[*[eE]dit\]*)$', '', self.cursection.strip())
+            self.cursection = self.cursection.strip()
+            self.cursection = self.cursection.partition('[edit]')[0]
+            self.cursection = self.cursection.partition('[Edit]')[0]
             if tag == 'h2':
                 self.sections[self.cursection] = UrwidMarkupHandler()
                 self.sec = self.sections[self.cursection]
