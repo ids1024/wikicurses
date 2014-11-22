@@ -210,7 +210,6 @@ def openPage(title, featured=False):
     elif 'disambiguation' in page.properties:
         header.set_text(page.title + ': Disambiguation')
         mainwidget.body = Disambig(page.result['text']['*'])
-
     else:
         header.set_text(page.title)
         mainwidget.body = Pager(page)
@@ -245,7 +244,6 @@ def edit(title):
         subprocess.call([os.environ.get('EDITOR', 'vim'), file.name])
         file.seek(0)
         newtext = file.read()
-
     if newtext == text:
         notify('Edit Canceled: No Change')
         return
