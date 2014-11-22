@@ -53,6 +53,7 @@ def parseDisambig(html):
 class _ExtractHTMLParser(HTMLParser):
     cursection = ''
     inh = 0
+    insidebar = False
     format = 0
 
     def __init__(self):
@@ -64,6 +65,8 @@ class _ExtractHTMLParser(HTMLParser):
         sec.add(text, tformat or self.format)
 
     def handle_starttag(self, tag, attrs):
+        attrs = dict(attrs)
+        classes = attrs.get('class', '').split(' ')
         if tag == 'h2':
             #Remove extra trailing newlines from last section
             sec = self.sections[self.cursection]
@@ -72,6 +75,9 @@ class _ExtractHTMLParser(HTMLParser):
             self.cursection = ''
         if re.fullmatch("h[2-6]", tag):
             self.inh = int(tag[1:])
+        elif tag == 'table' \
+                and ('wiki-sidebar' in classes or 'infobox' in classes):
+            self.insidebar = True
         elif tag == 'p' and self.format&formats.blockquote:
             self.add_text('> ')
         elif tag == 'br':
@@ -88,6 +94,8 @@ class _ExtractHTMLParser(HTMLParser):
         if re.fullmatch("h[2-6]", tag):
             self.inh = 0
             self.add_text('\n')
+        elif tag == 'table':
+            self.insidebar = False
         elif tag == 'p' and not self.format&formats.blockquote:
             self.add_text('\n')
         elif tag in (i.name for i in formats):
@@ -95,6 +103,8 @@ class _ExtractHTMLParser(HTMLParser):
 
     def handle_data(self, data):
         if self.inh and data in ('[', ']', 'edit', 'Edit'):
+            pass
+        if self.insidebar:
             pass
         elif self.inh == 2:
             self.cursection += data
