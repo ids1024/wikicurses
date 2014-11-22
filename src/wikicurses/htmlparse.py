@@ -1,7 +1,6 @@
 import re
 
 from collections import OrderedDict
-from html.parser import HTMLParser
 from bs4 import BeautifulSoup
 
 from wikicurses import formats
@@ -25,17 +24,44 @@ class UrwidMarkupHandler:
     def __getitem__(self, key):
         return self._list[key]
 
+def _processExtractSection(section):
+    items = UrwidMarkupHandler()
+    for i in section:
+        if isinstance(i, str):
+            strings = (i,)
+        else: 
+            if i.name == 'h2' or i.find('h2'):
+                break
+            strings = i.strings
+        for item in strings:
+            if [i for i in item.parents if i.name == 'table'\
+                    and {'wiki-sidebar', 'infobox'}.intersection(i.get('class', ()))]:
+                continue
+            partags = {i.name for i in item.parents}
+            format = sum(formats[i] for i in set(i.name for i in formats).intersection(partags))
+            if [i for i in partags if re.fullmatch('h[3-6]', i)]:
+                format = 'h'
+            items.add(item, format)
+    return items
+
 def parseExtract(html):
-    parser = _ExtractHTMLParser()
     html = re.sub('\n+', '\n', html).replace('\t', ' ')
-    parser.feed(html)
-    for i in parser.sections:
-        if not parser.sections[i]:
-            del parser.sections[i]
-    parser.sections.pop("External links", '')
-    parser.sections.pop("References", '')
-    parser.sections.pop("Contents", '')
-    return parser.sections
+    sections = OrderedDict()
+    soup = BeautifulSoup(html)
+    for i in soup.find_all(['p', 'br', 'h3', 'h4', 'h5', 'h6']):
+        i.insert_after(soup.new_string('\n'))
+    for i in soup.find_all('li'):
+        i.insert_before(soup.new_string('- '))
+    sections[''] = _processExtractSection(soup.body)
+    for i in soup.find_all('h2'):
+        title = re.sub('\[edit\]$', '', i.text)
+        title = re.sub('Edit$', '', title)
+        if title not in ('Contents', 'External links', 'References'):
+            sections[title] = _processExtractSection(i.next_siblings)
+    for i in sections:
+        if not sections[i]:
+            del sections[i]
+    return sections
 
 def parseFeature(html):
     return BeautifulSoup(html).text
@@ -57,70 +83,7 @@ def parseDisambig(html):
     sections[''] = _processDisambigSection(soup.body)
     for i in soup.find_all('h2'):
         title = re.sub('\[edit\]$', '', i.text)
+        title = re.sub('Edit$', '', title)
         if title not in ('Contents', 'See also'):
             sections[title] = _processDisambigSection(i.next_siblings)
     return sections
-
-class _ExtractHTMLParser(HTMLParser):
-    cursection = ''
-    inh = 0
-    insidebar = False
-    format = 0
-
-    def __init__(self):
-        self.sections = OrderedDict({'':UrwidMarkupHandler()})
-        super().__init__(self)
-
-    def add_text(self, text, tformat=None):
-        sec = self.sections[self.cursection]
-        sec.add(text, tformat or self.format)
-
-    def handle_starttag(self, tag, attrs):
-        attrs = dict(attrs)
-        classes = attrs.get('class', '').split(' ')
-        if tag == 'h2':
-            #Remove extra trailing newlines from last section
-            sec = self.sections[self.cursection]
-            if sec:
-                sec[-1][1] = sec[-1][1].rstrip() + '\n'
-            self.cursection = ''
-        if re.fullmatch("h[2-6]", tag):
-            self.inh = int(tag[1:])
-        elif tag == 'table' \
-                and ('wiki-sidebar' in classes or 'infobox' in classes):
-            self.insidebar = True
-        elif tag == 'p' and self.format&formats.blockquote:
-            self.add_text('> ')
-        elif tag == 'br':
-            self.add_text('\n')
-        elif tag == 'li':
-            self.add_text("- ")
-        elif tag in (i.name for i in formats):
-            self.format|=formats[tag]
-
-    def handle_endtag(self, tag):
-        if tag == 'h2':
-            self.cursection = self.cursection.strip()
-            self.sections[self.cursection] = UrwidMarkupHandler()
-        if re.fullmatch("h[2-6]", tag):
-            self.inh = 0
-            self.add_text('\n')
-        elif tag == 'table':
-            self.insidebar = False
-        elif tag == 'p' and not self.format&formats.blockquote:
-            self.add_text('\n')
-        elif tag in (i.name for i in formats):
-            self.format&=~formats[tag]
-
-    def handle_data(self, data):
-        if self.inh and data in ('[', ']', 'edit', 'Edit'):
-            pass
-        elif self.insidebar:
-            pass
-        elif self.inh == 2:
-            self.cursection += data
-        else:
-            tformat = 'h' if (self.inh > 2) else self.format
-            if not self.sections[self.cursection]:
-                data = data.lstrip()
-            self.add_text(data, tformat)
