@@ -57,7 +57,7 @@ def parseExtract(html):
         title = re.sub('\[edit\]$', '', i.text)
         title = re.sub('Edit$', '', title)
         if title not in ('Contents', 'External links', 'References'):
-            sections[title] = _processExtractSection(i.next_siblings)
+            sections[title.strip()] = _processExtractSection(i.next_siblings)
     for i in sections:
         if not sections[i]:
             del sections[i]
