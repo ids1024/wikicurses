@@ -44,7 +44,8 @@ def parseDisambig(html):
     sections = OrderedDict()
     soup = BeautifulSoup(html)
     for i in soup.find_all('h2'):
-        if i.text in ('Contents', 'See also'):
+        title = re.sub('\[edit\]$', '', i.text)
+        if title in ('Contents', 'See also'):
             continue
         items = []
         for j in i.next_siblings:
@@ -53,8 +54,8 @@ def parseDisambig(html):
             if isinstance(j, str):
                 continue
             for item in j.find_all('li'):
-                items.append((item.a.text, item.text))
-        sections[i.text] = items
+                items.append((item.a.text, item.text.split('\n')[0]))
+        sections[title] = items
     return sections
 
 class _ExtractHTMLParser(HTMLParser):
