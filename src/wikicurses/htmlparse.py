@@ -40,22 +40,25 @@ def parseExtract(html):
 def parseFeature(html):
     return BeautifulSoup(html).text
 
+def _processDisambigSection(section):
+    items = []
+    for i in section:
+        if isinstance(i, str):
+            continue
+        if i.name == 'h2' or i.find('h2'):
+            break
+        for item in i.find_all('li'):
+            items.append((item.a.text if item.a else '', item.text.split('\n')[0]))
+    return items
+
 def parseDisambig(html):
     sections = OrderedDict()
     soup = BeautifulSoup(html)
+    sections[''] = _processDisambigSection(soup.body)
     for i in soup.find_all('h2'):
         title = re.sub('\[edit\]$', '', i.text)
-        if title in ('Contents', 'See also'):
-            continue
-        items = []
-        for j in i.next_siblings:
-            if j.name == 'h2':
-                break
-            if isinstance(j, str):
-                continue
-            for item in j.find_all('li'):
-                items.append((item.a.text if item.a else '', item.text.split('\n')[0]))
-        sections[title] = items
+        if title not in ('Contents', 'See also'):
+            sections[title] = _processDisambigSection(i.next_siblings)
     return sections
 
 class _ExtractHTMLParser(HTMLParser):
