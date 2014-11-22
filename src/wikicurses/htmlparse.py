@@ -42,6 +42,7 @@ def _processExtractSection(section):
             if [i for i in partags if re.fullmatch('h[3-6]', i)]:
                 format = 'h'
             items.add(item, format)
+        items[-1][1] = items[-1][1].rstrip() + '\n'
     return items
 
 def parseExtract(html):
