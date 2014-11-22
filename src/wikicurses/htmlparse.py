@@ -54,7 +54,7 @@ def parseDisambig(html):
             if isinstance(j, str):
                 continue
             for item in j.find_all('li'):
-                items.append((item.a.text, item.text.split('\n')[0]))
+                items.append((item.a.text if item.a else '', item.text.split('\n')[0]))
         sections[title] = items
     return sections
 
