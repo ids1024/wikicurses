@@ -59,6 +59,7 @@ def parseExtract(html):
             i.insert_after(soup.new_string('\n'))
     for i in soup.find_all('li'):
         i.insert_before(soup.new_string('- '))
+        i.insert_after(soup.new_string('\n'))
     for i in soup.find_all(True, class_=skipclass):
         i.decompose()
     sections[''] = _processExtractSection(soup.body or soup)
