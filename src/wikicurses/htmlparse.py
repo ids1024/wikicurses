@@ -44,7 +44,7 @@ def _processExtractSection(section):
                 item = re.sub('\[edit\]$', '', item)
                 item = re.sub('Edit$', '', item)
             items.add(item, format)
-    if items and items[-1]:
+    if items:
         items[-1][1] = items[-1][1].rstrip() + '\n'
     return items
 
