@@ -56,7 +56,7 @@ def parseExtract(html):
         i.insert_after(soup.new_string('\n'))
     for i in soup.find_all('li'):
         i.insert_before(soup.new_string('- '))
-    sections[''] = _processExtractSection(soup)
+    sections[''] = _processExtractSection(soup.body or soup)
     for i in soup.find_all('h2'):
         title = re.sub('\[edit\]$', '', i.text)
         title = re.sub('Edit$', '', title)
