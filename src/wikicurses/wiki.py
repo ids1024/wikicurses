@@ -1,7 +1,6 @@
 import json
 import urllib.request
 import http.cookiejar
-import re
 import time
 import hashlib
 import sys
