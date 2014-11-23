@@ -209,7 +209,7 @@ def openPage(title, featured=False):
             mainwidget.body = Results(results)
     elif 'disambiguation' in page.properties:
         header.set_text(page.title + ': Disambiguation')
-        mainwidget.body = Disambig(page.result['text']['*'])
+        mainwidget.body = Disambig(page.html)
     else:
         header.set_text(page.title)
         mainwidget.body = Pager(page)
