@@ -61,7 +61,7 @@ def parseExtract(html):
     for i in soup.find_all('h2'):
         title = re.sub('\[edit\]$', '', i.text)
         title = re.sub('Edit$', '', title)
-        if title not in ('Contents', 'External links', 'References'):
+        if title not in ('Contents', 'External links', 'References', 'See also'):
             sections[title.strip()] = _processExtractSection(i.next_siblings)
     for i in sections:
         if not sections[i]:
