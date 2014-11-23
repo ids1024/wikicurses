@@ -41,6 +41,8 @@ def _processExtractSection(section):
             format = sum(formats[i] for i in set(i.name for i in formats).intersection(partags))
             if [i for i in partags if re.fullmatch('h[3-6]', i)]:
                 format = 'h'
+                item = re.sub('\[edit\]$', '', item)
+                item = re.sub('Edit$', '', item)
             items.add(item, format)
     items[-1][1] = items[-1][1].rstrip() + '\n'
     return items
