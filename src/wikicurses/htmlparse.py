@@ -48,9 +48,13 @@ def _processExtractSection(section):
     return items
 
 def parseExtract(html):
-    html = html.replace('\n', '').replace('\t', ' ')
+    html = html.replace('\t', ' ')
     sections = OrderedDict()
     soup = BeautifulSoup(html)
+    #Turn into tuple since the iterator is being modified
+    for i in tuple(soup.strings):
+        if not 'pre' in (j.name for j in i.parents):
+            i.replace_with(i.replace('\n', ''))
     for i in soup.find_all('p'):
         i.insert_after(soup.new_string('\n\n'))
     for i in soup.find_all(['h2', 'h3', 'h4', 'h5', 'h6', 'br']):
