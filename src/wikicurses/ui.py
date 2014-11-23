@@ -202,11 +202,10 @@ def openPage(title, featured=False):
         page = wiki.get_featured_feed(title)
     else:
         page = wiki.search(title)
-    if not page.exists:
-        results = wiki.search_sugestions(page.title)
-        if results:
-            header.set_text('Results for ' + title)
-            mainwidget.body = Results(results)
+    #This is not as inefficient as it looks; Wiki caches results
+    if not page.exists and wiki.search_sugestions(page.title):
+        header.set_text('Results for ' + title)
+        mainwidget.body = Results(wiki.search_sugestions(page.title))
     elif 'disambiguation' in page.properties:
         header.set_text(page.title + ': Disambiguation')
         mainwidget.body = Disambig(page.html)
