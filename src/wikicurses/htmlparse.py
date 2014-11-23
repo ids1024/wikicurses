@@ -44,7 +44,8 @@ def _processExtractSection(section):
                 item = re.sub('\[edit\]$', '', item)
                 item = re.sub('Edit$', '', item)
             items.add(item, format)
-    items[-1][1] = items[-1][1].rstrip() + '\n'
+    if items and items[-1]:
+        items[-1][1] = items[-1][1].rstrip() + '\n'
     return items
 
 def parseExtract(html):
@@ -55,7 +56,7 @@ def parseExtract(html):
         i.insert_after(soup.new_string('\n'))
     for i in soup.find_all('li'):
         i.insert_before(soup.new_string('- '))
-    sections[''] = _processExtractSection(soup.body)
+    sections[''] = _processExtractSection(soup)
     for i in soup.find_all('h2'):
         title = re.sub('\[edit\]$', '', i.text)
         title = re.sub('Edit$', '', title)
@@ -83,7 +84,7 @@ def _processDisambigSection(section):
 def parseDisambig(html):
     sections = OrderedDict()
     soup = BeautifulSoup(html)
-    sections[''] = _processDisambigSection(soup.body)
+    sections[''] = _processDisambigSection(soup)
     for i in soup.find_all('h2'):
         title = re.sub('\[edit\]$', '', i.text)
         title = re.sub('Edit$', '', title)
