@@ -29,16 +29,12 @@ class Wiki(object):
         result = self._query(action="query", meta="siteinfo",
                 siprop="general", format="json")
         query = json.loads(result)["query"]
-
         self.articlepath = urllib.parse.urljoin( 
                 query['general']['base'],
                 query['general']['articlepath'])
 
     def _query(self, post=False, **kwargs):
-        params = kwargs.copy()
-        for name, value in kwargs.items():
-            if value is False:
-                del params[name]
+        params = {k:v for k,v in kwargs.items() if v is not False}
         data =  urllib.parse.urlencode(params)
         url = self.siteurl
         if post:
@@ -90,10 +86,7 @@ class Wiki(object):
         result = json.loads(self._query(action="parse", page=name,
                  prop="images|externallinks|iwlinks|displaytitle|properties|text",
                  format="json", redirects=True,)).get('parse', {})
-        html = ''
-        if 'text' in result:
-            html = result['text']['*']
-        return _Article(self, name, html, result)
+        return _Article(self, name, result)
 
     @lru_cache(1)
     def list_featured_feeds(self):
@@ -125,15 +118,16 @@ class Wiki(object):
 
 class _Article(object):
     properties = {}
+    html = ''
 
-    def __init__(self, wiki, search, html, result):
+    def __init__(self, wiki, search, result):
         self.wiki = wiki
-        self.html = html
+        self.title = result.get('title', search)
         self.result = result
         self.exists = result != {}
-        self.title = result.get('title', search)
-        if 'properties' in result:
+        if self.exists:
             self.properties = {i['name']: i['*'] for i in result['properties']}
+            self.html = result['text']['*']
 
     @property
     def content(self):
