@@ -27,11 +27,9 @@ class Wiki(object):
     @lru_cache(1)
     def get_siteinfo(self):
         result = self._query(action="query", meta="siteinfo",
-                siprop="extensions|general", format="json")
+                siprop="general", format="json")
         query = json.loads(result)["query"]
 
-        extensions = (i["name"] for i in query["extensions"])
-        self.has_extract = "TextExtracts" in extensions
         self.articlepath = urllib.parse.urljoin( 
                 query['general']['base'],
                 query['general']['articlepath'])
@@ -89,20 +87,12 @@ class Wiki(object):
     @lru_cache(16)
     def search(self, name):
         self.get_siteinfo()
-        html = ''
-
         result = json.loads(self._query(action="parse", page=name,
                  prop="images|externallinks|iwlinks|displaytitle|properties|text",
                  format="json", redirects=True,)).get('parse', {})
-
-        if self.has_extract:
-            exresult = json.loads(self._query(action="query", redirects=True,
-                     titles=name, prop="extracts", format="json"))['query']
-            html = next(iter(exresult['pages'].values())).get('extract', '')
-
-        elif 'text' in result:
+        html = ''
+        if 'text' in result:
             html = result['text']['*']
-
         return _Article(self, name, html, result)
 
     @lru_cache(1)
