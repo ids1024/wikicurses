@@ -298,8 +298,8 @@ def closeOverlay():
 
 
 palette = [('h1', 'bold', 'dark blue'),
-           ('h2', 'underline', ''),
-           ('h', 'underline', '')]
+           ('h2', 'bold,underline', ''),
+           ('h', 'bold,underline', '')]
 
 #(ITALIC, 'italic') does not work. No italics option?
 outputfmt = (('b', 'bold'), ('blockquote', 'dark gray'))
