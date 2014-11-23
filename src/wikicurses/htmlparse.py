@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 from wikicurses import formats
 
 skipclass = ('wiki-sidebar', 'infobox', 'mw-editsection', 'editsection',
-            'wikitable', 'thumb', 'gallery')
+            'wikitable', 'thumb', 'gallery', 'article-thumb')
 
 class UrwidMarkupHandler:
     def __init__(self):
