@@ -5,6 +5,8 @@ from bs4 import BeautifulSoup
 
 from wikicurses import formats
 
+skipclass = ('wiki-sidebar', 'infobox', 'mw-editsection', 'editsection')
+
 class UrwidMarkupHandler:
     def __init__(self):
         self._list = []
@@ -34,15 +36,10 @@ def _processExtractSection(section):
                 break
             strings = i.strings
         for item in strings:
-            if [i for i in item.parents if i.name == 'table'\
-                    and {'wiki-sidebar', 'infobox'}.intersection(i.get('class', ()))]:
-                continue
             partags = {i.name for i in item.parents}
             format = sum(formats[i] for i in set(i.name for i in formats).intersection(partags))
             if [i for i in partags if re.fullmatch('h[3-6]', i)]:
                 format = 'h'
-                item = re.sub('\[edit\]$', '', item)
-                item = re.sub('Edit$', '', item)
             items.add(item, format)
     if items:
         items[0][1] = items[0][1].lstrip()
@@ -57,12 +54,12 @@ def parseExtract(html):
         i.insert_after(soup.new_string('\n'))
     for i in soup.find_all('li'):
         i.insert_before(soup.new_string('- '))
+    for i in soup.find_all(True, class_=skipclass):
+        i.decompose()
     sections[''] = _processExtractSection(soup.body or soup)
     for i in soup.find_all('h2'):
-        title = re.sub('\[edit\]$', '', i.text)
-        title = re.sub('Edit$', '', title)
-        if title not in ('Contents', 'External links', 'References', 'See also'):
-            sections[title.strip()] = _processExtractSection(i.next_siblings)
+        if i.text not in ('Contents', 'External links', 'References', 'See also'):
+            sections[i.text.strip()] = _processExtractSection(i.next_siblings)
     for i in sections:
         if not sections[i]:
             del sections[i]
@@ -85,10 +82,10 @@ def _processDisambigSection(section):
 def parseDisambig(html):
     sections = OrderedDict()
     soup = BeautifulSoup(html)
+    for i in soup.find_all(True, class_=skipclass):
+        i.decompose()
     sections[''] = _processDisambigSection(soup)
     for i in soup.find_all('h2'):
-        title = re.sub('\[edit\]$', '', i.text)
-        title = re.sub('Edit$', '', title)
-        if title not in ('Contents', 'See also'):
-            sections[title] = _processDisambigSection(i.next_siblings)
+        if i.text not in ('Contents', 'See also'):
+            sections[i.text] = _processDisambigSection(i.next_siblings)
     return sections
