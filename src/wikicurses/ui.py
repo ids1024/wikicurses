@@ -190,7 +190,7 @@ class Pager(StandardKeyBinds, urwid.ListBox):
         self.widgetnames = []
         for title, content in page.content.items():
             if title:
-                h2 = urwid.Text([('h2', title), '\n'], align="center")
+                h2 = urwid.Text(('h2', title), align="center")
                 self.body.append(h2)
                 self.widgetnames.append((title, self.body.index(h2)))
             else:
