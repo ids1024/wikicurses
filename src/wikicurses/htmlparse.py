@@ -46,7 +46,7 @@ def _processExtractSection(section):
             items.add(item, format)
     if items:
         items[0][1] = items[0][1].lstrip()
-        items[-1][1] = items[-1][1].rstrip() + '\n'
+        items[-1][1] = items[-1][1].rstrip() + '\n\n'
     return items
 
 def parseExtract(html):
