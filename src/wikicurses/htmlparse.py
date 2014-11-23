@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 
 from wikicurses import formats
 
-skipclass = ('wiki-sidebar', 'infobox', 'mw-editsection', 'editsection')
+skipclass = ('wiki-sidebar', 'infobox', 'mw-editsection', 'editsection', 'wikitable', 'thumb')
 
 class UrwidMarkupHandler:
     def __init__(self):
@@ -47,11 +47,16 @@ def _processExtractSection(section):
     return items
 
 def parseExtract(html):
-    html = re.sub('\n+', '\n', html).replace('\t', ' ')
+    html = html.replace('\n', '').replace('\t', ' ')
     sections = OrderedDict()
     soup = BeautifulSoup(html)
-    for i in soup.find_all(['p', 'br']):
+    for i in soup.find_all('p'):
+        i.insert_after(soup.new_string('\n\n'))
+    for i in soup.find_all(['h2', 'h3', 'h4', 'h5', 'h6', 'br']):
         i.insert_after(soup.new_string('\n'))
+    for i in soup.find_all('div'):
+        if i.text and not i.find_all('div'):
+            i.insert_after(soup.new_string('\n'))
     for i in soup.find_all('li'):
         i.insert_before(soup.new_string('- '))
     for i in soup.find_all(True, class_=skipclass):
