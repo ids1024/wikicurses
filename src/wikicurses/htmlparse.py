@@ -45,6 +45,7 @@ def _processExtractSection(section):
                 item = re.sub('Edit$', '', item)
             items.add(item, format)
     if items:
+        items[0][1] = items[0][1].lstrip()
         items[-1][1] = items[-1][1].rstrip() + '\n'
     return items
 
@@ -52,7 +53,7 @@ def parseExtract(html):
     html = re.sub('\n+', '\n', html).replace('\t', ' ')
     sections = OrderedDict()
     soup = BeautifulSoup(html)
-    for i in soup.find_all(['p', 'br', 'h3', 'h4', 'h5', 'h6']):
+    for i in soup.find_all(['p', 'br']):
         i.insert_after(soup.new_string('\n'))
     for i in soup.find_all('li'):
         i.insert_before(soup.new_string('- '))
