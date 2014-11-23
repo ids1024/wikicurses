@@ -41,6 +41,8 @@ def _processExtractSection(section):
             format = sum(formats[i] for i in set(i.name for i in formats).intersection(partags))
             if [i for i in partags if re.fullmatch('h[3-6]', i)]:
                 format = 'h'
+            if item.strip() and 'pre' not in partags:
+                item = item.replace('\n', '')
             items.add(item, format)
     if items:
         items[0][1] = items[0][1].lstrip()
@@ -48,7 +50,7 @@ def _processExtractSection(section):
     return items
 
 def parseExtract(html):
-    html = html.replace('\n', '').replace('\t', ' ')
+    html = html.replace('\t', ' ')
     sections = OrderedDict()
     soup = BeautifulSoup(html)
     for i in soup.find_all('p'):
