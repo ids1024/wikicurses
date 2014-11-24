@@ -156,6 +156,15 @@ class StandardKeyBinds:
         else:
             return super().keypress(size, key)
 
+    def mouse_event(self, size, event, button, col, row, focus):
+        if button == 4:
+            self.keypress(size, 'up')
+        if button == 5:
+            self.keypress(size, 'down')
+        else:
+            return False
+        return True
+
 class Disambig(StandardKeyBinds, SelectorBox):
     widgetnames = []
     def __init__(self, html):
@@ -314,4 +323,5 @@ urwid.command_map['ctrl f'] = 'cursor page down'
 header = urwid.Text('Wikicurses', align='center')
 loading = urwid.Filler(urwid.Text('Loading...'), 'top')
 mainwidget = urwid.Frame(loading, urwid.AttrMap(header, 'h1'), Ex())
-loop = urwid.MainLoop(mainwidget, palette=palette, handle_mouse=False)
+loop = urwid.MainLoop(mainwidget, palette=palette,
+        handle_mouse=settings.conf.getboolean('general', 'mouse'))

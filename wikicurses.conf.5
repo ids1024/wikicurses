@@ -1,4 +1,4 @@
-.TH wikicurses.conf 5 2014-10-25
+.TH wikicurses.conf 5 2014-11-23
 .SH NAME
 wikicurses \- curses interface for MediaWiki
 .SH SYNOPSIS
@@ -11,6 +11,7 @@ The configuration file for wikicurses is divided into sections with the "general
 .nf
 [general]
 default = Wikipedia
+mouse = False
 
 [keymap]
 q = quit
@@ -30,6 +31,11 @@ url = https://wiki.archlinux.org/api.php
 default
 .RS 4
 The name of the wiki to use by default
+.RE
+.PP
+mouse
+.RS 4
+Support mouse input. With this enabled, you will have to hold down shift to select text.
 .RE
 .SS keymap
 This section configures the keyboard bindings of wikicurses, in the format "key=command". Command can be any ex command supported by wikicurses.
