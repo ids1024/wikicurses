@@ -4,7 +4,7 @@ import subprocess
 import os
 from wikicurses import formats
 from wikicurses import settings
-from wikicurses.wiki import Wiki
+from wikicurses.wiki import Wiki, WikiError
 from wikicurses.htmlparse import parseDisambig
 
 def tabComplete(text, matches):
@@ -235,23 +235,22 @@ def openWiki(name):
         username = password = ''
     wiki = Wiki(url, username, password)
 
-def edit(title):
-    init = wiki.init_edit(title)
-    if not init:
-        notify('Unable to Edit: Page Not Found')
-        return
-    text, verify = init
-    error = wiki.login()
-    if error:
-        notify('Login Failed: ' + error)
-        return
-
+def runEditor(text):
     with tempfile.NamedTemporaryFile('w+') as file:
         file.write(text)
         file.flush()
         subprocess.call([os.environ.get('EDITOR', 'vim'), file.name])
         file.seek(0)
-        newtext = file.read()
+        return file.read()
+
+def edit(title):
+    try:
+        text, verify = wiki.init_edit(title)
+        wiki.login()
+    except WikiError as e:
+        notify('Error: ' + str(e))
+        return
+    newtext = runEditor(text)
     if newtext == text:
         notify('Edit Canceled: No Change')
         return

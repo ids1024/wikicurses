@@ -13,6 +13,9 @@ from wikicurses.settings import Settings
 useragent = "Wikicurses/0.1 (https://github.com/ids1024/wikicurses)"\
             " Python-urllib/%d.%d" % sys.version_info[:2]
 
+class WikiError(Exception):
+    pass
+
 @lru_cache(16)
 class Wiki(object):
     csrftoken = None
@@ -52,7 +55,7 @@ class Wiki(object):
         if result['result'] == 'NeedToken':
             result = json.loads(self._query(lgtoken=result['token'], **query))['login']
         if result['result'] != 'Success': #Error
-            return result['result']
+            raise WikiError(result['result'])
         self.csrftoken = json.loads(self._query(post=True, action='query',
             meta='tokens', format='json'))['query']['tokens']['csrftoken']
 
@@ -64,7 +67,7 @@ class Wiki(object):
         result = json.loads(self._query(action='query', prop='revisions',
             rvprop='timestamp|content', titles=title, format='json'))['query']
         if "missing" in result:
-            return
+            raise WikiError("Page Not Found")
 
         rev = next(iter(result['pages'].values()))['revisions'][0]
         starttime = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
