@@ -83,7 +83,7 @@ class Wiki(object):
 
         rev = next(iter(result['pages'].values()))['revisions'][0]
         starttime = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
-        return (rev['*'], (rev['timestamp'], starttime))
+        return rev['*'], (rev['timestamp'], starttime)
 
     def commit_edit(self, title, text, summary, minor, verify):
         """Commit edit of page.
