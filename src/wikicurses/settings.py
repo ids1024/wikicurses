@@ -42,5 +42,6 @@ class Settings:
 
 
 def wikis():
+    """Return dictionary of wiki urls by name."""
     exclude = ('general', 'DEFAULT', 'keymap')
     return {k: v['url'] for k, v in conf.items() if k not in exclude}

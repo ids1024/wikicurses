@@ -18,8 +18,8 @@ class WikiError(Exception):
     pass
 
 
-@lru_cache(16)
 class Wiki(object):
+    """A mediawiki wiki."""
     csrftoken = None
 
     def __init__(self, url, username, password):
@@ -49,6 +49,7 @@ class Wiki(object):
         return urllib.request.urlopen(url, data).read().decode('utf-8')
 
     def login(self):
+        """Log in to wiki using stored credentials."""
         if self.csrftoken:  # Already logged in
             return
         query = {'post': True, 'action': 'login', 'format': 'json',
@@ -63,10 +64,16 @@ class Wiki(object):
                                                 meta='tokens', format='json'))['query']['tokens']['csrftoken']
 
     def logout(self):
+        """Log out of wiki."""
         self._query(action='logout', format='json')
         self.csrftoken = None
 
     def init_edit(self, title):
+        """Initialize edit of page.
+
+        Return tuple (text, verify) where text is the text to be modified and
+        verify should be passed to commit_edit.
+        """
         result = json.loads(self._query(action='query', prop='revisions',
                                         rvprop='timestamp|content', titles=title, format='json'))['query']
         if "missing" in result:
@@ -77,6 +84,15 @@ class Wiki(object):
         return (rev['*'], (rev['timestamp'], starttime))
 
     def commit_edit(self, title, text, summary, minor, verify):
+        """Commit edit of page.
+        
+        Required arguments:
+        title -- the name of the page to be modified
+        text -- the new text to be saved
+        summary -- edit summary
+        minor -- boolean value; True if edit is minor
+        verify -- the verification tuple returned by init_edit()
+        """
         md5sum = hashlib.md5(text.encode()).hexdigest()
         result = json.loads(self._query(post=True, action='edit', text=text,
                                         title=title, basetimestamp=verify[
@@ -88,6 +104,7 @@ class Wiki(object):
 
     @lru_cache(16)
     def search(self, name):
+        """Search wiki for article and return _Article object."""
         self.get_siteinfo()
         result = json.loads(self._query(action="parse", page=name,
                                         prop="images|externallinks|iwlinks|displaytitle|properties|text",
@@ -96,6 +113,7 @@ class Wiki(object):
 
     @lru_cache(1)
     def list_featured_feeds(self):
+        """Return a list of available featured feeds."""
         result = json.loads(self._query(action="paraminfo",
                                         modules="featuredfeed", format="json"))["paraminfo"]
         if not result["modules"]:
@@ -110,11 +128,12 @@ class Wiki(object):
 
     @lru_cache(16)
     def search_sugestions(self, name):
+        """Return list of search suggestions for specified string."""
         result = self._query(action="opensearch", search=name, format="json")
         return json.loads(result)[1]
 
     def clear_cache(self):
-        Wiki.cache_clear()
+        """Clear the cache."""
         self.get_siteinfo.cache_clear()
         self.search.cache_clear()
         self.list_featured_feeds.cache_clear()

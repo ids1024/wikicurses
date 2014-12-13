@@ -53,6 +53,7 @@ def _processExtractSection(section):
 
 
 def parseExtract(html):
+    """Parse article html and return OrderedDict of sections."""
     html = html.replace('\t', ' ')
     sections = OrderedDict()
     soup = BeautifulSoup(html)
@@ -83,6 +84,7 @@ def parseExtract(html):
 
 
 def parseFeature(html):
+    """Parse featured feed html by striping out html tags."""
     return BeautifulSoup(html).text
 
 
@@ -100,6 +102,7 @@ def _processDisambigSection(section):
 
 
 def parseDisambig(html):
+    """Parse disambiguation page and return list of (article, text) tuples."""
     sections = OrderedDict()
     soup = BeautifulSoup(html)
     for i in soup.find_all(True, class_=skipclass):
