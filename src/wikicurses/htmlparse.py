@@ -6,9 +6,11 @@ from bs4 import BeautifulSoup
 from wikicurses import formats
 
 skipclass = ('wiki-sidebar', 'infobox', 'mw-editsection', 'editsection',
-            'wikitable', 'thumb', 'gallery', 'article-thumb')
+             'wikitable', 'thumb', 'gallery', 'article-thumb')
+
 
 class UrwidMarkupHandler:
+
     def __init__(self):
         self._list = []
 
@@ -27,18 +29,20 @@ class UrwidMarkupHandler:
     def __getitem__(self, key):
         return self._list[key]
 
+
 def _processExtractSection(section):
     items = UrwidMarkupHandler()
     for i in section:
         if isinstance(i, str):
             strings = (i,)
-        else: 
+        else:
             if i.name == 'h2' or i.find('h2'):
                 break
             strings = i.strings
         for item in strings:
             partags = {i.name for i in item.parents}
-            format = sum(formats[i] for i in set(i.name for i in formats).intersection(partags))
+            format = sum(
+                formats[i] for i in set(i.name for i in formats).intersection(partags))
             if [i for i in partags if re.fullmatch('h[3-6]', i)]:
                 format = 'h'
             items.add(item, format)
@@ -47,11 +51,12 @@ def _processExtractSection(section):
         items[-1][1] = items[-1][1].rstrip() + '\n\n'
     return items
 
+
 def parseExtract(html):
     html = html.replace('\t', ' ')
     sections = OrderedDict()
     soup = BeautifulSoup(html)
-    #Turn into tuple since the iterator is being modified
+    # Turn into tuple since the iterator is being modified
     for i in tuple(soup.strings):
         if not 'pre' in (j.name for j in i.parents):
             i.replace_with(i.replace('\n', ''))
@@ -76,8 +81,10 @@ def parseExtract(html):
             del sections[i]
     return sections
 
+
 def parseFeature(html):
     return BeautifulSoup(html).text
+
 
 def _processDisambigSection(section):
     items = []
@@ -87,8 +94,10 @@ def _processDisambigSection(section):
         if i.name == 'h2' or i.find('h2'):
             break
         for item in i.find_all('li'):
-            items.append((item.a.text if item.a else '', item.text.split('\n')[0]))
+            items.append(
+                (item.a.text if item.a else '', item.text.split('\n')[0]))
     return items
+
 
 def parseDisambig(html):
     sections = OrderedDict()

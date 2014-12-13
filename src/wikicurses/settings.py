@@ -5,12 +5,15 @@ from configparser import ConfigParser
 from enum import Enum
 
 default_configdir = os.environ['HOME'] + '/.config'
-configpath = os.environ.get('XDG_CONFIG_HOME', default_configdir) + '/wikicurses'
+configpath = os.environ.get(
+    'XDG_CONFIG_HOME', default_configdir) + '/wikicurses'
 
 conf = ConfigParser()
 conf.read(['/etc/wikicurses.conf', configpath + '/config'])
 
+
 class Settings:
+
     def __init__(self, wiki, name):
         self.configpath = configpath + '/' + urlparse(wiki).netloc
         self.file = self.configpath + '/' + name
@@ -36,6 +39,7 @@ class Settings:
         bookmarks = set(self)
         bookmarks.discard(bmark)
         self._save(list(bookmarks))
+
 
 def wikis():
     exclude = ('general', 'DEFAULT', 'keymap')

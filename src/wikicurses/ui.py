@@ -7,18 +7,21 @@ from wikicurses import settings
 from wikicurses.wiki import Wiki, WikiError
 from wikicurses.htmlparse import parseDisambig
 
+
 def tabComplete(text, matches):
     if not matches:
         return text
     matches = sorted(matches, key=len)
-    if matches[0] == text and len(matches)>1:
+    if matches[0] == text and len(matches) > 1:
         match = matches[1]
     else:
         match = matches[0]
     return match
 
+
 class SearchBox(urwid.Edit):
     title = "Search"
+
     def keypress(self, size, key):
         if key == 'enter':
             closeOverlay()
@@ -33,7 +36,9 @@ class SearchBox(urwid.Edit):
         else:
             return super().keypress(size, key)
 
+
 class SelectorBox(urwid.ListBox):
+
     def __init__(self):
         def selectButton(radio_button, new_state, parameter):
             if new_state:
@@ -52,7 +57,7 @@ class SelectorBox(urwid.ListBox):
                 parameter = name = item
                 selected = False
             self.body.append(urwid.RadioButton(buttons, name, selected,
-                selectButton, parameter))
+                                               selectButton, parameter))
             if selected:
                 self.set_focus(i)
 
@@ -62,17 +67,21 @@ class SelectorBox(urwid.ListBox):
         else:
             return super().keypress(size, key)
 
+
 class Toc(SelectorBox):
     title = "Table of Contents"
+
     def _items(self):
         for name, ind in mainwidget.body.widgetnames:
-            yield name, mainwidget.body.body.focus>=ind, ind
-    
+            yield name, mainwidget.body.body.focus >= ind, ind
+
     def _select(self, index):
-       mainwidget.body.body.set_focus(index)
+        mainwidget.body.body.set_focus(index)
+
 
 class Bmarks(SelectorBox):
     title = "Bookmarks"
+
     def _items(self):
         self.deleted = []
         return wiki.bmarks
@@ -81,7 +90,7 @@ class Bmarks(SelectorBox):
         openPage(name)
 
     def keypress(self, size, key):
-        #Undo Delete
+        # Undo Delete
         if key == 'u' and self.deleted:
             index, item = self.deleted.pop()
             wiki.bmarks.add(item.label)
@@ -94,8 +103,10 @@ class Bmarks(SelectorBox):
         else:
             return super().keypress(size, key)
 
+
 class Wikis(SelectorBox):
     title = "Wikis"
+
     def _items(self):
         for name, url in settings.wikis().items():
             yield name, wiki.siteurl == url, name
@@ -104,15 +115,19 @@ class Wikis(SelectorBox):
         openWiki(name)
         openPage('Main page')
 
+
 class Feeds(SelectorBox):
     title = "Feeds"
+
     def _items(self):
         return wiki.list_featured_feeds()
 
     def _select(self, feed):
         openPage(feed, True)
 
+
 class Ex(urwid.Edit):
+
     def keypress(self, size, key):
         if key == 'esc' or (key == 'backspace' and not self.edit_text):
             self.exitexmode()
@@ -137,7 +152,9 @@ class Ex(urwid.Edit):
         mainwidget.set_focus('footer')
         self.set_caption(':')
 
+
 class StandardKeyBinds:
+
     def keypress(self, size, key):
         if not isinstance(mainwidget.footer, urwid.Edit):
             mainwidget.footer = Ex()
@@ -149,7 +166,7 @@ class StandardKeyBinds:
             self.set_focus(0)
             self.render(size)
         elif key in ('G', 'end'):
-            self.set_focus(len(self.body)-1)
+            self.set_focus(len(self.body) - 1)
             self.render(size)
         elif key in cmdmap and cmdmap[key]:
             processCmd(cmdmap[key])
@@ -165,8 +182,10 @@ class StandardKeyBinds:
             return False
         return True
 
+
 class Disambig(StandardKeyBinds, SelectorBox):
     widgetnames = []
+
     def __init__(self, html):
         self.sections = parseDisambig(html)
         super().__init__()
@@ -181,8 +200,10 @@ class Disambig(StandardKeyBinds, SelectorBox):
     def _select(self, name):
         openPage(name)
 
+
 class Results(StandardKeyBinds, SelectorBox):
     widgetnames = []
+
     def __init__(self, results):
         self.results = results
         super().__init__()
@@ -193,7 +214,9 @@ class Results(StandardKeyBinds, SelectorBox):
     def _select(self, title):
         openPage(title)
 
+
 class Pager(StandardKeyBinds, urwid.ListBox):
+
     def __init__(self, page):
         super().__init__(urwid.SimpleFocusListWalker([]))
         self.widgetnames = []
@@ -206,12 +229,13 @@ class Pager(StandardKeyBinds, urwid.ListBox):
                 self.widgetnames.append((page.title, 0))
             self.body.append(urwid.Text(list(content)))
 
+
 def openPage(title, featured=False):
     if featured:
         page = wiki.get_featured_feed(title)
     else:
         page = wiki.search(title)
-    #This is not as inefficient as it looks; Wiki caches results
+    # This is not as inefficient as it looks; Wiki caches results
     if not page.exists and wiki.search_sugestions(page.title):
         header.set_text('Results for ' + title)
         mainwidget.body = Results(wiki.search_sugestions(page.title))
@@ -221,6 +245,7 @@ def openPage(title, featured=False):
     else:
         header.set_text(page.title)
         mainwidget.body = Pager(page)
+
 
 def openWiki(name):
     global wiki
@@ -235,6 +260,7 @@ def openWiki(name):
         username = password = ''
     wiki = Wiki(url, username, password)
 
+
 def runEditor(text):
     with tempfile.NamedTemporaryFile('w+') as file:
         file.write(text)
@@ -242,6 +268,7 @@ def runEditor(text):
         subprocess.call([os.environ.get('EDITOR', 'vim'), file.name])
         file.seek(0)
         return file.read()
+
 
 def edit(title):
     try:
@@ -258,7 +285,7 @@ def edit(title):
     def submit(button):
         closeOverlay()
         wiki.commit_edit(title, newtext, summary.edit_text,
-                minor.get_state(), verify)
+                         minor.get_state(), verify)
         openPage(title)
     summary = urwid.Edit('Summary: ')
     minor = urwid.CheckBox('Minor Edit')
@@ -267,17 +294,19 @@ def edit(title):
 
 cmds = ('quit', 'bmark', 'bmarks', 'wikis', 'feeds',
         'open', 'contents', 'edit', 'clearcache')
+
+
 def processCmd(cmd, *args):
     if cmd in ('q', 'quit'):
         raise urwid.ExitMainLoop
     elif cmd == 'bmark':
         wiki.bmarks.add(header.text)
         notify("Bookmark Added")
-    elif cmd in ('bmarks' ,'wikis', 'feeds', 'contents'):
-        openOverlay({'bmarks':Bmarks,
-                     'wikis':Wikis,
-                     'feeds':Feeds,
-                     'contents':Toc}[cmd]())
+    elif cmd in ('bmarks', 'wikis', 'feeds', 'contents'):
+        openOverlay({'bmarks': Bmarks,
+                     'wikis': Wikis,
+                     'feeds': Feeds,
+                     'contents': Toc}[cmd]())
     elif cmd == 'open':
         if args:
             openPage(' '.join(args))
@@ -290,8 +319,10 @@ def processCmd(cmd, *args):
     elif cmd:
         notify(cmd + ': Unknown Command')
 
+
 def notify(text):
     mainwidget.footer = urwid.Text(text)
+
 
 def openOverlay(widget, title=None, height=('relative', 50), width=('relative', 50)):
     if widget._sizing == {'flow'}:
@@ -299,6 +330,7 @@ def openOverlay(widget, title=None, height=('relative', 50), width=('relative', 
     box = urwid.LineBox(widget, title or widget.title)
     overlay = urwid.Overlay(box, mainwidget, 'center', width, 'middle', height)
     loop.widget = overlay
+
 
 def closeOverlay():
     loop.widget = mainwidget
@@ -311,7 +343,7 @@ palette = [('h1', 'bold', 'dark blue'),
 #(ITALIC, 'italic') does not work. No italics option?
 outputfmt = (('b', 'bold'), ('blockquote', 'dark gray'))
 for x in range(1, sum(formats) + 1):
-    fmt = ','.join(j for i, j in outputfmt if x&formats[i])
+    fmt = ','.join(j for i, j in outputfmt if x & formats[i])
     palette.append((x, fmt, ''))
 
 urwid.command_map['k'] = 'cursor up'
@@ -323,4 +355,4 @@ header = urwid.Text('Wikicurses', align='center')
 loading = urwid.Filler(urwid.Text('Loading...'), 'top')
 mainwidget = urwid.Frame(loading, urwid.AttrMap(header, 'h1'), Ex())
 loop = urwid.MainLoop(mainwidget, palette=palette,
-        handle_mouse=settings.conf.getboolean('general', 'mouse'))
+                      handle_mouse=settings.conf.getboolean('general', 'mouse'))

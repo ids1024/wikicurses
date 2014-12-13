@@ -4,7 +4,7 @@ import http.cookiejar
 import time
 import hashlib
 import sys
-import  xml.etree.ElementTree as ET
+import xml.etree.ElementTree as ET
 from collections import OrderedDict
 from functools import lru_cache
 from wikicurses.htmlparse import parseExtract, parseFeature
@@ -13,8 +13,10 @@ from wikicurses.settings import Settings
 useragent = "Wikicurses/0.1 (https://github.com/ids1024/wikicurses)"\
             " Python-urllib/%d.%d" % sys.version_info[:2]
 
+
 class WikiError(Exception):
     pass
+
 
 @lru_cache(16)
 class Wiki(object):
@@ -29,15 +31,15 @@ class Wiki(object):
     @lru_cache(1)
     def get_siteinfo(self):
         result = self._query(action="query", meta="siteinfo",
-                siprop="general", format="json")
+                             siprop="general", format="json")
         query = json.loads(result)["query"]
-        self.articlepath = urllib.parse.urljoin( 
-                query['general']['base'],
-                query['general']['articlepath'])
+        self.articlepath = urllib.parse.urljoin(
+            query['general']['base'],
+            query['general']['articlepath'])
 
     def _query(self, post=False, **kwargs):
-        params = {k:v for k,v in kwargs.items() if v is not False}
-        data =  urllib.parse.urlencode(params)
+        params = {k: v for k, v in kwargs.items() if v is not False}
+        data = urllib.parse.urlencode(params)
         url = self.siteurl
         if post:
             data = data.encode()
@@ -47,17 +49,18 @@ class Wiki(object):
         return urllib.request.urlopen(url, data).read().decode('utf-8')
 
     def login(self):
-        if self.csrftoken: #Already logged in
+        if self.csrftoken:  # Already logged in
             return
-        query = {'post':True, 'action':'login', 'format': 'json',
-                'lgname':self.username, 'lgpassword':self.password}
+        query = {'post': True, 'action': 'login', 'format': 'json',
+                 'lgname': self.username, 'lgpassword': self.password}
         result = json.loads(self._query(**query))['login']
         if result['result'] == 'NeedToken':
-            result = json.loads(self._query(lgtoken=result['token'], **query))['login']
-        if result['result'] != 'Success': #Error
+            result = json.loads(
+                self._query(lgtoken=result['token'], **query))['login']
+        if result['result'] != 'Success':  # Error
             raise WikiError(result['result'])
         self.csrftoken = json.loads(self._query(post=True, action='query',
-            meta='tokens', format='json'))['query']['tokens']['csrftoken']
+                                                meta='tokens', format='json'))['query']['tokens']['csrftoken']
 
     def logout(self):
         self._query(action='logout', format='json')
@@ -65,7 +68,7 @@ class Wiki(object):
 
     def init_edit(self, title):
         result = json.loads(self._query(action='query', prop='revisions',
-            rvprop='timestamp|content', titles=title, format='json'))['query']
+                                        rvprop='timestamp|content', titles=title, format='json'))['query']
         if "missing" in result:
             raise WikiError("Page Not Found")
 
@@ -76,9 +79,10 @@ class Wiki(object):
     def commit_edit(self, title, text, summary, minor, verify):
         md5sum = hashlib.md5(text.encode()).hexdigest()
         result = json.loads(self._query(post=True, action='edit', text=text,
-                title=title, basetimestamp=verify[0], starttimestamp=verify[1],
-                md5=md5sum, token=self.csrftoken, summary=summary, minor=minor,
-                format='json'))['edit']
+                                        title=title, basetimestamp=verify[
+                                            0], starttimestamp=verify[1],
+                                        md5=md5sum, token=self.csrftoken, summary=summary, minor=minor,
+                                        format='json'))['edit']
         self.search.cache_clear()
         return result['result']
 
@@ -86,18 +90,18 @@ class Wiki(object):
     def search(self, name):
         self.get_siteinfo()
         result = json.loads(self._query(action="parse", page=name,
-                 prop="images|externallinks|iwlinks|displaytitle|properties|text",
-                 format="json", redirects=True,)).get('parse', {})
+                                        prop="images|externallinks|iwlinks|displaytitle|properties|text",
+                                        format="json", redirects=True,)).get('parse', {})
         return _Article(self, name, result)
 
     @lru_cache(1)
     def list_featured_feeds(self):
-         result = json.loads(self._query(action="paraminfo",
-             modules="featuredfeed", format="json"))["paraminfo"]
-         if not result["modules"]:
-             return []
-         return next(i for i in result["modules"][0]["parameters"]
-                 if i["name"]=="feed")["type"]
+        result = json.loads(self._query(action="paraminfo",
+                                        modules="featuredfeed", format="json"))["paraminfo"]
+        if not result["modules"]:
+            return []
+        return next(i for i in result["modules"][0]["parameters"]
+                    if i["name"] == "feed")["type"]
 
     @lru_cache(16)
     def get_featured_feed(self, feed):
@@ -134,14 +138,14 @@ class _Article(object):
     @property
     def content(self):
         if not self.exists:
-            return {'':['Page Not Found.']}
+            return {'': ['Page Not Found.']}
         sections = parseExtract(self.html)
 
         images = [self.wiki.articlepath.replace('$1', 'File:' + i)
-                 for i in self.result['images']]
-        #if an url starts with //, it can by http or https.  Use http.
+                  for i in self.result['images']]
+        # if an url starts with //, it can by http or https.  Use http.
         extlinks = ['http:' + i if i.startswith('//') else i
-                for i in self.result['externallinks']]
+                    for i in self.result['externallinks']]
         iwlinks = [i['url'] for i in self.result['iwlinks']]
 
         if images:
@@ -165,10 +169,12 @@ class _Featured(object):
         for i in self.result.findall('item'):
             description = i.findtext('description')
             text = parseFeature(description)
-            self.content[i.findtext('title')] = i.findtext('link') + '\n' + text
+            self.content[i.findtext('title')] = i.findtext(
+                'link') + '\n' + text
 
-            
+
 cookiejar = http.cookiejar.CookieJar()
-opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cookiejar))
+opener = urllib.request.build_opener(
+    urllib.request.HTTPCookieProcessor(cookiejar))
 opener.addheaders = [('User-agent', useragent)]
 urllib.request.install_opener(opener)
