@@ -102,7 +102,8 @@ class Wiki(object):
                                         token=self.csrftoken, summary=summary,
                                         minor=minor, format='json'))['edit']
         self.search.cache_clear()
-        return result['result']
+        if result['result'] != 'Success':
+            raise WikiError(result['result'])
 
     @lru_cache(16)
     def search(self, name):

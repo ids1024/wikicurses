@@ -274,23 +274,24 @@ def edit(title):
     try:
         text, verify = wiki.init_edit(title)
         wiki.login()
+
+        newtext = runEditor(text)
+        if newtext == text:
+            notify('Edit Canceled: No Change')
+            return
+
+        def submit(button):
+            closeOverlay()
+            wiki.commit_edit(title, newtext, summary.edit_text,
+                             minor.get_state(), verify)
+            openPage(title)
+        summary = urwid.Edit('Summary: ')
+        minor = urwid.CheckBox('Minor Edit')
+        submit_button = urwid.Button('Submit', submit)
+        pile = urwid.Pile([summary, minor, submit_button])
+        openOverlay(pile, 'Edit', 'pack')
     except WikiError as e:
         notify('Error: ' + str(e))
-        return
-    newtext = runEditor(text)
-    if newtext == text:
-        notify('Edit Canceled: No Change')
-        return
-
-    def submit(button):
-        closeOverlay()
-        wiki.commit_edit(title, newtext, summary.edit_text,
-                         minor.get_state(), verify)
-        openPage(title)
-    summary = urwid.Edit('Summary: ')
-    minor = urwid.CheckBox('Minor Edit')
-    submit_button = urwid.Button('Submit', submit)
-    openOverlay(urwid.Pile([summary, minor, submit_button]), 'Edit', 'pack')
 
 cmds = ('quit', 'bmark', 'bmarks', 'wikis', 'feeds',
         'open', 'contents', 'edit', 'clearcache')
