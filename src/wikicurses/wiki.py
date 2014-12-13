@@ -73,7 +73,7 @@ class Wiki(object):
         """Initialize edit of page.
 
         Return tuple (text, verify) where text is the text to be modified and
-        verify should be passed to commit_edit.
+        verify should be passed to commit_edit().
         """
         result = json.loads(self._query(action='query', prop='revisions',
                                         rvprop='timestamp|content',
