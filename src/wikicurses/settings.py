@@ -2,7 +2,6 @@ import os
 import json
 from urllib.parse import urlparse
 from configparser import ConfigParser
-from enum import Enum
 
 default_configdir = os.environ['HOME'] + '/.config'
 configpath = os.environ.get(

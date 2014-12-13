@@ -21,7 +21,7 @@ class UrwidMarkupHandler:
             self._list.append([attribute, text])
 
     def __iter__(self):
-        return map(tuple, self._list)
+        return (tuple(i) for i in self._list)
 
     def __len__(self):
         return len(self._list)
@@ -41,11 +41,11 @@ def _processExtractSection(section):
             strings = i.strings
         for item in strings:
             partags = {i.name for i in item.parents}
-            format = sum(
+            tformat = sum(
                 formats[i] for i in set(i.name for i in formats).intersection(partags))
             if [i for i in partags if re.fullmatch('h[3-6]', i)]:
-                format = 'h'
-            items.add(item, format)
+                tformat = 'h'
+            items.add(item, tformat)
     if items:
         items[0][1] = items[0][1].lstrip()
         items[-1][1] = items[-1][1].rstrip() + '\n\n'

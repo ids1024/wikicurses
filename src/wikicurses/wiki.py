@@ -61,7 +61,8 @@ class Wiki(object):
         if result['result'] != 'Success':  # Error
             raise WikiError(result['result'])
         self.csrftoken = json.loads(self._query(post=True, action='query',
-                                                meta='tokens', format='json'))['query']['tokens']['csrftoken']
+                                                meta='tokens', format='json')
+                                    )['query']['tokens']['csrftoken']
 
     def logout(self):
         """Log out of wiki."""
@@ -75,7 +76,8 @@ class Wiki(object):
         verify should be passed to commit_edit.
         """
         result = json.loads(self._query(action='query', prop='revisions',
-                                        rvprop='timestamp|content', titles=title, format='json'))['query']
+                                        rvprop='timestamp|content',
+                                        titles=title, format='json'))['query']
         if "missing" in result:
             raise WikiError("Page Not Found")
 
@@ -95,10 +97,10 @@ class Wiki(object):
         """
         md5sum = hashlib.md5(text.encode()).hexdigest()
         result = json.loads(self._query(post=True, action='edit', text=text,
-                                        title=title, basetimestamp=verify[
-                                            0], starttimestamp=verify[1],
-                                        md5=md5sum, token=self.csrftoken, summary=summary, minor=minor,
-                                        format='json'))['edit']
+                                        title=title, basetimestamp=verify[0],
+                                        starttimestamp=verify[1], md5=md5sum,
+                                        token=self.csrftoken, summary=summary,
+                                        minor=minor, format='json'))['edit']
         self.search.cache_clear()
         return result['result']
 
@@ -107,15 +109,18 @@ class Wiki(object):
         """Search wiki for article and return _Article object."""
         self.get_siteinfo()
         result = json.loads(self._query(action="parse", page=name,
-                                        prop="images|externallinks|iwlinks|displaytitle|properties|text",
-                                        format="json", redirects=True,)).get('parse', {})
+                                        prop="images|externallinks|iwlinks|"
+                                        "displaytitle|properties|text",
+                                        format="json", redirects=True
+                                        )).get('parse', {})
         return _Article(self, name, result)
 
     @lru_cache(1)
     def list_featured_feeds(self):
         """Return a list of available featured feeds."""
         result = json.loads(self._query(action="paraminfo",
-                                        modules="featuredfeed", format="json"))["paraminfo"]
+                                        modules="featuredfeed",
+                                        format="json"))["paraminfo"]
         if not result["modules"]:
             return []
         return next(i for i in result["modules"][0]["parameters"]
