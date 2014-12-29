@@ -111,7 +111,7 @@ class Wiki(object):
         self.get_siteinfo()
         result = json.loads(self._query(action="parse", page=name,
                                         prop="images|externallinks|iwlinks|"
-                                        "displaytitle|properties|text",
+                                        "links|displaytitle|properties|text",
                                         format="json", redirects=True
                                         )).get('parse', {})
         return _Article(self, name, result)
@@ -150,6 +150,7 @@ class Wiki(object):
 class _Article(object):
     properties = {}
     html = ''
+    links = []
 
     def __init__(self, wiki, search, result):
         self.wiki = wiki
@@ -159,6 +160,9 @@ class _Article(object):
         if self.exists:
             self.properties = {i['name']: i['*'] for i in result['properties']}
             self.html = result['text']['*']
+            self.links = [i['*'] for i in result['links'] if ('exists' in i)
+                    and not any(i['*'].startswith(j + ':') for j in
+                        ('Category', 'Template', 'Template talk', 'Wikipedia'))]
 
     @property
     def content(self):
@@ -185,6 +189,7 @@ class _Article(object):
 class _Featured(object):
     exists = True
     properties = {}
+    links = []
 
     def __init__(self, feed, result):
         self.feed = feed

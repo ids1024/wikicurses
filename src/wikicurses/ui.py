@@ -104,6 +104,16 @@ class Bmarks(SelectorBox):
             return super().keypress(size, key)
 
 
+class Links(SelectorBox):
+    title = "Links"
+
+    def _items(self):
+        return page.links
+
+    def _select(self, name):
+        openPage(name)
+
+
 class Wikis(SelectorBox):
     title = "Wikis"
 
@@ -238,6 +248,7 @@ def openPage(title, featured=False, browsinghistory=False):
         history.append(title)
         current += 1
 
+    global page
     if featured:
         page = wiki.get_featured_feed(title)
     else:
@@ -300,8 +311,8 @@ def edit(title):
     except WikiError as e:
         notify('Error: ' + str(e))
 
-cmds = ('quit', 'bmark', 'bmarks', 'wikis', 'feeds',
-        'open', 'contents', 'edit', 'clearcache')
+cmds = ('quit', 'bmark', 'bmarks', 'wikis', 'feeds', 'open', 'contents',
+        'edit', 'clearcache', 'links', 'back', 'forward')
 
 
 def processCmd(cmd, *args):
@@ -310,11 +321,12 @@ def processCmd(cmd, *args):
     elif cmd == 'bmark':
         wiki.bmarks.add(header.text)
         notify("Bookmark Added")
-    elif cmd in ('bmarks', 'wikis', 'feeds', 'contents'):
+    elif cmd in ('bmarks', 'wikis', 'feeds', 'contents', 'links'):
         openOverlay({'bmarks': Bmarks,
                      'wikis': Wikis,
                      'feeds': Feeds,
-                     'contents': Toc}[cmd]())
+                     'contents': Toc,
+                     'links': Links}[cmd]())
     elif cmd == 'open':
         if args:
             openPage(' '.join(args))
@@ -356,6 +368,7 @@ def closeOverlay():
 
 history = []
 current = -1
+page = None
 
 palette = [('h1', 'bold', 'dark blue'),
            ('h2', 'bold,underline', ''),
