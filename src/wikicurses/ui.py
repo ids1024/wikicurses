@@ -230,7 +230,14 @@ class Pager(StandardKeyBinds, urwid.ListBox):
             self.body.append(urwid.Text(list(content)))
 
 
-def openPage(title, featured=False):
+def openPage(title, featured=False, browsinghistory=False):
+    if not browsinghistory:
+        global current
+        if current < len(history)-1:
+            del history[current+1:len(history)]
+        history.append(title)
+        current += 1
+
     if featured:
         page = wiki.get_featured_feed(title)
     else:
@@ -317,6 +324,16 @@ def processCmd(cmd, *args):
         wiki.clear_cache()
     elif cmd == 'edit':
         edit(header.text)
+    elif cmd == 'back':
+        global current
+        if current > 0:
+            current -= 1
+            openPage(history[current], browsinghistory=True)
+    elif cmd == 'forward':
+        global current
+        if current < len(history)-1:
+            current += 1
+            openPage(history[current], browsinghistory=True)
     elif cmd:
         notify(cmd + ': Unknown Command')
 
@@ -336,6 +353,9 @@ def openOverlay(widget, title=None, height=('relative', 50), width=('relative', 
 def closeOverlay():
     loop.widget = mainwidget
 
+
+history = []
+current = -1
 
 palette = [('h1', 'bold', 'dark blue'),
            ('h2', 'bold,underline', ''),
