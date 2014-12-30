@@ -10,3 +10,4 @@ Dependencies
 - [Python 3](http://www.python.org)
 - [Urwid](http://www.urwid.org)
 - [Beautiful Soup 4](http://www.crummy.com/software/BeautifulSoup)
+- [lxml](http://lxml.de/)

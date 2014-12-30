@@ -4,11 +4,11 @@ import http.cookiejar
 import time
 import hashlib
 import sys
-import xml.etree.ElementTree as ET
+from bs4 import BeautifulSoup
 from collections import OrderedDict
 from functools import lru_cache
 from wikicurses.htmlparse import parseExtract, parseFeature
-from wikicurses.settings import Settings
+from wikicurses.settings import Settings, wikis, conf
 
 useragent = "Wikicurses/0.1 (https://github.com/ids1024/wikicurses)"\
             " Python-urllib/%d.%d" % sys.version_info[:2]
@@ -28,6 +28,28 @@ class Wiki(object):
         self.password = password
         self.bmarks = Settings(url, 'bookmarks')
 
+    @classmethod
+    def fromApiUrl(cls, url):
+        wikiname = {v: k for k, v in wikis().items()}.get(url)
+        username = password = None
+        if wikiname:
+            username = conf[wikiname].get('username')
+            password = conf[wikiname].get('password')
+        return cls(url, username, password)
+
+    @classmethod
+    def fromPageUrl(cls, url):
+        html = urllib.request.urlopen(url).read().decode()
+        soup = BeautifulSoup(html, 'lxml')
+        link = soup.find('link', rel='EditURI')
+        if not link:
+            return None
+        rsdurl = urllib.parse.urljoin(url, link['href'])
+        rsd = urllib.request.urlopen(rsdurl).read().decode()
+        soup = BeautifulSoup(rsd, "xml")
+        apiurl = soup.find('api', {'name': 'MediaWiki'})['apiLink']
+        return cls.fromApiUrl(apiurl)
+
     @lru_cache(1)
     def get_siteinfo(self):
         result = self._query(action="query", meta="siteinfo",
@@ -36,6 +58,7 @@ class Wiki(object):
         self.articlepath = urllib.parse.urljoin(
             query['general']['base'],
             query['general']['articlepath'])
+        self.mainpage = query['general']['mainpage']
 
     def _query(self, post=False, **kwargs):
         params = {k: v for k, v in kwargs.items() if v is not False}
@@ -109,6 +132,8 @@ class Wiki(object):
     def search(self, name):
         """Search wiki for article and return _Article object."""
         self.get_siteinfo()
+        if not name:
+            name = self.mainpage
         result = json.loads(self._query(action="parse", page=name,
                                         prop="images|externallinks|iwlinks|"
                                         "links|displaytitle|properties|text",
@@ -130,7 +155,7 @@ class Wiki(object):
     @lru_cache(16)
     def get_featured_feed(self, feed):
         result = self._query(action="featuredfeed", feed=feed)
-        return _Featured(feed, ET.fromstring(result)[0])
+        return _Featured(feed, BeautifulSoup(result, "xml").find("channel"))
 
     @lru_cache(16)
     def search_sugestions(self, name):
@@ -151,6 +176,7 @@ class _Article(object):
     properties = {}
     html = ''
     links = []
+    iwlinks = []
 
     def __init__(self, wiki, search, result):
         self.wiki = wiki
@@ -163,6 +189,8 @@ class _Article(object):
             self.links = [i['*'] for i in result['links'] if ('exists' in i)
                     and not any(i['*'].startswith(j + ':') for j in
                         ('Category', 'Template', 'Template talk', 'Wikipedia'))]
+            self.iwlinks = [(i['*'].split(':', 1)[1], i['url'])
+                            for i in self.result['iwlinks']]
 
     @property
     def content(self):
@@ -175,14 +203,14 @@ class _Article(object):
         # if an url starts with //, it can by http or https.  Use http.
         extlinks = ['http:' + i if i.startswith('//') else i
                     for i in self.result['externallinks']]
-        iwlinks = [i['url'] for i in self.result['iwlinks']]
 
         if images:
             sections['Images'] = '\n'.join(images) + '\n'
         if extlinks:
             sections['External links'] = '\n'.join(extlinks) + '\n'
-        if iwlinks:
-            sections['Interwiki links'] = '\n'.join(iwlinks) + '\n'
+        if self.iwlinks:
+            sections['Interwiki links'] = '\n'.join(url for name, url
+                                                    in self.iwlinks) + '\n'
         return sections
 
 
@@ -190,17 +218,18 @@ class _Featured(object):
     exists = True
     properties = {}
     links = []
+    iwlinks = []
 
     def __init__(self, feed, result):
         self.feed = feed
         self.result = result
         self.title = result.find('title').text
         self.content = OrderedDict()
-        for i in self.result.findall('item'):
-            description = i.findtext('description')
+        for i in self.result.find_all('item'):
+            description = i.find('description').text
             text = parseFeature(description)
-            self.content[i.findtext('title')] = i.findtext(
-                'link') + '\n' + text
+            self.content[i.find('title').text] = i.find(
+                'link').text + '\n' + text
 
 
 cookiejar = http.cookiejar.CookieJar()

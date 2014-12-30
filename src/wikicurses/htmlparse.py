@@ -56,7 +56,7 @@ def parseExtract(html):
     """Parse article html and return OrderedDict of sections."""
     html = html.replace('\t', ' ')
     sections = OrderedDict()
-    soup = BeautifulSoup(html)
+    soup = BeautifulSoup(html, 'lxml')
     # Turn into tuple since the iterator is being modified
     for i in tuple(soup.strings):
         if not 'pre' in (j.name for j in i.parents):
@@ -85,7 +85,7 @@ def parseExtract(html):
 
 def parseFeature(html):
     """Parse featured feed html by striping out html tags."""
-    return BeautifulSoup(html).text
+    return BeautifulSoup(html, 'lxml').text
 
 
 def _processDisambigSection(section):
@@ -104,7 +104,7 @@ def _processDisambigSection(section):
 def parseDisambig(html):
     """Parse disambiguation page and return list of (article, text) tuples."""
     sections = OrderedDict()
-    soup = BeautifulSoup(html)
+    soup = BeautifulSoup(html, 'lxml')
     for i in soup.find_all(True, class_=skipclass):
         i.decompose()
     sections[''] = _processDisambigSection(soup)

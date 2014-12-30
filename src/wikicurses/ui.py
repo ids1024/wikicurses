@@ -2,6 +2,7 @@ import urwid
 import tempfile
 import subprocess
 import os
+import urllib.parse
 from wikicurses import formats
 from wikicurses import settings
 from wikicurses.wiki import Wiki, WikiError
@@ -25,7 +26,7 @@ class SearchBox(urwid.Edit):
     def keypress(self, size, key):
         if key == 'enter':
             closeOverlay()
-            openPage(self.edit_text or 'Main page')
+            openPage(self.edit_text)
         elif key == 'tab':
             matches = wiki.search_sugestions(self.edit_text)
             match = tabComplete(self.edit_text, matches)
@@ -111,6 +112,26 @@ class Links(SelectorBox):
         return page.links
 
     def _select(self, name):
+        openPage(name)
+
+
+class Iwlinks(SelectorBox):
+    title = "Interwiki Links"
+
+    def _items(self):
+        netlocname = [(urllib.parse.urlparse(url).netloc, name)
+                       for name, url in page.iwlinks]
+        netlocs = set(netloc for netloc, name in netlocname)
+        for netloc in netlocs:
+            yield urwid.Text(netloc)
+            # If the name in blank, the link refers to the site's Main Page
+            yield from (j or "Main Page" for i, j in netlocname if i == netloc)
+
+    def _select(sel, name):
+        if name == "Main Page":
+            name = ''
+        url = dict(page.iwlinks)[name]
+        openWiki(Wiki.fromPageUrl(url))
         openPage(name)
 
 
@@ -267,6 +288,9 @@ def openPage(title, featured=False, browsinghistory=False):
 
 def openWiki(name):
     global wiki
+    if isinstance(name, Wiki):
+        wiki = name
+        return
     if not name:
         name = settings.conf['general']['default']
     if name in settings.conf:
@@ -274,8 +298,8 @@ def openWiki(name):
         username = settings.conf[name].get('username')
         password = settings.conf[name].get('password')
     else:
-        url = name
-        username = password = ''
+        wiki = Wiki.fromApiUrl(name)
+        return
     wiki = Wiki(url, username, password)
 
 
@@ -312,7 +336,7 @@ def edit(title):
         notify('Error: ' + str(e))
 
 cmds = ('quit', 'bmark', 'bmarks', 'wikis', 'feeds', 'open', 'contents',
-        'edit', 'clearcache', 'links', 'back', 'forward')
+        'edit', 'clearcache', 'links', 'iwlinks', 'back', 'forward')
 
 
 def processCmd(cmd, *args):
@@ -321,12 +345,13 @@ def processCmd(cmd, *args):
     elif cmd == 'bmark':
         wiki.bmarks.add(header.text)
         notify("Bookmark Added")
-    elif cmd in ('bmarks', 'wikis', 'feeds', 'contents', 'links'):
+    elif cmd in ('bmarks', 'wikis', 'feeds', 'contents', 'links', 'iwlinks'):
         openOverlay({'bmarks': Bmarks,
                      'wikis': Wikis,
                      'feeds': Feeds,
                      'contents': Toc,
-                     'links': Links}[cmd]())
+                     'links': Links,
+                     'iwlinks': Iwlinks}[cmd]())
     elif cmd == 'open':
         if args:
             openPage(' '.join(args))
