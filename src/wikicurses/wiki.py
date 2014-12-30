@@ -29,6 +29,13 @@ class Wiki(object):
         self.bmarks = Settings(url, 'bookmarks')
 
     @classmethod
+    def fromName(cls, name):
+        url = conf[name]['url']
+        username = conf[name].get('username')
+        password = conf[name].get('password')
+        return cls(url, username, password)
+
+    @classmethod
     def fromApiUrl(cls, url):
         wikiname = {v: k for k, v in wikis().items()}.get(url)
         username = password = None

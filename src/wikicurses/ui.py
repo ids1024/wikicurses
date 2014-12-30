@@ -290,17 +290,12 @@ def openWiki(name):
     global wiki
     if isinstance(name, Wiki):
         wiki = name
-        return
     if not name:
         name = settings.conf['general']['default']
     if name in settings.conf:
-        url = settings.conf[name]['url']
-        username = settings.conf[name].get('username')
-        password = settings.conf[name].get('password')
+        wiki = Wiki.fromName(name)
     else:
         wiki = Wiki.fromApiUrl(name)
-        return
-    wiki = Wiki(url, username, password)
 
 
 def runEditor(text):
