@@ -335,9 +335,14 @@ def edit(title):
     except WikiError as e:
         notify('Error: ' + str(e))
 
-cmds = ('quit', 'bmark', 'bmarks', 'wikis', 'feeds', 'open', 'contents',
-        'edit', 'clearcache', 'links', 'iwlinks', 'back', 'forward')
-
+overlaymap = {'bmarks': Bmarks,
+              'wikis': Wikis,
+              'feeds': Feeds,
+              'contents': Toc,
+              'links': Links,
+              'iwlinks': Iwlinks}
+cmds = tuple(overlaymap) + ('quit', 'bmark', 'open', 'edit', 'clearcache',
+                            'back', 'forward')
 
 def processCmd(cmd, *args):
     if cmd in ('q', 'quit'):
@@ -345,13 +350,8 @@ def processCmd(cmd, *args):
     elif cmd == 'bmark':
         wiki.bmarks.add(header.text)
         notify("Bookmark Added")
-    elif cmd in ('bmarks', 'wikis', 'feeds', 'contents', 'links', 'iwlinks'):
-        openOverlay({'bmarks': Bmarks,
-                     'wikis': Wikis,
-                     'feeds': Feeds,
-                     'contents': Toc,
-                     'links': Links,
-                     'iwlinks': Iwlinks}[cmd]())
+    elif cmd in overlaymap:
+        openOverlay(overlaymap[cmd]())
     elif cmd == 'open':
         if args:
             openPage(' '.join(args))
