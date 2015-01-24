@@ -215,9 +215,6 @@ class _Article(object):
             sections['Images'] = '\n'.join(images) + '\n'
         if extlinks:
             sections['External links'] = '\n'.join(extlinks) + '\n'
-        if self.iwlinks:
-            sections['Interwiki links'] = '\n'.join(url for name, url
-                                                    in self.iwlinks) + '\n'
         return sections
 
 
