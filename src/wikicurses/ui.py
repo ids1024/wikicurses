@@ -3,8 +3,7 @@ import tempfile
 import subprocess
 import os
 import urllib.parse
-from wikicurses import formats
-from wikicurses import settings
+from wikicurses import formats, settings
 from wikicurses.wiki import Wiki, WikiError
 from wikicurses.htmlparse import parseDisambig
 
@@ -341,6 +340,8 @@ cmds = tuple(overlaymap) + ('quit', 'bmark', 'open', 'edit', 'clearcache',
                             'back', 'forward')
 
 def processCmd(cmd, *args):
+    global current
+
     if cmd in ('q', 'quit'):
         raise urwid.ExitMainLoop
     elif cmd == 'bmark':
@@ -358,12 +359,10 @@ def processCmd(cmd, *args):
     elif cmd == 'edit':
         edit(header.text)
     elif cmd == 'back':
-        global current
         if current > 0:
             current -= 1
             openPage(history[current], browsinghistory=True)
     elif cmd == 'forward':
-        global current
         if current < len(history)-1:
             current += 1
             openPage(history[current], browsinghistory=True)
