@@ -4,10 +4,15 @@ from collections import OrderedDict
 from bs4 import BeautifulSoup
 
 from wikicurses import formats
+from wikicurses.settings import conf
 
 skipclass = ('wiki-sidebar', 'infobox', 'mw-editsection', 'editsection',
              'wikitable', 'thumb', 'gallery', 'article-thumb')
+skipsection = ('Contents', 'External links', 'See also')
 
+if conf.getboolean('general', 'hide_references'):
+    skipclass += ('reference',)
+    skipsection += ('References',)
 
 class UrwidMarkupHandler:
 
@@ -79,7 +84,7 @@ def parseExtract(html):
         i.decompose()
     sections[''] = _processExtractSection(soup.body or soup)
     for i in soup.find_all('h2'):
-        if i.text not in ('Contents', 'External links', 'See also'):
+        if i.text not in skipsection:
             sections[i.text.strip()] = _processExtractSection(i.next_siblings)
     for i in sections:
         if not sections[i]:

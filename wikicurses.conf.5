@@ -1,4 +1,4 @@
-.TH wikicurses.conf 5 2014-12-29
+.TH wikicurses.conf 5 2015-02-22
 .SH NAME
 wikicurses \- curses interface for MediaWiki
 .SH SYNOPSIS
@@ -12,6 +12,7 @@ The configuration file for wikicurses is divided into sections with the "general
 [general]
 default = Wikipedia
 mouse = False
+hide_references = False
 
 [keymap]
 q = quit
@@ -40,6 +41,11 @@ The name of the wiki to use by default
 mouse
 .RS 4
 Support mouse input. With this enabled, you will have to hold down shift to select text.
+.RE
+.PP
+hide_references
+.RS 4
+Hide the References section at the bottom of the page and strip citations from the text.
 .RE
 .SS keymap
 This section configures the keyboard bindings of wikicurses, in the format "key=command". Command can be any ex command supported by wikicurses.
