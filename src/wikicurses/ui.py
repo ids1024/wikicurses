@@ -338,7 +338,7 @@ overlaymap = {'bmarks': Bmarks,
               'links': Links,
               'iwlinks': Iwlinks}
 cmds = tuple(overlaymap) + ('quit', 'bmark', 'open', 'edit', 'clearcache',
-                            'help', 'back', 'forward')
+                            'help', 'back', 'forward', 'random')
 
 def processCmd(cmd, *args):
     global current
@@ -370,6 +370,8 @@ def processCmd(cmd, *args):
         if current < len(history)-1:
             current += 1
             openPage(history[current], browsinghistory=True)
+    elif cmd == 'random':
+        openPage(wiki.random())
     elif cmd:
         notify(cmd + ': Unknown Command')
 

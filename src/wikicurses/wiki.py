@@ -170,6 +170,12 @@ class Wiki(object):
         result = self._query(action="opensearch", search=name, format="json")
         return json.loads(result)[1]
 
+    def random(self):
+        """Return the name of a random page."""
+        result = json.loads(self._query(action="query", list="random",
+            rnnamespace=0, format="json"))
+        return result["query"]["random"][0]["title"]
+
     def clear_cache(self):
         """Clear the cache."""
         self.get_siteinfo.cache_clear()
