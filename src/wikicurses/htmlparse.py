@@ -69,7 +69,11 @@ def parseExtract(html):
         if i.text and not i.find_all('div'):
             i.insert_after(soup.new_string('\n'))
     for i in soup.find_all('li'):
-        i.insert_before(soup.new_string('- '))
+        if i.parent.name == 'ol':
+            num = i.parent.find_all('li').index(i) + 1
+            i.insert_before(soup.new_string(str(num) + '. '))
+        else:
+            i.insert_before(soup.new_string('- '))
         i.insert_after(soup.new_string('\n'))
     for i in soup.find_all(True, class_=skipclass):
         i.decompose()
