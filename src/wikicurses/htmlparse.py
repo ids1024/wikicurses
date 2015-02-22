@@ -79,7 +79,7 @@ def parseExtract(html):
         i.decompose()
     sections[''] = _processExtractSection(soup.body or soup)
     for i in soup.find_all('h2'):
-        if i.text not in ('Contents', 'External links', 'References', 'See also'):
+        if i.text not in ('Contents', 'External links', 'See also'):
             sections[i.text.strip()] = _processExtractSection(i.next_siblings)
     for i in sections:
         if not sections[i]:
