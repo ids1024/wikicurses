@@ -206,6 +206,7 @@ class _Article(object):
                             for i in self.result['iwlinks']]
 
     @property
+    @lru_cache(1)
     def content(self):
         if not self.exists:
             return {'': ['Page Not Found.']}

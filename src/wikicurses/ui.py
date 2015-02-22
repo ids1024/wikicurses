@@ -5,7 +5,7 @@ import os
 import urllib.parse
 from wikicurses import formats, settings
 from wikicurses.wiki import Wiki, WikiError
-from wikicurses.htmlparse import parseDisambig
+from wikicurses.htmlparse import parseDisambig, UrwidMarkupHandler
 
 
 def tabComplete(text, matches):
@@ -157,19 +157,27 @@ class Feeds(SelectorBox):
 
 
 class Ex(urwid.Edit):
+    mode = None
 
     def keypress(self, size, key):
         if key == 'esc' or (key == 'backspace' and not self.edit_text):
             self.exitexmode()
-        elif key == 'tab':
+        elif key == 'tab' and self.mode == 'ex':
             matches = [i for i in cmds if i.startswith(self.edit_text)]
             match = tabComplete(self.edit_text, matches)
             self.set_edit_text(match)
             self.edit_pos = len(match)
         elif key == 'enter':
             words = self.edit_text.split(' ')
+            mode = self.mode
             self.exitexmode()
-            processCmd(*words)
+            if mode == 'ex':
+                processCmd(*words)
+            elif mode == 'search':
+                for title, content in page.content.items():
+                    if isinstance(content, UrwidMarkupHandler):
+                        content.search(' '.join(words))
+                mainwidget.body = Pager(page)
         else:
             return super().keypress(size, key)
 
@@ -177,10 +185,17 @@ class Ex(urwid.Edit):
         self.set_caption('')
         self.set_edit_text('')
         mainwidget.set_focus('body')
+        self.mode = None
 
     def enterexmode(self):
         mainwidget.set_focus('footer')
         self.set_caption(':')
+        self.mode = 'ex'
+
+    def entersearchmode(self):
+        mainwidget.set_focus('footer')
+        self.set_caption('/')
+        self.mode = 'search'
 
 
 class StandardKeyBinds:
@@ -192,6 +207,8 @@ class StandardKeyBinds:
         cmdmap = settings.conf['keymap']
         if key == ':':
             mainwidget.footer.enterexmode()
+        if key == '/':
+            mainwidget.footer.entersearchmode()
         elif key in ('g', 'home'):
             self.set_focus(0)
             self.render(size)
@@ -401,7 +418,11 @@ palette = [('h1', 'bold', 'dark blue'),
            ('h', 'bold,underline', '')]
 
 #(ITALIC, 'italic') does not work. No italics option?
-outputfmt = (('b', 'bold'), ('blockquote', 'dark gray'))
+outputfmt = (
+        ('b', 'bold'),
+        ('blockquote', 'dark gray'),
+        ('searchresult', 'standout')
+        )
 for x in range(1, sum(formats) + 1):
     fmt = ','.join(j for i, j in outputfmt if x & formats[i])
     palette.append((x, fmt, ''))

@@ -18,12 +18,33 @@ class UrwidMarkupHandler:
 
     def __init__(self):
         self._list = []
+        self._oldlist = None
 
     def add(self, text, attribute):
         if self and self[-1][0] == attribute:
             self[-1][1] += text
         else:
             self._list.append([attribute, text])
+
+    def search(self, findtext):
+        self.unsearch()
+        self._oldlist = self._list
+        self._list = []
+        for attribute, text in self._oldlist:
+            cur = 0
+            if isinstance(attribute, str):
+                continue
+            for match in re.finditer(findtext, text):
+                start, end = match.start(), match.end()
+                self.add(text[cur:start], attribute)
+                self.add(text[start:end], attribute | formats.searchresult)
+                cur = end
+            self.add(text[cur:], attribute)
+
+    def unsearch(self):
+        if self._oldlist:
+            self._list = self._oldlist
+            self._oldlist = None
 
     def __iter__(self):
         return (tuple(i) for i in self._list)
