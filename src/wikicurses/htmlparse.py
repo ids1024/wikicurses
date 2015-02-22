@@ -73,7 +73,7 @@ def parseExtract(html):
             num = i.parent.find_all('li').index(i) + 1
             i.insert_before(soup.new_string(str(num) + '. '))
         else:
-            i.insert_before(soup.new_string('- '))
+            i.insert_before(soup.new_string('• '))
         i.insert_after(soup.new_string('\n'))
     for i in soup.find_all(True, class_=skipclass):
         i.decompose()
