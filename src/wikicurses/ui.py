@@ -305,6 +305,7 @@ def runEditor(text):
         subprocess.call([os.environ.get('EDITOR', 'vim'), file.name])
         file.seek(0)
         return file.read()
+    loop.screen.clear() # Completely redraw screen after external command
 
 
 def edit(title):
@@ -360,6 +361,7 @@ def processCmd(cmd, *args):
         edit(header.text)
     elif cmd == 'help':
         subprocess.call(['man', 'wikicurses'])
+        loop.screen.clear() # Completely redraw screen after external command
     elif cmd == 'back':
         if current > 0:
             current -= 1
