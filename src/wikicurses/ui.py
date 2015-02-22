@@ -337,7 +337,7 @@ overlaymap = {'bmarks': Bmarks,
               'links': Links,
               'iwlinks': Iwlinks}
 cmds = tuple(overlaymap) + ('quit', 'bmark', 'open', 'edit', 'clearcache',
-                            'back', 'forward')
+                            'help', 'back', 'forward')
 
 def processCmd(cmd, *args):
     global current
@@ -358,6 +358,8 @@ def processCmd(cmd, *args):
         wiki.clear_cache()
     elif cmd == 'edit':
         edit(header.text)
+    elif cmd == 'help':
+        subprocess.call(['man', 'wikicurses'])
     elif cmd == 'back':
         if current > 0:
             current -= 1
