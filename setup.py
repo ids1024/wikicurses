@@ -3,7 +3,7 @@
 from distutils.core import setup
 
 setup(name='Wikicurses',
-      version='1.0',
+      version='1.1',
       description='A simple curses interface for accessing Wikipedia.',
       author='Ian D. Scott',
       author_email='ian@perebruin.com',
