@@ -201,7 +201,7 @@ class Ex(urwid.Edit):
 class StandardKeyBinds:
 
     def keypress(self, size, key):
-        if not isinstance(mainwidget.footer, urwid.Edit):
+        if not isinstance(mainwidget.footer, Ex):
             mainwidget.footer = Ex()
 
         cmdmap = settings.conf['keymap']
