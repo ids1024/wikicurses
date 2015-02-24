@@ -33,6 +33,7 @@ class UrwidMarkupHandler:
         for attribute, text in self._oldlist:
             cur = 0
             if isinstance(attribute, str):
+                self.add(text, attribute)
                 continue
             for match in re.finditer(findtext, text):
                 start, end = match.start(), match.end()
