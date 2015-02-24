@@ -1,2 +1,2 @@
-- Implement search feature
-  * Implement actual searching in UrwidMarkupHandler
+- Implement search feature (Partially implemented)
+- Add :set command / other method to configure from within wikicurses
