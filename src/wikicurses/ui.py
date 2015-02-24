@@ -168,7 +168,7 @@ class Ex(urwid.Edit):
             self.set_edit_text(match)
             self.edit_pos = len(match)
         elif key == 'enter':
-            words = self.edit_text.split(' ')
+            words = self.edit_text.split()
             mode = self.mode
             self.exitexmode()
             if mode == 'ex':
@@ -176,7 +176,10 @@ class Ex(urwid.Edit):
             elif mode == 'search':
                 for title, content in page.content.items():
                     if isinstance(content, UrwidMarkupHandler):
-                        content.search(' '.join(words))
+                        if words:
+                           content.search(' '.join(words))
+                        else:
+                            content.unsearch()
                 mainwidget.body = Pager(page)
         else:
             return super().keypress(size, key)
