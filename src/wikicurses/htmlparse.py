@@ -40,7 +40,8 @@ class UrwidMarkupHandler:
                 self.add(text[cur:start], attribute)
                 self.add(text[start:end], attribute | formats.searchresult)
                 cur = end
-            self.add(text[cur:], attribute)
+            if text[cur:]:
+                self.add(text[cur:], attribute)
 
     def unsearch(self):
         if self._oldlist:
