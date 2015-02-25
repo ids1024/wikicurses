@@ -105,6 +105,8 @@ def parseExtract(html):
         else:
             i.insert_before(soup.new_string('• '))
         i.insert_after(soup.new_string('\n'))
+        if not 'li' in (j.name for j in i.next_siblings): # Last item in list
+            i.insert_after(soup.new_string('\n'))
     for i in soup.find_all(True, class_=skipclass):
         i.decompose()
     sections[''] = _processExtractSection(soup.body or soup)
