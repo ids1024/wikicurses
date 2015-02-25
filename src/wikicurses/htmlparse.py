@@ -21,6 +21,8 @@ class UrwidMarkupHandler:
         self._oldlist = None
 
     def add(self, text, attribute):
+        if not text:
+            return
         if self and self[-1][0] == attribute:
             self[-1][1] += text
         else:
