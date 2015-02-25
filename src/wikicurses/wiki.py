@@ -186,11 +186,6 @@ class Wiki(object):
 
 
 class _Article(object):
-    properties = {}
-    html = ''
-    links = []
-    iwlinks = []
-
     def __init__(self, wiki, search, result):
         self.wiki = wiki
         self.title = result.get('title', search)
@@ -204,25 +199,25 @@ class _Article(object):
                         ('Category', 'Template', 'Template talk', 'Wikipedia'))]
             self.iwlinks = [(i['*'].split(':', 1)[1], i['url'])
                             for i in self.result['iwlinks']]
+            # if an url starts with //, it can by http or https.  Use http.
+            self.extlinks = ['http:' + i if i.startswith('//') else i
+                             for i in self.result['externallinks']]
+            self.images = [self.wiki.articlepath.replace('$1', 'File:' + i)
+                           for i in self.result['images']]
 
-    @property
-    @lru_cache(1)
-    def content(self):
-        if not self.exists:
-            return {'': ['Page Not Found.']}
-        sections = parseExtract(self.html)
-
-        images = [self.wiki.articlepath.replace('$1', 'File:' + i)
-                  for i in self.result['images']]
-        # if an url starts with //, it can by http or https.  Use http.
-        extlinks = ['http:' + i if i.startswith('//') else i
-                    for i in self.result['externallinks']]
-
-        if images:
-            sections['Images'] = '\n'.join(images) + '\n'
-        if extlinks:
-            sections['External links'] = '\n'.join(extlinks) + '\n'
-        return sections
+            self.content = parseExtract(self.html)
+            if self.images:
+                self.content['Images'] = '\n'.join(self.images) + '\n'
+            if self.extlinks:
+                self.content['External links'] = '\n'.join(self.extlinks) + '\n'
+        else:
+            self.properties = {}
+            self.html = ''
+            self.links = []
+            self.iwlinks = []
+            self.extlinks = []
+            self.image = []
+            self.content = {'': ['Page Not Found.']}
 
 
 class _Featured(object):
