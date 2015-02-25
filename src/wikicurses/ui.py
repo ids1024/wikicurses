@@ -8,6 +8,14 @@ from wikicurses.wiki import Wiki, WikiError
 from wikicurses.htmlparse import parseDisambig, UrwidMarkupHandler
 
 
+def executeCommand(cmd):
+    try:
+        subprocess.call(cmd)
+    except FileNotFoundError:
+        notify("Error: command '" + cmd[0] + "' not found.")
+    loop.screen.clear() # Completely redraw screen after external command
+
+
 def tabComplete(text, matches):
     if not matches:
         return text
@@ -141,8 +149,7 @@ class Extlinks(SelectorBox):
         return page.extlinks
 
     def _select(sel, url):
-        subprocess.call([os.environ.get('BROWSER', 'lynx'), url])
-        loop.screen.clear() # Completely redraw screen after external command
+        executeCommand([os.environ.get('BROWSER', 'lynx'), url])
 
 
 class Wikis(SelectorBox):
@@ -333,10 +340,9 @@ def runEditor(text):
     with tempfile.NamedTemporaryFile('w+') as file:
         file.write(text)
         file.flush()
-        subprocess.call([os.environ.get('EDITOR', 'vim'), file.name])
+        executeCommand([os.environ.get('EDITOR', 'vim'), file.name])
         file.seek(0)
         return file.read()
-    loop.screen.clear() # Completely redraw screen after external command
 
 
 def edit(title):
@@ -392,8 +398,7 @@ def processCmd(cmd, *args):
     elif cmd == 'edit':
         edit(header.text)
     elif cmd == 'help':
-        subprocess.call(['man', 'wikicurses'])
-        loop.screen.clear() # Completely redraw screen after external command
+        executeCommand(['man', 'wikicurses'])
     elif cmd == 'back':
         if current > 0:
             current -= 1
