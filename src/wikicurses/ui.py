@@ -176,9 +176,22 @@ class Feeds(SelectorBox):
 
 class Ex(urwid.Edit):
     mode = None
+    highlighted = ''
+
+    def highlightText(self, text):
+        self.highlighted = text
+        for title, content in page.content.items():
+            if isinstance(content, UrwidMarkupHandler):
+                if text:
+                   content.search(text)
+                else:
+                    content.unsearch()
+        mainwidget.body = Pager(page)
 
     def keypress(self, size, key):
         if key == 'esc' or (key == 'backspace' and not self.edit_text):
+            if self.mode == 'search':
+                self.highlightText(self.previous_highlight)
             self.exitexmode()
         elif key == 'tab' and self.mode == 'ex':
             matches = [i for i in cmds if i.startswith(self.edit_text)]
@@ -192,15 +205,14 @@ class Ex(urwid.Edit):
             if mode == 'ex':
                 processCmd(*words)
             elif mode == 'search':
-                for title, content in page.content.items():
-                    if isinstance(content, UrwidMarkupHandler):
-                        if words:
-                           content.search(' '.join(words))
-                        else:
-                            content.unsearch()
-                mainwidget.body = Pager(page)
+                self.highlightText(' '.join(words))
         else:
-            return super().keypress(size, key)
+            returnval = super().keypress(size, key)
+            # Highlight after running super().keypress() so that edit_text is
+            # up to date.
+            if self.mode == 'search':
+                self.highlightText(self.edit_text)
+            return returnval
 
     def exitexmode(self):
         self.set_caption('')
@@ -214,6 +226,7 @@ class Ex(urwid.Edit):
         self.mode = 'ex'
 
     def entersearchmode(self):
+        self.previous_highlight = self.highlighted
         mainwidget.set_focus('footer')
         self.set_caption('/')
         self.mode = 'search'
@@ -223,7 +236,7 @@ class StandardKeyBinds:
 
     def keypress(self, size, key):
         if not isinstance(mainwidget.footer, Ex):
-            mainwidget.footer = Ex()
+            mainwidget.footer = ex
 
         cmdmap = settings.conf['keymap']
         if key == ':':
@@ -452,7 +465,8 @@ urwid.command_map['j'] = 'cursor down'
 urwid.command_map['ctrl b'] = 'cursor page up'
 urwid.command_map['ctrl f'] = 'cursor page down'
 
+ex = Ex()
 header = urwid.Text('Wikicurses', align='center')
 loading = urwid.Filler(urwid.Text('Loading...'), 'top')
-mainwidget = urwid.Frame(loading, urwid.AttrMap(header, 'h1'), Ex())
+mainwidget = urwid.Frame(loading, urwid.AttrMap(header, 'h1'), ex)
 loop = urwid.MainLoop(mainwidget, palette=palette, handle_mouse=settings.mouse)
