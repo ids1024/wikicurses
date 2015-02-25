@@ -1,4 +1,4 @@
-.TH wikicurses 1 2015-02-22
+.TH wikicurses 1 2015-02-24
 .SH NAME
 wikicurses \- curses interface for MediaWiki
 .SH SYNOPSIS
@@ -67,9 +67,14 @@ Open bookmarks
 Open list of internal links in page
 .RE
 .PP
-:links
+:iwlinks
 .RS 4
 Open list of interwiki links in page
+.RE
+.PP
+:extlinks
+.RS 4
+Open list of external links in page to open in browser
 .RE
 .PP
 :wikis
@@ -144,6 +149,21 @@ Url or name of wiki to use
 .RS 4
 view featured feed
 .RE
+.SH ENVIRONMENT VARIABLES
+.PP
+HOME, XDG_CONFIG_HOME
+.RS 4
+Determines where to look for and store configuration files.
+.RE
+.PP
+EDITOR
+.RS 4
+The name of the command to use as a text editor, defaulting to vim.
+.RE
+.PP
+BROWSER
+.RS 4
+The name of the command to use as a web browser, defaulting to lynx.
 .SH EXAMPLES
 .PP
 wikicurses Wiki
