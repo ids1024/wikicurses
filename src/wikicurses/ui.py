@@ -446,19 +446,22 @@ history = []
 current = -1
 page = None
 
-palette = [('h1', 'bold', 'dark blue'),
-           ('h2', 'bold,underline', ''),
-           ('h', 'bold,underline', '')]
-
+palette = []
 #(ITALIC, 'italic') does not work. No italics option?
 outputfmt = (
-        ('b', 'bold'),
-        ('blockquote', 'dark gray'),
-        ('searchresult', 'standout')
+        ('b', 'bold', ''),
+        ('blockquote', 'dark gray', ''),
+        ('searchresult', 'standout', ''),
+        ('h1', 'bold', 'dark blue'),
+        ('h2', 'bold,underline', ''),
+        ('h', 'bold,underline', '')
         )
 for x in range(1, sum(formats) + 1):
-    fmt = ','.join(j for i, j in outputfmt if x & formats[i])
-    palette.append((x, fmt, ''))
+    fgfmt = set(j for i, fg, bg in outputfmt if x & formats[i]
+            and fg for j in fg.split(','))
+    bgfmt = set(j for i, fg, bg in outputfmt if x & formats[i]
+            and bg for j in bg.split(','))
+    palette.append((x, ','.join(fgfmt), ','.join(bgfmt)))
 
 urwid.command_map['k'] = 'cursor up'
 urwid.command_map['j'] = 'cursor down'
@@ -468,5 +471,5 @@ urwid.command_map['ctrl f'] = 'cursor page down'
 ex = Ex()
 header = urwid.Text('Wikicurses', align='center')
 loading = urwid.Filler(urwid.Text('Loading...'), 'top')
-mainwidget = urwid.Frame(loading, urwid.AttrMap(header, 'h1'), ex)
+mainwidget = urwid.Frame(loading, urwid.AttrMap(header, formats.h1), ex)
 loop = urwid.MainLoop(mainwidget, palette=palette, handle_mouse=settings.mouse)

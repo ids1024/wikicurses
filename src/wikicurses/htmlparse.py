@@ -74,7 +74,7 @@ def _processExtractSection(section):
             tformat = sum(
                 formats[i] for i in set(i.name for i in formats).intersection(partags))
             if [i for i in partags if re.fullmatch('h[3-6]', i)]:
-                tformat = 'h'
+                tformat |= formats.h
             items.add(item, tformat)
     if items:
         items[0][1] = items[0][1].lstrip()
