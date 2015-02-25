@@ -134,6 +134,17 @@ class Iwlinks(SelectorBox):
         openPage(name)
 
 
+class Extlinks(SelectorBox):
+    title = "External Links"
+
+    def _items(self):
+        return page.extlinks
+
+    def _select(sel, url):
+        subprocess.call([os.environ.get('BROWSER', 'lynx'), url])
+        loop.screen.clear() # Completely redraw screen after external command
+
+
 class Wikis(SelectorBox):
     title = "Wikis"
 
@@ -356,7 +367,8 @@ overlaymap = {'bmarks': Bmarks,
               'feeds': Feeds,
               'contents': Toc,
               'links': Links,
-              'iwlinks': Iwlinks}
+              'iwlinks': Iwlinks,
+              'extlinks': Extlinks}
 cmds = tuple(overlaymap) + ('quit', 'bmark', 'open', 'edit', 'clearcache',
                             'help', 'back', 'forward', 'random')
 
