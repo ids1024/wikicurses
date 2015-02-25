@@ -142,7 +142,7 @@ class Wiki(object):
         if not name:
             name = self.mainpage
         result = json.loads(self._query(action="parse", page=name,
-                                        prop="images|externallinks|iwlinks|"
+                                        prop="externallinks|iwlinks|"
                                         "links|displaytitle|properties|text",
                                         format="json", redirects=True
                                         )).get('parse', {})
@@ -202,12 +202,8 @@ class _Article(object):
             # if an url starts with //, it can by http or https.  Use http.
             self.extlinks = ['http:' + i if i.startswith('//') else i
                              for i in self.result['externallinks']]
-            self.images = [self.wiki.articlepath.replace('$1', 'File:' + i)
-                           for i in self.result['images']]
 
             self.content = parseExtract(self.html)
-            if self.images:
-                self.content['Images'] = '\n'.join(self.images) + '\n'
             if self.extlinks:
                 self.content['External links'] = '\n'.join(self.extlinks) + '\n'
         else:
@@ -216,7 +212,6 @@ class _Article(object):
             self.links = []
             self.iwlinks = []
             self.extlinks = []
-            self.image = []
             self.content = {'': ['Page Not Found.']}
 
 
