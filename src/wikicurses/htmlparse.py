@@ -4,13 +4,13 @@ from collections import OrderedDict
 from bs4 import BeautifulSoup
 
 from wikicurses import formats
-from wikicurses.settings import conf
+from wikicurses import settings
 
 skipclass = ('wiki-sidebar', 'infobox', 'mw-editsection', 'editsection',
              'wikitable', 'thumb', 'gallery', 'article-thumb')
 skipsection = ('Contents', 'External links', 'See also')
 
-if conf.getboolean('general', 'hide_references'):
+if settings.hide_references:
     skipclass += ('reference',)
     skipsection += ('References',)
 

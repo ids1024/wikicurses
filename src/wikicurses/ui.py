@@ -455,5 +455,4 @@ urwid.command_map['ctrl f'] = 'cursor page down'
 header = urwid.Text('Wikicurses', align='center')
 loading = urwid.Filler(urwid.Text('Loading...'), 'top')
 mainwidget = urwid.Frame(loading, urwid.AttrMap(header, 'h1'), Ex())
-loop = urwid.MainLoop(mainwidget, palette=palette,
-                      handle_mouse=settings.conf.getboolean('general', 'mouse'))
+loop = urwid.MainLoop(mainwidget, palette=palette, handle_mouse=settings.mouse)

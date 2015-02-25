@@ -1,15 +1,23 @@
 import os
 import json
 from urllib.parse import urlparse
-from configparser import ConfigParser
+import configparser
 
 default_configdir = os.environ['HOME'] + '/.config'
 configpath = os.environ.get(
     'XDG_CONFIG_HOME', default_configdir) + '/wikicurses'
 
-conf = ConfigParser()
+conf = configparser.ConfigParser()
 conf.read(['/etc/wikicurses.conf', configpath + '/config'])
 
+try:
+    mouse = conf.getboolean('general', 'mouse')
+except (ValueError, configparser.NoOptionError):
+    mouse = False
+try:
+    hide_references = conf.getboolean('general', 'hide_references')
+except (ValueError, configparser.NoOptionError):
+    hide_references = False
 
 class Settings:
 
