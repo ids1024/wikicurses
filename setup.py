@@ -18,4 +18,5 @@ setup(name='Wikicurses',
           ('/usr/share/zsh/site-functions', ['_wikicurses'])
           ],
       scripts = ['wikicurses'],
+      install_requires = ['beautifulsoup4', 'lxml', 'urwid'],
      )
