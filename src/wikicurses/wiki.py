@@ -194,9 +194,9 @@ class _Article(object):
         if self.exists:
             self.properties = {i['name']: i['*'] for i in result['properties']}
             self.html = result['text']['*']
-            self.links = [i['*'] for i in result['links'] if ('exists' in i)
-                    and not any(i['*'].startswith(j + ':') for j in
-                        ('Category', 'Template', 'Template talk', 'Wikipedia'))]
+            self.links = [i['*'] for i in result['links'] if ('exists' in i) and
+                          not any(i['*'].startswith(j + ':') for j in
+                          ('Category', 'Template', 'Template talk', 'Wikipedia'))]
             self.iwlinks = [(i['*'].split(':', 1)[1], i['url'])
                             for i in self.result['iwlinks']]
             # if an url starts with //, it can by http or https.  Use http.
