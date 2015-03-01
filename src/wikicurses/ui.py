@@ -370,7 +370,7 @@ def edit(title):
 
         def submit(button):
             closeOverlay()
-            wiki.commit_edit(title, newtext, summary.edit_text,
+            wiki.commit_edit(newtext, summary.edit_text,
                              minor.get_state(), verify)
             openPage(title)
         summary = urwid.Edit('Summary: ')

@@ -113,9 +113,9 @@ class Wiki(object):
 
         rev = next(iter(result['pages'].values()))['revisions'][0]
         starttime = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
-        return rev['*'], (rev['timestamp'], starttime)
+        return rev['*'], (title, rev['timestamp'], starttime)
 
-    def commit_edit(self, title, text, summary, minor, verify):
+    def commit_edit(self, text, summary, minor, verify):
         """Commit edit of page.
         
         Required arguments:
@@ -127,8 +127,8 @@ class Wiki(object):
         """
         md5sum = hashlib.md5(text.encode()).hexdigest()
         result = json.loads(self._query(post=True, action='edit', text=text,
-                                        title=title, basetimestamp=verify[0],
-                                        starttimestamp=verify[1], md5=md5sum,
+                                        title=verify[0], basetimestamp=verify[1],
+                                        starttimestamp=verify[2], md5=md5sum,
                                         token=self.csrftoken, summary=summary,
                                         minor=minor, format='json'))['edit']
         self.search.cache_clear()
