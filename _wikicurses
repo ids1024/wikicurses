@@ -2,7 +2,7 @@
 
 _wikicurses_wiki() {
 	IFS=$'\n'
-	wikis=($(wikicurses --complete wiki $words[CURRENT] 2>/dev/null))
+	wikis=($(wikicurses --complete wiki 2>/dev/null))
 	_wanted wikis expl "wikis" compadd "${(@)wikis}"
 }
 
@@ -19,9 +19,9 @@ _wikicurses_feed() {
 	_wikicurses_get_wikiarg
 	IFS=$'\n'
 	if [[ $wiki ]] then
-		feeds=($(wikicurses -w $wiki --complete feed $words[CURRENT] 2>/dev/null))
+		feeds=($(wikicurses -w $wiki --complete feed 2>/dev/null))
 	else
-		feeds=($(wikicurses --complete feed $words[CURRENT] 2>/dev/null))
+		feeds=($(wikicurses --complete feed 2>/dev/null))
 	fi
 	_wanted feeds expl "feeds" compadd "${(@)feeds}"
 }
