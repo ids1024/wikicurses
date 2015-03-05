@@ -16,6 +16,7 @@ _wikicurses_get_wikiarg() {
 }
 
 _wikicurses_feed() {
+	local wiki
 	_wikicurses_get_wikiarg
 	IFS=$'\n'
 	if [[ $wiki ]] then
@@ -27,6 +28,7 @@ _wikicurses_feed() {
 }
 
 _wikicurses_name() {
+	local wiki
 	_wikicurses_get_wikiarg
 	IFS=$'\n'
 	if [[ $wiki ]] then
