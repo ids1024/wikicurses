@@ -7,7 +7,8 @@ from wikicurses import formats
 from wikicurses import settings
 
 skipclass = ('wiki-sidebar', 'infobox', 'mw-editsection', 'editsection',
-             'wikitable', 'thumb', 'gallery', 'article-thumb')
+             'wikitable', 'thumb', 'gallery', 'article-thumb',
+             'mw-headline-anchor')
 skipsection = ('Contents', 'External links', 'See also')
 
 if settings.hide_references:
