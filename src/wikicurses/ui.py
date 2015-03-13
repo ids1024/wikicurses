@@ -246,11 +246,11 @@ class StandardKeyBinds:
         if key == '/':
             ex.entersearchmode()
         elif key in ('g', 'home'):
-            self.set_focus(0)
-            self.render(size)
+            self.change_focus(size, 0, 0)
         elif key in ('G', 'end'):
-            self.set_focus(len(self.body) - 1)
-            self.render(size)
+            self.change_focus(size, len(self.body) - 1)
+            offset = size[1] - self.focus.rows((size[0],))
+            self.change_focus(size, len(self.body) - 1, offset)
         elif key in cmdmap and cmdmap[key]:
             processCmd(cmdmap[key])
         else:
