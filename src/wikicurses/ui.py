@@ -242,9 +242,9 @@ class StandardKeyBinds:
 
         cmdmap = settings.conf['keymap']
         if key == ':':
-            mainwidget.footer.enterexmode()
+            ex.enterexmode()
         if key == '/':
-            mainwidget.footer.entersearchmode()
+            ex.entersearchmode()
         elif key in ('g', 'home'):
             self.set_focus(0)
             self.render(size)
