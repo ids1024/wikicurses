@@ -12,7 +12,7 @@ def executeCommand(cmd):
     try:
         subprocess.call(cmd)
     except FileNotFoundError:
-        notify("Error: command '" + cmd[0] + "' not found.")
+        ex.notify("Error: command '" + cmd[0] + "' not found.")
     loop.screen.clear() # Completely redraw screen after external command
 
 
@@ -231,12 +231,14 @@ class Ex(urwid.Edit):
         self.set_caption('/')
         self.mode = 'search'
 
+    def notify(self, text):
+        self.set_edit_text(text)
+
 
 class StandardKeyBinds:
 
     def keypress(self, size, key):
-        if not isinstance(mainwidget.footer, Ex):
-            mainwidget.footer = ex
+        ex.notify('') # Clear any notification
 
         cmdmap = settings.conf['keymap']
         if key == ':':
@@ -365,7 +367,7 @@ def edit(title):
 
         newtext = runEditor(text)
         if newtext == text:
-            notify('Edit Canceled: No Change')
+            ex.notify('Edit Canceled: No Change')
             return
 
         def submit(button):
@@ -379,7 +381,7 @@ def edit(title):
         pile = urwid.Pile([summary, minor, submit_button])
         openOverlay(pile, 'Edit', 'pack')
     except WikiError as e:
-        notify('Error: ' + str(e))
+        ex.notify('Error: ' + str(e))
 
 overlaymap = {'bmarks': Bmarks,
               'wikis': Wikis,
@@ -398,7 +400,7 @@ def processCmd(cmd, *args):
         raise urwid.ExitMainLoop
     elif cmd == 'bmark':
         wiki.bmarks.add(header.text)
-        notify("Bookmark Added")
+        ex.notify("Bookmark Added")
     elif cmd in overlaymap:
         openOverlay(overlaymap[cmd]())
     elif cmd == 'open':
@@ -423,11 +425,7 @@ def processCmd(cmd, *args):
     elif cmd == 'random':
         openPage(wiki.random())
     elif cmd:
-        notify(cmd + ': Unknown Command')
-
-
-def notify(text):
-    mainwidget.footer = urwid.Text(text)
+        ex.notify(cmd + ': Unknown Command')
 
 
 def openOverlay(widget, title=None, height=('relative', 50), width=('relative', 50)):
