@@ -238,6 +238,7 @@ class Ex(urwid.Edit):
 class StandardKeyBinds:
 
     def keypress(self, size, key):
+        returnval = None
         ex.notify('') # Clear any notification
 
         cmdmap = settings.conf['keymap']
@@ -254,7 +255,15 @@ class StandardKeyBinds:
         elif key in cmdmap and cmdmap[key]:
             processCmd(cmdmap[key])
         else:
-            return super().keypress(size, key)
+            returnval = super().keypress(size, key)
+
+        # Set progress percentage
+        lens = [i.rows((size[0],)) for i in self.body]
+        offset, inset = self.get_focus_offset_inset(size)
+        current_line = sum(lens[:self.body.focus]) + inset - offset
+        progress.set_text(str(round(((current_line / sum(lens))*100))) + '%')
+
+        return returnval
 
     def mouse_event(self, size, event, button, col, row, focus):
         if button == 4:
@@ -469,5 +478,7 @@ urwid.command_map['ctrl f'] = 'cursor page down'
 ex = Ex()
 header = urwid.Text('Wikicurses', align='center')
 loading = urwid.Filler(urwid.Text('Loading...'), 'top')
-mainwidget = urwid.Frame(loading, urwid.AttrMap(header, formats.h1), ex)
+progress = urwid.Text('')
+footer = urwid.Columns([ex, ('pack', progress)], 2)
+mainwidget = urwid.Frame(loading, urwid.AttrMap(header, formats.h1), footer)
 loop = urwid.MainLoop(mainwidget, palette=palette, handle_mouse=settings.mouse)

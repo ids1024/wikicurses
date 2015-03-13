@@ -1,4 +1,3 @@
 - Implement search feature (Partially implemented)
 - Add :set command / other method to configure from within wikicurses
 - Bash completion (currently only has zsh completion)
-- Display % progress in page in the bottom right corner
