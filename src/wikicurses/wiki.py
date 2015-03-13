@@ -10,7 +10,7 @@ from functools import lru_cache
 from wikicurses.htmlparse import parseExtract, parseFeature
 from wikicurses.settings import Settings, wikis, conf
 
-useragent = "Wikicurses/1.1 (https://github.com/ids1024/wikicurses)"\
+useragent = "Wikicurses/1.2 (https://github.com/ids1024/wikicurses)"\
             " Python-urllib/%d.%d" % sys.version_info[:2]
 
 
