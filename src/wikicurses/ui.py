@@ -346,6 +346,8 @@ def openPage(title, featured=False, browsinghistory=False):
         header.set_text(page.title)
         mainwidget.body = Pager(page)
 
+    progress.set_text('0%')
+
 
 def openWiki(name):
     global wiki
