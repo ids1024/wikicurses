@@ -1,3 +1,4 @@
 - Implement search feature (Partially implemented)
 - Add :set command / other method to configure from within wikicurses
 - Bash completion (currently only has zsh completion)
+- Improved color support; allow colors to be set in config
