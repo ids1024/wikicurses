@@ -438,7 +438,7 @@ def processCmd(cmd, *args):
     if cmd in ('q', 'quit'):
         raise urwid.ExitMainLoop
     elif cmd == 'bmark':
-        wiki.bmarks.add(header.text)
+        wiki.bmarks.add(page.title)
         ex.notify("Bookmark Added")
     elif cmd in overlaymap:
         openOverlay(overlaymap[cmd]())
@@ -450,7 +450,7 @@ def processCmd(cmd, *args):
     elif cmd == 'clearcache':
         wiki.clear_cache()
     elif cmd == 'edit':
-        edit(header.text)
+        edit(page.title)
     elif cmd == 'help':
         executeCommand(['man', 'wikicurses'])
     elif cmd == 'back':
