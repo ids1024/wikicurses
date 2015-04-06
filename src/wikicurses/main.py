@@ -1,4 +1,3 @@
-import sys
 import argparse
 import urwid
 import tempfile
@@ -506,7 +505,7 @@ def main():
         elif args.complete == 'wiki':
             sugestions = settings.wikis().keys()
         print(*sugestions, sep='\n')
-        sys.exit()
+        return
 
     callback = lambda x, y: openPage(args.feed or args.search, bool(args.feed))
     loop.set_alarm_in(0, callback)  # Open page once loop is started
