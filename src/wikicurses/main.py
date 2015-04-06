@@ -1,3 +1,5 @@
+import sys
+import argparse
 import urwid
 import tempfile
 import subprocess
@@ -463,6 +465,42 @@ def openOverlay(widget, title=None, height=('relative', 50), width=('relative', 
 
 def closeOverlay():
     loop.widget = mainwidget
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="A simple curses interface for accessing Wikipedia.")
+
+    parser.add_argument('search',
+                        nargs='?',
+                        help="page to search for")
+    parser.add_argument('-w', '--wiki', help='wiki api url')
+    # For shell completion functions
+    parser.add_argument('--complete',
+                        action='store',
+                        help=argparse.SUPPRESS)
+
+    parser.add_argument('-f', '--feed', help='view featured feed')
+
+    args = parser.parse_args()
+    openWiki(args.wiki)
+
+    if args.complete:
+        if args.complete == 'search':
+            sugestions = wiki.search_sugestions(args.search)
+        elif args.complete == 'feed':
+            sugestions = wiki.list_featured_feeds()
+        elif args.complete == 'wiki':
+            sugestions = settings.wikis().keys()
+        print(*sugestions, sep='\n')
+        sys.exit()
+
+    callback = lambda x, y: openPage(args.feed or args.search, bool(args.feed))
+    loop.set_alarm_in(0, callback)  # Open page once loop is started
+    try:
+        loop.run()
+    except KeyboardInterrupt:
+        pass
 
 
 history = []

@@ -17,6 +17,6 @@ setup(name='Wikicurses',
           ('/usr/share/man/man5', ['wikicurses.conf.5']),
           ('/usr/share/zsh/site-functions', ['_wikicurses'])
           ],
-      scripts = ['wikicurses'],
+      entry_points={'console_scripts': ['wikicurses = wikicurses.main:main']},
       install_requires = ['beautifulsoup4', 'lxml', 'urwid'],
      )
