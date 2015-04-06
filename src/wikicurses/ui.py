@@ -277,7 +277,7 @@ class StandardKeyBinds:
         if button == 5:
             self.keypress(size, 'down')
         else:
-            return False
+            return super().mouse_event(size, event, button, col, row, focus)
         return True
 
 
