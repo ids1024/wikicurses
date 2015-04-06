@@ -95,6 +95,8 @@ class Wiki(object):
         """Log in to wiki using stored credentials."""
         if self.csrftoken:  # Already logged in
             return
+        if not (self.username or self.password):
+            raise WikiError("Username or password not configured for this wiki")
         query = {'post': True, 'action': 'login', 'format': 'json',
                  'lgname': self.username, 'lgpassword': self.password}
         result = json.loads(self._query(**query))['login']
