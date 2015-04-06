@@ -258,10 +258,16 @@ class StandardKeyBinds:
             returnval = super().keypress(size, key)
 
         # Set progress percentage
+        maxcol, maxrow = size
         lens = [i.rows((size[0],)) for i in self.body]
         offset, inset = self.get_focus_offset_inset(size)
-        current_line = sum(lens[:self.body.focus]) + inset - offset
-        progress.set_text(str(round(((current_line / sum(lens))*100))) + '%')
+        if offset:
+            # Number of the first line on the screen
+            current_line = sum(lens[:self.body.focus]) - offset
+        else:
+            current_line = sum(lens[:self.body.focus]) + inset
+        position = current_line / (sum(lens) - maxrow) * 100
+        progress.set_text(str(round(position)) + '%')
 
         return returnval
 
