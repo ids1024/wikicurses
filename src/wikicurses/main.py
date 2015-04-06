@@ -148,6 +148,18 @@ class Iwlinks(SelectorBox):
         openPage(name)
 
 
+class Langs(SelectorBox):
+    title = "Languages"
+
+    def _items(self):
+        return page.langlinks.keys()
+
+    def _select(sel, lang):
+        url, name = page.langlinks[lang]
+        openWiki(Wiki.fromPageUrl(url))
+        openPage(name)
+
+
 class Extlinks(SelectorBox):
     title = "External Links"
 
@@ -416,7 +428,8 @@ overlaymap = {'bmarks': Bmarks,
               'contents': Toc,
               'links': Links,
               'iwlinks': Iwlinks,
-              'extlinks': Extlinks}
+              'extlinks': Extlinks,
+              'langs': Langs}
 cmds = tuple(overlaymap) + ('quit', 'bmark', 'open', 'edit', 'clearcache',
                             'help', 'back', 'forward', 'random')
 

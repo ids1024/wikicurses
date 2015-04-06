@@ -154,7 +154,7 @@ class Wiki(object):
     def search(self, name):
         """Search wiki for article and return _Article object."""
         result = json.loads(self._query(action="parse", page=name,
-                                        prop="externallinks|iwlinks|"
+                                        prop="externallinks|iwlinks|langlinks|"
                                         "links|displaytitle|properties|text",
                                         format="json", redirects=True
                                         )).get('parse', {})
@@ -214,6 +214,8 @@ class _Article(object):
             # if an url starts with //, it can by http or https.  Use http.
             self.extlinks = ['http:' + i if i.startswith('//') else i
                              for i in self.result['externallinks']]
+            self.langlinks = {i.get('autonym', i['lang']): (i['url'], i['*'])
+                             for i in self.result.get('langlinks')}
 
             self.content = parseExtract(self.html)
             if self.extlinks:
