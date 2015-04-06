@@ -21,6 +21,8 @@ class WikiError(Exception):
 class Wiki(object):
     """A mediawiki wiki."""
     csrftoken = None
+    _articlepath = None
+    _mainpage = None
 
     def __init__(self, url, username, password):
         self.siteurl = url
@@ -57,15 +59,26 @@ class Wiki(object):
         apiurl = soup.find('api', {'name': 'MediaWiki'})['apiLink']
         return cls.fromApiUrl(apiurl)
 
-    @lru_cache(1)
-    def get_siteinfo(self):
+    def _get_siteinfo(self):
         result = self._query(action="query", meta="siteinfo",
                              siprop="general", format="json")
         query = json.loads(result)["query"]
-        self.articlepath = urllib.parse.urljoin(
+        self._articlepath = urllib.parse.urljoin(
             query['general']['base'],
             query['general']['articlepath'])
-        self.mainpage = query['general']['mainpage']
+        self._mainpage = query['general']['mainpage']
+
+    @property
+    def articlepath(self):
+        if not self._articlepath:
+            self._get_siteinfo()
+        return self._articlepath
+
+    @property
+    def mainpage(self):
+        if not self._mainpage:
+            self._get_siteinfo()
+        return self._mainpage
 
     def _query(self, post=False, **kwargs):
         params = {k: v for k, v in kwargs.items() if v is not False}
@@ -138,9 +151,6 @@ class Wiki(object):
     @lru_cache(16)
     def search(self, name):
         """Search wiki for article and return _Article object."""
-        self.get_siteinfo()
-        if not name:
-            name = self.mainpage
         result = json.loads(self._query(action="parse", page=name,
                                         prop="externallinks|iwlinks|"
                                         "links|displaytitle|properties|text",
@@ -192,7 +202,7 @@ class _Article(object):
         self.result = result
         self.exists = result != {}
         if self.exists:
-            self.properties = {i['name']: i['*'] for i in result['properties']}
+            self.properties = {i['name']: i['*'] for i in result.get('properties',())}
             self.html = result['text']['*']
             self.links = [i['*'] for i in result['links'] if ('exists' in i) and
                           not any(i['*'].startswith(j + ':') for j in

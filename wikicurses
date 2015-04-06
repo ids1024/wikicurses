@@ -10,7 +10,6 @@ parser = argparse.ArgumentParser(
 
 parser.add_argument('search',
                     nargs='?',
-                    default='Main page',
                     help="page to search for")
 parser.add_argument('-w', '--wiki', help='wiki api url')
 # For shell completion functions

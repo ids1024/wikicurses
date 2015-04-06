@@ -132,10 +132,10 @@ class Iwlinks(SelectorBox):
         for netloc in netlocs:
             yield urwid.Text(netloc)
             # If the name in blank, the link refers to the site's Main Page
-            yield from (j or "Main Page" for i, j in netlocname if i == netloc)
+            yield from (j or "Main page" for i, j in netlocname if i == netloc)
 
     def _select(sel, name):
-        if name == "Main Page":
+        if name == "Main page":
             name = ''
         url = dict(page.iwlinks)[name]
         openWiki(Wiki.fromPageUrl(url))
@@ -161,7 +161,7 @@ class Wikis(SelectorBox):
 
     def _select(self, name):
         openWiki(name)
-        openPage('Main page')
+        openPage()
 
 
 class Feeds(SelectorBox):
@@ -323,6 +323,9 @@ class Pager(StandardKeyBinds, urwid.ListBox):
 
 
 def openPage(title, featured=False, browsinghistory=False):
+    if not title:
+        title = wiki.mainpage
+
     if not browsinghistory:
         global current
         if current < len(history)-1:
