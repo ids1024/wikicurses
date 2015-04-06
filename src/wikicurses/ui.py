@@ -322,7 +322,7 @@ class Pager(StandardKeyBinds, urwid.ListBox):
             self.body.append(urwid.Text(list(content)))
 
 
-def openPage(title, featured=False, browsinghistory=False):
+def openPage(title=None, featured=False, browsinghistory=False):
     if not title:
         title = wiki.mainpage
 
