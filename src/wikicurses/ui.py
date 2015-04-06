@@ -16,6 +16,10 @@ def executeCommand(cmd):
     loop.screen.clear() # Completely redraw screen after external command
 
 
+def setTerminalWindowTitle(title):
+    print('\33]0;' + title + ' - wikicurses\a')
+
+
 def tabComplete(text, matches):
     if not matches:
         return text
@@ -355,6 +359,7 @@ def openPage(title=None, featured=False, browsinghistory=False):
         header.set_text(page.title)
         mainwidget.body = Pager(page)
 
+    setTerminalWindowTitle(title)
     progress.set_text('0%')
 
 
