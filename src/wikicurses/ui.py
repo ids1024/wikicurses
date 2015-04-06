@@ -258,7 +258,7 @@ class StandardKeyBinds:
             returnval = super().keypress(size, key)
 
         # Set progress percentage
-        maxcol, maxrow = size
+        maxrow = size[1]
         lens = [i.rows((size[0],)) for i in self.body]
         offset, inset = self.get_focus_offset_inset(size)
         if offset:
