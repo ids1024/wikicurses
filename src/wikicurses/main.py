@@ -413,10 +413,13 @@ def edit(title):
             wiki.commit_edit(newtext, summary.edit_text,
                              minor.get_state(), verify)
             openPage(title)
+        def cancel(button):
+            closeOverlay()
         summary = urwid.Edit('Summary: ')
         minor = urwid.CheckBox('Minor Edit')
+        cancel_button = urwid.Button('Cancel', cancel)
         submit_button = urwid.Button('Submit', submit)
-        pile = urwid.Pile([summary, minor, submit_button])
+        pile = urwid.Pile([summary, minor, cancel_button, submit_button])
         openOverlay(pile, 'Edit', 'pack')
     except WikiError as e:
         ex.notify('Error: ' + str(e))
