@@ -1,5 +1,6 @@
 import argparse
 import urwid
+import json
 import tempfile
 import subprocess
 import os
@@ -494,6 +495,9 @@ def main():
     parser.add_argument('--complete',
                         action='store',
                         help=argparse.SUPPRESS)
+    parser.add_argument('--dumpcolors',
+                        action='store_true',
+                        help="print default color settings")
 
     parser.add_argument('-f', '--feed', help='view featured feed')
 
@@ -509,6 +513,9 @@ def main():
             sugestions = settings.wikis().keys()
         print(*sugestions, sep='\n')
         return
+    elif args.dumpcolors:
+        print(json.dumps(settings.defcolors, indent=2))
+        return
 
     callback = lambda x, y: openPage(args.feed or args.search, bool(args.feed))
     loop.set_alarm_in(0, callback)  # Open page once loop is started
@@ -523,21 +530,13 @@ current = -1
 page = None
 
 palette = []
-#(ITALIC, 'italic') does not work. No italics option?
-outputfmt = (
-        ('b', ('bold',), '', ''),
-        ('blockquote', (), 'dark gray', ''),
-        ('searchresult', ('standout',), '', ''),
-        ('h1', ('bold',), '', 'dark blue'),
-        ('h2', ('bold', 'underline'), '', ''),
-        ('h', ('bold', 'underline'), '', '')
-        )
+colors = settings.colors.items()
 for x in range(1, sum(formats) + 1):
-    fgs = [fg for i, shape, fg, bg in outputfmt if x & formats[i]]
+    fgs = [fg for i, (shape, fg, bg) in colors if x & formats[i]]
     fgcolor = fgs[-1] if fgs else ''
-    bgs = [bg for i, shape, fg, bg in outputfmt if x & formats[i]]
+    bgs = [bg for i, (shape, fg, bg) in colors if x & formats[i]]
     bg = bgs[-1] if bgs else ''
-    fgfmts = {j for i, shape, fg, bg in outputfmt if x & formats[i]
+    fgfmts = {j for i, (shape, fg, bg) in colors if x & formats[i]
             for j in shape}
     if fgcolor:
         fgfmts.add(fgcolor)

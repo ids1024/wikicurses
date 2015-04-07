@@ -19,6 +19,20 @@ try:
 except (ValueError, configparser.NoOptionError):
     hide_references = False
 
+defcolors = {
+        'b': [['bold',], '', ''],
+        'blockquote': [[], 'dark gray', ''],
+        'searchresult': [['standout'], '', ''],
+        'h1': [['bold'], '', 'dark blue'],
+        'h2': [['bold', 'underline'], '', ''],
+        'h': [['bold', 'underline'], '', '']
+        }
+if os.path.exists(configpath + '/colors.json'):
+    with open(configpath + '/colors.json') as file:
+        colors = json.load(file)
+else:
+    colors = defcolors
+
 class Settings:
 
     def __init__(self, wiki, name):
