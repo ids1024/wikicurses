@@ -525,17 +525,24 @@ page = None
 palette = []
 #(ITALIC, 'italic') does not work. No italics option?
 outputfmt = (
-        ('b', ('bold',), ()),
-        ('blockquote', ('dark gray',), ()),
-        ('searchresult', ('standout',), ()),
-        ('h1', ('bold',), ('dark blue',)),
-        ('h2', ('bold', 'underline'), ()),
-        ('h', ('bold', 'underline'), ())
+        ('b', ('bold',), '', ''),
+        ('blockquote', (), 'dark gray', ''),
+        ('searchresult', ('standout',), '', ''),
+        ('h1', ('bold',), '', 'dark blue'),
+        ('h2', ('bold', 'underline'), '', ''),
+        ('h', ('bold', 'underline'), '', '')
         )
 for x in range(1, sum(formats) + 1):
-    fgfmt = set(j for i, fg, bg in outputfmt if x & formats[i] for j in fg)
-    bgfmt = set(j for i, fg, bg in outputfmt if x & formats[i] for j in bg)
-    palette.append((x, ','.join(fgfmt), ','.join(bgfmt)))
+    fgs = [fg for i, shape, fg, bg in outputfmt if x & formats[i]]
+    fgcolor = fgs[-1] if fgs else ''
+    bgs = [bg for i, shape, fg, bg in outputfmt if x & formats[i]]
+    bg = bgs[-1] if bgs else ''
+    fgfmts = {j for i, shape, fg, bg in outputfmt if x & formats[i]
+            for j in shape}
+    if fgcolor:
+        fgfmts.add(fgcolor)
+    fg = ','.join(fgfmts)
+    palette.append((x, fg, bg))
 
 urwid.command_map['k'] = 'cursor up'
 urwid.command_map['j'] = 'cursor down'
