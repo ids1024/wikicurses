@@ -468,7 +468,7 @@ def processCmd(cmd, *args):
 
 
 def openOverlay(widget, title=None, height=('relative', 50), width=('relative', 50)):
-    if widget._sizing == {'flow'}:
+    if widget.sizing() == {'flow'}:
         height = 'pack'
     box = urwid.LineBox(widget, title or widget.title)
     overlay = urwid.Overlay(box, mainwidget, 'center', width, 'middle', height)
