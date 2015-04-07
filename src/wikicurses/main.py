@@ -525,18 +525,16 @@ page = None
 palette = []
 #(ITALIC, 'italic') does not work. No italics option?
 outputfmt = (
-        ('b', 'bold', ''),
-        ('blockquote', 'dark gray', ''),
-        ('searchresult', 'standout', ''),
-        ('h1', 'bold', 'dark blue'),
-        ('h2', 'bold,underline', ''),
-        ('h', 'bold,underline', '')
+        ('b', ('bold',), ()),
+        ('blockquote', ('dark gray',), ()),
+        ('searchresult', ('standout',), ()),
+        ('h1', ('bold',), ('dark blue',)),
+        ('h2', ('bold', 'underline'), ()),
+        ('h', ('bold', 'underline'), ())
         )
 for x in range(1, sum(formats) + 1):
-    fgfmt = set(j for i, fg, bg in outputfmt if x & formats[i] and fg
-            for j in fg.split(','))
-    bgfmt = set(j for i, fg, bg in outputfmt if x & formats[i] and bg
-            for j in bg.split(','))
+    fgfmt = set(j for i, fg, bg in outputfmt if x & formats[i] for j in fg)
+    bgfmt = set(j for i, fg, bg in outputfmt if x & formats[i] for j in bg)
     palette.append((x, ','.join(fgfmt), ','.join(bgfmt)))
 
 urwid.command_map['k'] = 'cursor up'
