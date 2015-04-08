@@ -530,14 +530,14 @@ current = -1
 page = None
 
 palette = []
-colors = settings.colors.items()
+colors = settings.colors
 for x in range(1, sum(formats) + 1):
-    fgs = [fg for i, (shape, fg, bg) in colors if x & formats[i]]
+    fgs = [colors[i.name][1] for i in formats if x & i and i.name in colors]
     fgcolor = fgs[-1] if fgs else ''
-    bgs = [bg for i, (shape, fg, bg) in colors if x & formats[i]]
+    bgs = [colors[i.name][2] for i in formats if x & i and i.name in colors]
     bg = bgs[-1] if bgs else ''
-    fgfmts = {j for i, (shape, fg, bg) in colors if x & formats[i]
-            for j in shape}
+    fgfmts = {j for i in formats if x & i and i.name in colors
+            for j in colors[i.name][0]}
     if fgcolor:
         fgfmts.add(fgcolor)
     fg = ','.join(fgfmts)
