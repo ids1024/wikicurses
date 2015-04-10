@@ -1,4 +1,4 @@
-.TH wikicurses 1 2015-04-07
+.TH wikicurses 1 2015-04-10
 .SH NAME
 wikicurses \- curses interface for MediaWiki
 .SH SYNOPSIS
@@ -162,10 +162,10 @@ view featured feed
 .PP
 \-\-dumpcolors
 .RS 4
-print default color settings
+write current color settings to config file
 .RE
 .SH COLOR SETTINGS
-To use colors other than the defaults, you need a file called ~/.config/wikicurses/colors.json.  To create this file with the default color settings, run wikicurses --dumpcolors > ~/.config/wikicurses/colors.json.  This is a json object containing various things that can be colored.  Each has an array containing the foreground color, display settings (bold, underline, or standout), and the background color.  The color options are the same as in urwid (see http://urwid.org/manual/displayattributes.html).
+To use colors other than the defaults, you need a file called ~/.config/wikicurses/colors.  To create this file with the current color settings, run wikicurses --dumpcolors.  This is a configuration file containing various things that can be colored.  Each has allows setting display settings (bold, underline, or standout), foreground color, and background color.  Multiple settings can be set by separating with spaces.  The color options are the same as in urwid (see http://urwid.org/manual/displayattributes.html).
 .SH ENVIRONMENT VARIABLES
 .PP
 HOME, XDG_CONFIG_HOME

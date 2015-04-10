@@ -42,6 +42,7 @@ _wikicurses_name() {
 _wikicurses() {
 	_arguments -s : \
 		{-h,--help}'[Display help message]'\
+		'--dumpcolors[Write current color settings to config file]'\
 		{-w,--wiki}'[Url or name of wiki to use]:wikis:_wikicurses_wiki'\
 		{-f,--feed}'[Show featured articles (Wikipedia only)]:feeds:_wikicurses_feed'\
 		'*:pages:_wikicurses_name'

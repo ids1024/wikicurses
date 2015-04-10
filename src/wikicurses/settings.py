@@ -27,11 +27,30 @@ defcolors = {
         'h2': [['bold', 'underline'], '', ''],
         'h': [['bold', 'underline'], '', '']
         }
-colors = defcolors
-if os.path.exists(configpath + '/colors.json'):
-    with open(configpath + '/colors.json') as file:
-        # Use colors in colors.json, with defaults as fallbacks
-        colors.insert(json.load(file))
+if os.path.exists(configpath + '/colors'):
+    colorsconf = configparser.ConfigParser()
+    colors = {}
+    colorsconf.read(configpath + '/colors')
+    for name, (defsettings, deffgcolor, defbgcolor) in defcolors.items():
+        try:
+            settings = colorsconf.get(name, 'settings').split()
+        except (configparser.NoSectionError, configparser.NoOptionError):
+            settings = defsettings
+        fgcolor = colorsconf.get(name, 'fgcolor', fallback=deffgcolor)
+        bgcolor = colorsconf.get(name, 'bgcolor', fallback=defbgcolor)
+        colors[name] = [settings, fgcolor, bgcolor]
+else:
+    colors = defcolors
+
+def dumpColors():
+    colorsconf = configparser.ConfigParser()
+    for name, (settings, fgcolor, bgcolor) in colors.items():
+        colorsconf.add_section(name)
+        colorsconf.set(name, 'settings', ' '.join(settings))
+        colorsconf.set(name, 'fgcolor', fgcolor)
+        colorsconf.set(name, 'bgcolor', bgcolor)
+    with open(configpath + '/colors', 'w') as file:
+        colorsconf.write(file)
 
 class Settings:
 

@@ -1,6 +1,5 @@
 import argparse
 import urwid
-import json
 import tempfile
 import subprocess
 import os
@@ -514,7 +513,8 @@ def main():
         print(*sugestions, sep='\n')
         return
     elif args.dumpcolors:
-        print(json.dumps(settings.defcolors, indent=2))
+        settings.dumpColors()
+        print("Color settings written to " + settings.configpath + '/colors.')
         return
 
     callback = lambda x, y: openPage(args.feed or args.search, bool(args.feed))
