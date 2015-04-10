@@ -139,7 +139,7 @@ class Iwlinks(SelectorBox):
             # If the name in blank, the link refers to the site's Main Page
             yield from (j or "Main page" for i, j in netlocname if i == netloc)
 
-    def _select(sel, name):
+    def _select(self, name):
         if name == "Main page":
             name = ''
         url = dict(page.iwlinks)[name]
@@ -153,7 +153,7 @@ class Langs(SelectorBox):
     def _items(self):
         return page.langlinks.keys()
 
-    def _select(sel, lang):
+    def _select(self, lang):
         url, name = page.langlinks[lang]
         openWiki(Wiki.fromPageUrl(url))
         openPage(name)
