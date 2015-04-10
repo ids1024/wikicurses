@@ -226,6 +226,7 @@ class _Article(object):
             self.links = []
             self.iwlinks = []
             self.extlinks = []
+            self.langlinks = []
             self.content = {'': ['Page Not Found.']}
 
 
@@ -234,6 +235,8 @@ class _Featured(object):
     properties = {}
     links = []
     iwlinks = []
+    extlinks = []
+    langlinks = []
 
     def __init__(self, feed, result):
         self.feed = feed
