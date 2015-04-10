@@ -514,7 +514,7 @@ def main():
         return
     elif args.dumpcolors:
         settings.dumpColors()
-        print("Color settings written to " + settings.configpath + '/colors.')
+        print("Color settings written to " + settings.colorspath + '.')
         return
 
     callback = lambda x, y: openPage(args.feed or args.search, bool(args.feed))

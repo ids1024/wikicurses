@@ -27,10 +27,11 @@ defcolors = {
         'h2': [['bold', 'underline'], '', ''],
         'h': [['bold', 'underline'], '', '']
         }
-if os.path.exists(configpath + '/colors'):
+colorspath = configpath + '/colors'
+if os.path.exists(colorspath):
     colorsconf = configparser.ConfigParser()
     colors = {}
-    colorsconf.read(configpath + '/colors')
+    colorsconf.read(colorspath)
     for name, (defsettings, deffgcolor, defbgcolor) in defcolors.items():
         try:
             settings = colorsconf.get(name, 'settings').split()
@@ -49,7 +50,7 @@ def dumpColors():
         colorsconf.set(name, 'settings', ' '.join(settings))
         colorsconf.set(name, 'fgcolor', fgcolor)
         colorsconf.set(name, 'bgcolor', bgcolor)
-    with open(configpath + '/colors', 'w') as file:
+    with open(colorspath, 'w') as file:
         colorsconf.write(file)
 
 class Settings:
