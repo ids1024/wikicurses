@@ -90,7 +90,7 @@ def parseExtract(html):
     soup = BeautifulSoup(html, 'lxml')
     # Turn into tuple since the iterator is being modified
     for i in tuple(soup.strings):
-        if 'pre' not in (j.name for j in i.parents):
+        if not {'pre', 'code'}.intersection(j.name for j in i.parents):
             i.replace_with(i.replace('\n', ''))
     for i in soup.find_all('p'):
         i.insert_after(soup.new_string('\n\n'))
