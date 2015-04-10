@@ -198,6 +198,14 @@ class Wiki(object):
 
 
 class _Article(object):
+    properties = {}
+    html = ''
+    links = []
+    iwlinks = []
+    extlinks = []
+    langlinks = {}
+    content = {'': ['Page Not Found.']}
+
     def __init__(self, wiki, search, result):
         self.wiki = wiki
         self.title = result.get('title', search)
@@ -220,14 +228,6 @@ class _Article(object):
             self.content = parseArticle(self.html)
             if self.extlinks:
                 self.content['External links'] = '\n'.join(self.extlinks) + '\n'
-        else:
-            self.properties = {}
-            self.html = ''
-            self.links = []
-            self.iwlinks = []
-            self.extlinks = []
-            self.langlinks = {}
-            self.content = {'': ['Page Not Found.']}
 
 
 class _Featured(object):
