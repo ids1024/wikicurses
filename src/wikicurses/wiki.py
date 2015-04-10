@@ -7,7 +7,7 @@ import sys
 from bs4 import BeautifulSoup
 from collections import OrderedDict
 from functools import lru_cache
-from wikicurses.htmlparse import parseExtract, parseFeature
+from wikicurses.htmlparse import parseArticle, parseFeature
 from wikicurses.settings import Settings, wikis, conf
 
 useragent = "Wikicurses/1.2 (https://github.com/ids1024/wikicurses)"\
@@ -217,7 +217,7 @@ class _Article(object):
             self.langlinks = {i.get('autonym', i['lang']): (i['url'], i['*'])
                              for i in self.result.get('langlinks')}
 
-            self.content = parseExtract(self.html)
+            self.content = parseArticle(self.html)
             if self.extlinks:
                 self.content['External links'] = '\n'.join(self.extlinks) + '\n'
         else:

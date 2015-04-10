@@ -61,7 +61,7 @@ class UrwidMarkupHandler:
         return self._list[key]
 
 
-def _processExtractSection(section):
+def _processArticleSection(section):
     items = UrwidMarkupHandler()
     for i in section:
         if isinstance(i, str):
@@ -83,7 +83,7 @@ def _processExtractSection(section):
     return items
 
 
-def parseExtract(html):
+def parseArticle(html):
     """Parse article html and return OrderedDict of sections."""
     html = html.replace('\t', ' ')
     sections = OrderedDict()
@@ -110,10 +110,10 @@ def parseExtract(html):
             i.insert_after(soup.new_string('\n'))
     for i in soup.find_all(True, class_=skipclass):
         i.decompose()
-    sections[''] = _processExtractSection(soup.body or soup)
+    sections[''] = _processArticleSection(soup.body or soup)
     for i in soup.find_all('h2'):
         if i.text not in skipsection:
-            sections[i.text.strip()] = _processExtractSection(i.next_siblings)
+            sections[i.text.strip()] = _processArticleSection(i.next_siblings)
     for i in sections:
         if not sections[i]:
             del sections[i]
