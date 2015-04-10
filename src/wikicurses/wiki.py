@@ -190,7 +190,6 @@ class Wiki(object):
 
     def clear_cache(self):
         """Clear the cache."""
-        self.get_siteinfo.cache_clear()
         self.search.cache_clear()
         self.list_featured_feeds.cache_clear()
         self.get_featured_feed.cache_clear()
