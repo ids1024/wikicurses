@@ -27,11 +27,11 @@ defcolors = {
         'h2': [['bold', 'underline'], '', ''],
         'h': [['bold', 'underline'], '', '']
         }
+colors = defcolors
 if os.path.exists(configpath + '/colors.json'):
     with open(configpath + '/colors.json') as file:
-        colors = json.load(file)
-else:
-    colors = defcolors
+        # Use colors in colors.json, with defaults as fallbacks
+        colors.insert(json.load(file))
 
 class Settings:
 
