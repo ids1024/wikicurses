@@ -158,7 +158,7 @@ class Wiki(object):
                                         "links|displaytitle|properties|text",
                                         format="json", redirects=True
                                         )).get('parse', {})
-        return _Article(self, name, result)
+        return _Article(name, result)
 
     @lru_cache(1)
     def list_featured_feeds(self):
@@ -174,7 +174,7 @@ class Wiki(object):
     @lru_cache(16)
     def get_featured_feed(self, feed):
         result = self._query(action="featuredfeed", feed=feed)
-        return _Featured(feed, BeautifulSoup(result, "xml").find("channel"))
+        return _Featured(BeautifulSoup(result, "xml").find("channel"))
 
     @lru_cache(16)
     def search_sugestions(self, name):
@@ -208,10 +208,8 @@ class _Page:
 class _Article(_Page):
     content = {'': ['Page Not Found.']}
 
-    def __init__(self, wiki, search, result):
-        self.wiki = wiki
+    def __init__(self, search, result):
         self.title = result.get('title', search)
-        self.result = result
         self.exists = result != {}
         if self.exists:
             self.properties = {i['name']: i['*'] for i in result.get('properties',())}
@@ -220,12 +218,12 @@ class _Article(_Page):
                           not any(i['*'].startswith(j + ':') for j in
                           ('Category', 'Template', 'Template talk', 'Wikipedia'))]
             self.iwlinks = [(i['*'].split(':', 1)[1], i['url'])
-                            for i in self.result['iwlinks']]
+                            for i in result['iwlinks']]
             # if an url starts with //, it can by http or https.  Use http.
             self.extlinks = ['http:' + i if i.startswith('//') else i
-                             for i in self.result['externallinks']]
+                             for i in result['externallinks']]
             self.langlinks = {i.get('autonym', i['lang']): (i['url'], i['*'])
-                             for i in self.result.get('langlinks')}
+                             for i in result.get('langlinks')}
 
             self.content = parseArticle(self.html)
             if self.extlinks:
@@ -235,12 +233,10 @@ class _Article(_Page):
 class _Featured(_Page):
     exists = True
 
-    def __init__(self, feed, result):
-        self.feed = feed
-        self.result = result
+    def __init__(self, result):
         self.title = result.find('title').text
         self.content = OrderedDict()
-        for i in self.result.find_all('item'):
+        for i in result.find_all('item'):
             description = i.find('description').text
             text = parseFeature(description)
             self.content[i.find('title').text] = i.find(
