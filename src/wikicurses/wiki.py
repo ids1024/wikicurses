@@ -1,12 +1,14 @@
+import sys
+import time
+import hashlib
 import json
 import urllib.request
 import http.cookiejar
-import time
-import hashlib
-import sys
-from bs4 import BeautifulSoup
-from collections import OrderedDict
 from functools import lru_cache
+from collections import OrderedDict
+
+from bs4 import BeautifulSoup
+
 from wikicurses.htmlparse import parseArticle, parseFeature
 from wikicurses.settings import Settings, wikis, conf
 

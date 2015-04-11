@@ -1,7 +1,7 @@
 import os
 import json
-from urllib.parse import urlparse
 import configparser
+from urllib.parse import urlparse
 
 default_configdir = os.environ['HOME'] + '/.config'
 configpath = os.environ.get(

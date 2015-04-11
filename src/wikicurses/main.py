@@ -1,9 +1,11 @@
+import os
 import argparse
-import urwid
 import tempfile
 import subprocess
-import os
 import urllib.parse
+
+import urwid
+
 from wikicurses import formats, settings
 from wikicurses.wiki import Wiki, WikiError
 from wikicurses.htmlparse import parseDisambig, UrwidMarkupHandler
