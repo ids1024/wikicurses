@@ -120,7 +120,8 @@ def parseArticle(html):
 def parseFeature(html):
     """Parse featured feed html by striping out html tags."""
     items = UrwidMarkupHandler()
-    text = BeautifulSoup(html, 'lxml').text + '\n'
+    text = BeautifulSoup(html, 'lxml').text.strip() + '\n\n'
+    text = re.sub('\n\n+', '\n\n', text)
     items.add(text, 0)
     return items
 
