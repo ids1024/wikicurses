@@ -119,7 +119,10 @@ def parseArticle(html):
 
 def parseFeature(html):
     """Parse featured feed html by striping out html tags."""
-    return BeautifulSoup(html, 'lxml').text
+    items = UrwidMarkupHandler()
+    text = BeautifulSoup(html, 'lxml').text + '\n'
+    items.add(text, 0)
+    return items
 
 
 def _processDisambigSection(section):
