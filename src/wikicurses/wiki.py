@@ -196,13 +196,16 @@ class Wiki(object):
         self.search_sugestions.cache_clear()
 
 
-class _Article:
+class _Page:
     properties = {}
     html = ''
     links = []
     iwlinks = []
     extlinks = []
     langlinks = {}
+
+
+class _Article(_Page):
     content = {'': ['Page Not Found.']}
 
     def __init__(self, wiki, search, result):
@@ -229,13 +232,8 @@ class _Article:
                 self.content['External links'] = '\n'.join(self.extlinks) + '\n'
 
 
-class _Featured:
+class _Featured(_Page):
     exists = True
-    properties = {}
-    links = []
-    iwlinks = []
-    extlinks = []
-    langlinks = {}
 
     def __init__(self, feed, result):
         self.feed = feed
