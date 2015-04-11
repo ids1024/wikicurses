@@ -235,11 +235,12 @@ class _Featured(_Page):
     def __init__(self, result):
         self.title = result.find('title').text
         self.content = OrderedDict()
+        self.content[''] = result.find('description').text + '\n\n'
         for i in result.find_all('item'):
             description = i.find('description').text
             text = parseFeature(description)
             self.content[i.find('title').text] = i.find(
-                'link').text + '\n' + text
+                'link').text + '\n' + text + '\n'
 
 
 cookiejar = http.cookiejar.CookieJar()
