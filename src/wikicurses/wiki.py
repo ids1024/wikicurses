@@ -134,7 +134,6 @@ class Wiki(object):
         """Commit edit of page.
         
         Required arguments:
-        title -- the name of the page to be modified
         text -- the new text to be saved
         summary -- edit summary
         minor -- boolean value; True if edit is minor
