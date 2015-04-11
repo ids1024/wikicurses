@@ -196,7 +196,7 @@ class Wiki(object):
         self.search_sugestions.cache_clear()
 
 
-class _Article(object):
+class _Article:
     properties = {}
     html = ''
     links = []
@@ -229,7 +229,7 @@ class _Article(object):
                 self.content['External links'] = '\n'.join(self.extlinks) + '\n'
 
 
-class _Featured(object):
+class _Featured:
     exists = True
     properties = {}
     links = []
