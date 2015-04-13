@@ -1,7 +1,7 @@
 import re
 from collections import OrderedDict
 
-from bs4 import BeautifulSoup
+import bs4
 
 from wikicurses import formats
 from wikicurses import settings
@@ -68,6 +68,8 @@ def _processArticleSection(section):
                 break
             strings = i.strings
         for item in strings:
+            if isinstance(item, bs4.element.Comment):
+                continue # Strip out html comments
             partags = {i.name for i in item.parents}
             tformat = sum(
                 formats[i] for i in set(i.name for i in formats).intersection(partags))
@@ -84,7 +86,7 @@ def parseArticle(html):
     """Parse article html and return OrderedDict of sections."""
     html = html.replace('\t', ' ')
     sections = OrderedDict()
-    soup = BeautifulSoup(html, 'lxml')
+    soup = bs4.BeautifulSoup(html, 'lxml')
     # Turn into tuple since the iterator is being modified
     for i in tuple(soup.strings):
         if not {'pre', 'code'}.intersection(j.name for j in i.parents):
@@ -120,7 +122,7 @@ def parseArticle(html):
 def parseFeature(html):
     """Parse featured feed html by striping out html tags."""
     items = UrwidMarkupHandler()
-    text = BeautifulSoup(html, 'lxml').text.strip() + '\n\n'
+    text = bs4.BeautifulSoup(html, 'lxml').text.strip() + '\n\n'
     text = re.sub('\n\n+', '\n\n', text)
     items.add(text, 0)
     return items
@@ -142,7 +144,7 @@ def _processDisambigSection(section):
 def parseDisambig(html):
     """Parse disambiguation page and return list of (article, text) tuples."""
     sections = OrderedDict()
-    soup = BeautifulSoup(html, 'lxml')
+    soup = bs4.BeautifulSoup(html, 'lxml')
     for i in soup.find_all(True, class_=skipclass):
         i.decompose()
     sections[''] = _processDisambigSection(soup)
