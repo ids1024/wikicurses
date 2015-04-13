@@ -25,7 +25,8 @@ defcolors = {
         'searchresult': [['standout'], '', ''],
         'h1': [['bold'], '', 'dark blue'],
         'h2': [['bold', 'underline'], '', ''],
-        'h': [['bold', 'underline'], '', '']
+        'h': [['bold', 'underline'], '', ''],
+        'pre': [[], 'dark green', '']
         }
 colorspath = configpath + '/colors'
 if os.path.exists(colorspath):
