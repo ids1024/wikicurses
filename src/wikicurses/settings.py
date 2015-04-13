@@ -24,8 +24,8 @@ defcolors = {
         'blockquote': [[], 'dark gray', ''],
         'searchresult': [['standout'], '', ''],
         'h1': [['bold'], '', 'dark blue'],
-        'h2': [['bold', 'underline'], '', ''],
-        'h': [['bold', 'underline'], '', ''],
+        'h2': [['bold', 'underline'], 'dark blue', ''],
+        'h': [['bold', 'underline'], 'dark blue', ''],
         'pre': [[], 'dark green', '']
         }
 colorspath = configpath + '/colors'
