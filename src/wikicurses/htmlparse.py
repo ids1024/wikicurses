@@ -75,6 +75,11 @@ def _processArticleSection(section):
                 formats[i] for i in set(i.name for i in formats).intersection(partags))
             if [i for i in partags if re.fullmatch('h[3-6]', i)]:
                 tformat |= formats.h
+            # Make <strong>/<em> use same formats as <b>/<i>
+            if 'strong' in partags:
+                tformat |= formats.b
+            if 'em' in partags:
+                tformat |= formats.i
             items.add(item, tformat)
     if items:
         items[0][1] = items[0][1].lstrip()
