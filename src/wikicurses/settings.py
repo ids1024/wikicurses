@@ -26,7 +26,8 @@ defcolors = {
         'h1': [['bold'], '', 'dark blue'],
         'h2': [['bold', 'underline'], 'dark blue', ''],
         'h': [['bold', 'underline'], 'dark blue', ''],
-        'pre': [[], 'dark green', '']
+        'pre': [[], 'dark green', ''],
+        'code': [[], '', ''],
         }
 colorspath = configpath + '/colors'
 if os.path.exists(colorspath):
