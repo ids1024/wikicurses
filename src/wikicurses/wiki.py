@@ -5,12 +5,12 @@ import json
 import urllib.request
 import http.cookiejar
 from functools import lru_cache
-from collections import OrderedDict
 
 from bs4 import BeautifulSoup
 
 from wikicurses.htmlparse import parseArticle, parseFeature
 from wikicurses.settings import Settings, wikis, conf
+from wikicurses import formats
 
 useragent = "Wikicurses/1.2 (https://github.com/ids1024/wikicurses)"\
             " Python-urllib/%d.%d" % sys.version_info[:2]
@@ -228,7 +228,8 @@ class _Article(_Page):
 
             self.content = parseArticle(self.html)
             if self.extlinks:
-                self.content['External links'] = '\n'.join(self.extlinks) + '\n'
+                self.content.append([formats.h2, 'External links'])
+                self.content.append([0, '\n'.join(self.extlinks) + '\n'])
 
 
 class _Featured(_Page):
@@ -236,12 +237,13 @@ class _Featured(_Page):
 
     def __init__(self, result):
         self.title = result.find('title').text
-        self.content = OrderedDict()
-        self.content[''] = parseFeature(result.find('description').text)
+        self.content = []
+        self.content.append([0, parseFeature(result.find('description').text)])
         for i in result.find_all('item'):
             description = i.find('description').text
             text = parseFeature(description)
-            self.content[i.find('title').text] = text
+            self.content.append([formats.h2, i.find('title').text])
+            self.content.append([0, text])
 
 
 cookiejar = http.cookiejar.CookieJar()

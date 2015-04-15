@@ -1,4 +1,5 @@
 import os
+import re
 import argparse
 import tempfile
 import subprocess
@@ -8,7 +9,7 @@ import urwid
 
 from wikicurses import formats, settings
 from wikicurses.wiki import Wiki, WikiError
-from wikicurses.htmlparse import parseDisambig, UrwidMarkupHandler
+from wikicurses.htmlparse import parseDisambig
 
 
 def executeCommand(cmd):
@@ -199,13 +200,10 @@ class Ex(urwid.Edit):
 
     def highlightText(self, text):
         self.highlighted = text
-        for title, content in page.content.items():
-            if isinstance(content, UrwidMarkupHandler):
-                if text:
-                   content.search(text)
-                else:
-                    content.unsearch()
-        mainwidget.body = Pager(page)
+        if text:
+            mainwidget.body.search(text)
+        else:
+            mainwidget.body.unsearch()
 
     def keypress(self, size, key):
         if key == 'esc' or (key == 'backspace' and not self.edit_text):
@@ -336,15 +334,54 @@ class Pager(StandardKeyBinds, urwid.ListBox):
 
     def __init__(self, page):
         super().__init__(urwid.SimpleFocusListWalker([]))
-        self.widgetnames = []
-        for title, content in page.content.items():
-            if title:
-                h2 = urwid.Text((formats.h2, title), align="center")
-                self.body.append(h2)
-                self.widgetnames.append((title, self.body.index(h2)))
+        self._content = page.content.copy()
+        self._render()
+
+    def _render(self):
+        self.body.clear()
+        self.widgetnames = [(page.title, 0)]
+        curtext = []
+        curh2 = []
+        for tformat, text in self._content:
+            if tformat & formats.h2: 
+                if curtext:
+                    self.body.append(urwid.Text(curtext))
+                    curtext.clear()
+                curh2.append((tformat, text))
             else:
-                self.widgetnames.append((page.title, 0))
-            self.body.append(urwid.Text(list(content)))
+                if curh2:
+                    h2 = urwid.Text(curh2, align="center")
+                    self.body.append(h2)
+                    title = ''.join(txt for attr, txt in curh2)
+                    self.widgetnames.append((title, self.body.index(h2)))
+                    curh2.clear()
+                curtext.append((tformat, text))
+        if curtext:
+            self.body.append(urwid.Text(curtext))
+
+    def _add(self, text, attribute):
+        if text:
+            if self._content and self._content[-1][0] == attribute:
+                self._content[-1][1] += text
+            else:
+                self._content.append([attribute, text])
+
+    def search(self, findtext):
+        self._content = []
+        for attribute, text in page.content:
+            cur = 0
+            for match in re.finditer(findtext, text):
+                start, end = match.start(), match.end()
+                self._add(text[cur:start], attribute)
+                self._add(text[start:end], attribute | formats.searchresult)
+                cur = end
+            if text[cur:]:
+                self._add(text[cur:], attribute)
+        self._render()
+
+    def unsearch(self):
+        self._content = page.content.copy()
+        self._render()
 
 
 def openPage(title=None, featured=False, browsinghistory=False):
