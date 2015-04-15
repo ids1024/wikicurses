@@ -367,7 +367,7 @@ class Pager(StandardKeyBinds, urwid.ListBox):
                 self._content.append([attribute, text])
 
     def search(self, findtext):
-        self._content = []
+        self._content.clear()
         for attribute, text in page.content:
             cur = 0
             for match in re.finditer(findtext, text):
