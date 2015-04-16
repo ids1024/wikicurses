@@ -341,23 +341,34 @@ class Pager(StandardKeyBinds, urwid.ListBox):
         self.body.clear()
         self.widgetnames = [(page.title, 0)]
         curtext = []
-        curh2 = []
+        curh2 = ''
+        prevalign = 'left'
         for tformat, text in self._content:
+            aligns = [j for j in (settings.colors[i.name].align for i in formats
+                if tformat & i and i.name in settings.colors) if j]
+            align = aligns[-1] if aligns else 'left'
+
+            if ((align != prevalign and curtext)
+                or (tformat & formats.h2 and not curh2)):
+                # Also have new Text() for every h2 for TOC
+                textwidget = urwid.Text(curtext, align=prevalign)
+                self.body.append(textwidget)
+                curtext.clear()
+            
             if tformat & formats.h2: 
-                if curtext:
-                    self.body.append(urwid.Text(curtext))
-                    curtext.clear()
-                curh2.append((tformat, text))
-            else:
-                if curh2:
-                    h2 = urwid.Text(curh2, align="center")
-                    self.body.append(h2)
-                    title = ''.join(txt for attr, txt in curh2)
-                    self.widgetnames.append((title, self.body.index(h2)))
-                    curh2.clear()
-                curtext.append((tformat, text))
+                curh2 += text
+            elif curh2:
+                # len(self.body) = index of next item in list
+                # (add in next loop iteration)
+                self.widgetnames.append((curh2, len(self.body)))
+                curh2 = ''
+
+            curtext.append((tformat, text))
+
+            prevalign = align
         if curtext:
-            self.body.append(urwid.Text(curtext))
+            textwidget = urwid.Text(curtext, align=prevalign)
+            self.body.append(textwidget)
 
     def _add(self, text, attribute):
         if text:
@@ -569,14 +580,15 @@ current = -1
 page = None
 
 palette = []
-colors = settings.colors
 for x in range(1, sum(formats) + 1):
-    fgs = [colors[i.name][1] for i in formats if x & i and i.name in colors]
+    fgs = [settings.colors[i.name].fgcolor for i in formats
+            if x & i and i.name in settings.colors]
     fgcolor = fgs[-1] if fgs else ''
-    bgs = [colors[i.name][2] for i in formats if x & i and i.name in colors]
+    bgs = [settings.colors[i.name].bgcolor for i in formats
+            if x & i and i.name in settings.colors]
     bg = bgs[-1] if bgs else ''
-    fgfmts = {j for i in formats if x & i and i.name in colors
-            for j in colors[i.name][0]}
+    fgfmts = {j for i in formats if x & i and i.name in settings.colors
+            for j in settings.colors[i.name][0]}
     if fgcolor:
         fgfmts.add(fgcolor)
     fg = ','.join(fgfmts)

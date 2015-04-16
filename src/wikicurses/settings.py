@@ -1,5 +1,6 @@
 import os
 import json
+import collections
 import configparser
 from urllib.parse import urlparse
 
@@ -19,29 +20,32 @@ try:
 except (ValueError, configparser.NoOptionError):
     hide_references = False
 
+Attribute = collections.namedtuple('Attribute',
+        ('settings', 'fgcolor', 'bgcolor', 'align'))
 defcolors = {
-        'b': [['bold',], '', ''],
-        'blockquote': [[], 'dark gray', ''],
-        'searchresult': [['standout'], '', ''],
-        'h1': [['bold'], '', 'dark blue'],
-        'h2': [['bold', 'underline'], 'dark blue', ''],
-        'h': [['bold', 'underline'], 'dark blue', ''],
-        'pre': [[], 'dark green', ''],
-        'code': [[], '', ''],
+        'b': Attribute(['bold',], '', '', ''),
+        'blockquote': Attribute([], 'dark gray', '', ''),
+        'searchresult': Attribute(['standout'], '', '', ''),
+        'h1': Attribute(['bold'], '', 'dark blue', ''),
+        'h2': Attribute(['bold', 'underline'], 'dark blue', '', 'center'),
+        'h': Attribute(['bold', 'underline'], 'dark blue', '', ''),
+        'pre': Attribute([], 'dark green', '', ''),
+        'code': Attribute([], '', '', ''),
         }
 colorspath = configpath + '/colors'
 if os.path.exists(colorspath):
     colorsconf = configparser.ConfigParser()
     colors = {}
     colorsconf.read(colorspath)
-    for name, (defsettings, deffgcolor, defbgcolor) in defcolors.items():
+    for name, defattr in defcolors.items():
         try:
             settings = colorsconf.get(name, 'settings').split()
         except (configparser.NoSectionError, configparser.NoOptionError):
-            settings = defsettings
-        fgcolor = colorsconf.get(name, 'fgcolor', fallback=deffgcolor)
-        bgcolor = colorsconf.get(name, 'bgcolor', fallback=defbgcolor)
-        colors[name] = [settings, fgcolor, bgcolor]
+            settings = defattr.settings
+        fgcolor = colorsconf.get(name, 'fgcolor', fallback=defattr.fgcolor)
+        bgcolor = colorsconf.get(name, 'bgcolor', fallback=defattr.bgcolor)
+        align = colorsconf.get(name, 'bgcolor', fallback=defattr.align)
+        colors[name] = Attribute(settings, fgcolor, bgcolor, align)
 else:
     colors = defcolors
 
