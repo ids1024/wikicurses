@@ -343,16 +343,25 @@ class Pager(StandardKeyBinds, urwid.ListBox):
         curtext = []
         curh2 = ''
         prevalign = 'left'
+        prevpadding = 0
         for tformat, text in self._content:
             aligns = [j for j in (settings.colors[i.name].align for i in formats
                 if tformat & i and i.name in settings.colors) if j]
             align = aligns[-1] if aligns else 'left'
+            paddings = [j for j in (settings.colors[i.name].padding for i
+                in formats if tformat & i and i.name in settings.colors) if j]
+            padding = paddings[-1] if paddings else 0
 
-            if ((align != prevalign and curtext)
-                or (tformat & formats.h2 and not curh2)):
+            if ((align != prevalign and curtext) or
+                    (padding != prevpadding and curtext) or
+                    (tformat & formats.h2 and not curh2)):
                 # Also have new Text() for every h2 for TOC
                 textwidget = urwid.Text(curtext, align=prevalign)
-                self.body.append(textwidget)
+                if prevpadding:
+                    self.body.append(urwid.Padding(textwidget,
+                        left=prevpadding, right=prevpadding))
+                else:
+                    self.body.append(textwidget)
                 curtext.clear()
             
             if tformat & formats.h2: 
@@ -366,6 +375,7 @@ class Pager(StandardKeyBinds, urwid.ListBox):
             curtext.append((tformat, text))
 
             prevalign = align
+            prevpadding = padding
         if curtext:
             textwidget = urwid.Text(curtext, align=prevalign)
             self.body.append(textwidget)

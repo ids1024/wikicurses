@@ -21,16 +21,16 @@ except (ValueError, configparser.NoOptionError):
     hide_references = False
 
 Attribute = collections.namedtuple('Attribute',
-        ('settings', 'fgcolor', 'bgcolor', 'align'))
+        ('settings', 'fgcolor', 'bgcolor', 'align', 'padding'))
 defcolors = {
-        'b': Attribute(['bold',], '', '', ''),
-        'blockquote': Attribute([], 'dark gray', '', ''),
-        'searchresult': Attribute(['standout'], '', '', ''),
-        'h1': Attribute(['bold'], '', 'dark blue', ''),
-        'h2': Attribute(['bold', 'underline'], 'dark blue', '', 'center'),
-        'h': Attribute(['bold', 'underline'], 'dark blue', '', ''),
-        'pre': Attribute([], 'dark green', '', ''),
-        'code': Attribute([], '', '', ''),
+        'b': Attribute(['bold',], '', '', '', 0),
+        'blockquote': Attribute([], 'dark gray', '', '', 0),
+        'searchresult': Attribute(['standout'], '', '', '', 0),
+        'h1': Attribute(['bold'], '', 'dark blue', '', 0),
+        'h2': Attribute(['bold', 'underline'], 'dark blue', '', 'center', 0),
+        'h': Attribute(['bold', 'underline'], 'dark blue', '', '', 0),
+        'pre': Attribute([], 'dark green', '', '', 3),
+        'code': Attribute([], '', '', '', 0),
         }
 colorspath = configpath + '/colors'
 if os.path.exists(colorspath):
@@ -44,8 +44,9 @@ if os.path.exists(colorspath):
             settings = defattr.settings
         fgcolor = colorsconf.get(name, 'fgcolor', fallback=defattr.fgcolor)
         bgcolor = colorsconf.get(name, 'bgcolor', fallback=defattr.bgcolor)
-        align = colorsconf.get(name, 'bgcolor', fallback=defattr.align)
-        colors[name] = Attribute(settings, fgcolor, bgcolor, align)
+        align = colorsconf.get(name, 'align', fallback=defattr.align)
+        padding = colorsconf.getint(name, 'padding', fallback=defattr.padding)
+        colors[name] = Attribute(settings, fgcolor, bgcolor, align, padding)
 else:
     colors = defcolors
 
