@@ -345,12 +345,8 @@ class Pager(StandardKeyBinds, urwid.ListBox):
         prevalign = 'left'
         prevpadding = 0
         for tformat, text in self._content:
-            aligns = [j for j in (settings.colors[i.name].align for i in formats
-                if tformat & i and i.name in settings.colors) if j]
-            align = aligns[-1] if aligns else 'left'
-            paddings = [j for j in (settings.colors[i.name].padding for i
-                in formats if tformat & i and i.name in settings.colors) if j]
-            padding = paddings[-1] if paddings else 0
+            align = settings.getColor(tformat, 'align', default='left')
+            padding = settings.getColor(tformat, 'padding', default=0)
 
             if ((align != prevalign and curtext) or
                     (padding != prevpadding and curtext) or
@@ -591,12 +587,8 @@ page = None
 
 palette = []
 for x in range(1, sum(formats) + 1):
-    fgs = [settings.colors[i.name].fgcolor for i in formats
-            if x & i and i.name in settings.colors]
-    fgcolor = fgs[-1] if fgs else ''
-    bgs = [settings.colors[i.name].bgcolor for i in formats
-            if x & i and i.name in settings.colors]
-    bg = bgs[-1] if bgs else ''
+    fgcolor = settings.getColor(x, 'fgcolor')
+    bg = settings.getColor(x, 'bgcolor')
     fgfmts = {j for i in formats if x & i and i.name in settings.colors
             for j in settings.colors[i.name][0]}
     if fgcolor:

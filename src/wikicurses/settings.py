@@ -2,6 +2,7 @@ import os
 import json
 import collections
 import configparser
+from wikicurses import formats
 from urllib.parse import urlparse
 
 default_configdir = os.environ['HOME'] + '/.config'
@@ -49,6 +50,11 @@ if os.path.exists(colorspath):
         colors[name] = Attribute(settings, fgcolor, bgcolor, align, padding)
 else:
     colors = defcolors
+
+def getColor(tformat, name, default=''):
+    values = [j for j in (getattr(colors[i.name], name) for i in formats
+              if tformat & i and i.name in colors) if j]
+    return values[-1] if values else default
 
 def dumpColors():
     colorsconf = configparser.ConfigParser()
