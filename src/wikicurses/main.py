@@ -45,7 +45,7 @@ class SearchBox(urwid.Edit):
         elif key == 'tab':
             matches = wiki.search_sugestions(self.edit_text)
             match = tabComplete(self.edit_text, matches)
-            self.set_edit_text(match)
+            self.edit_text = match
             self.edit_pos = len(match)
         elif key == 'esc':
             closeOverlay()
@@ -213,16 +213,14 @@ class Ex(urwid.Edit):
         elif key == 'tab' and self.mode == 'ex':
             matches = [i for i in cmds if i.startswith(self.edit_text)]
             match = tabComplete(self.edit_text, matches)
-            self.set_edit_text(match)
+            self.edit_text = match
             self.edit_pos = len(match)
         elif key == 'enter':
-            words = self.edit_text.split()
-            mode = self.mode
+            if self.mode == 'ex':
+                processCmd(*self.edit_text.split())
+            if self.mode == 'search':
+                self.highlightText(self.edit_text)
             self.exitexmode()
-            if mode == 'ex':
-                processCmd(*words)
-            elif mode == 'search':
-                self.highlightText(' '.join(words))
         else:
             returnval = super().keypress(size, key)
             # Highlight after running super().keypress() so that edit_text is
@@ -256,6 +254,7 @@ class StandardKeyBinds:
 
     def keypress(self, size, key):
         returnval = None
+        maxcol, maxrow = size
         ex.notify('') # Clear any notification
 
         cmdmap = settings.conf['keymap']
@@ -269,7 +268,7 @@ class StandardKeyBinds:
             self.change_focus(size, 0, 0)
         elif key in ('G', 'end'):
             self.change_focus(size, len(self.body) - 1)
-            offset = size[1] - self.focus.rows((size[0],))
+            offset = maxrow - self.focus.rows((maxcol,))
             self.change_focus(size, len(self.body) - 1, offset)
         elif key in cmdmap and cmdmap[key]:
             processCmd(cmdmap[key])
@@ -277,7 +276,6 @@ class StandardKeyBinds:
             returnval = super().keypress(size, key)
 
         # Set progress percentage
-        maxcol, maxrow = size
         lens = [i.rows((maxcol,)) for i in self.body]
         offset, inset = self.get_focus_offset_inset(size)
         # Number of the first line on the screen
