@@ -58,11 +58,13 @@ def getColor(tformat, name, default=''):
 
 def dumpColors():
     colorsconf = configparser.ConfigParser()
-    for name, (settings, fgcolor, bgcolor) in colors.items():
+    for name, (settings, fgcolor, bgcolor, align, padding) in colors.items():
         colorsconf.add_section(name)
         colorsconf.set(name, 'settings', ' '.join(settings))
         colorsconf.set(name, 'fgcolor', fgcolor)
         colorsconf.set(name, 'bgcolor', bgcolor)
+        colorsconf.set(name, 'align', align)
+        colorsconf.set(name, 'padding', str(padding))
     with open(colorspath, 'w') as file:
         colorsconf.write(file)
 
