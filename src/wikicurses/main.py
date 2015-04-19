@@ -568,7 +568,7 @@ def main():
         return
 
     callback = lambda x, y: openPage(args.feed or args.search, bool(args.feed))
-    loop.set_alarm_in(0, callback)  # Open page once loop is started
+    loop.set_alarm_in(.001, callback)  # Open page once loop is started
     try:
         loop.run()
     except KeyboardInterrupt:
