@@ -262,7 +262,9 @@ class StandardKeyBinds:
         if key == ':':
             ex.enterexmode()
         if key == '/':
-            ex.entersearchmode()
+            # Disable search for Disambig/Results page
+            if isinstance(mainwidget.body, Pager):
+                ex.entersearchmode()
         elif key in ('g', 'home'):
             self.change_focus(size, 0, 0)
         elif key in ('G', 'end'):
