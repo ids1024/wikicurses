@@ -341,19 +341,23 @@ class Pager(StandardKeyBinds, urwid.ListBox):
         curh2 = ''
         prevalign = 'left'
         prevpadding = 0
+        prevborder = False
         for tformat, text in self._content:
             align = settings.getColor(tformat, 'align', default='left')
             padding = settings.getColor(tformat, 'padding', default=0)
+            border = settings.getColor(tformat, 'border', default=False)
 
-            if (((align != prevalign or padding != prevpadding) and curtext) or
+            if (((align != prevalign or padding != prevpadding or
+                    prevborder != border) and curtext) or
                     (tformat & formats.h2 and not curh2)):
                 # Also have new Text() for every h2 for TOC
-                textwidget = urwid.Text(curtext, align=prevalign)
+                widget = urwid.Text(curtext, align=prevalign)
+                if prevborder:
+                    widget = urwid.LineBox(widget)
                 if prevpadding:
-                    self.body.append(urwid.Padding(textwidget,
-                        left=prevpadding, right=prevpadding))
-                else:
-                    self.body.append(textwidget)
+                    widget = urwid.Padding(widget,
+                        left=prevpadding, right=prevpadding)
+                self.body.append(widget)
                 curtext.clear()
             
             curtext.append((tformat, text))
@@ -366,9 +370,15 @@ class Pager(StandardKeyBinds, urwid.ListBox):
 
             prevalign = align
             prevpadding = padding
+            prevborder = border
         if curtext:
-            textwidget = urwid.Text(curtext, align=prevalign)
-            self.body.append(textwidget)
+            widget = urwid.Text(curtext, align=prevalign)
+            if prevborder:
+                widget = urwid.LineBox(widget)
+            if prevpadding:
+                widget = urwid.Padding(widget,
+                    left=prevpadding, right=prevpadding)
+            self.body.append(widget)
 
     def _add(self, text, attribute):
         if text:

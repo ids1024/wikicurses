@@ -68,6 +68,16 @@ def parseArticle(html):
         if 'em' in partags:
             tformat |= formats.i
 
+        # Handle divs with padding or borders defined in css style
+        stylediv = item.findParent('div', style=True)
+        if stylediv:
+            stylekeys = [i.split(':', 1)[0].strip() for i in 
+                    stylediv.get('style').split(';')]
+            if 'padding' in stylekeys:
+                tformat |= formats.divpadding
+            if 'border' in stylekeys:
+                tformat |= formats.divborder
+
         # Added specifically for handling spaces between removed references
         if items and items[-1][1] and (items[-1][1][-1] == ' '):
             item = item.lstrip()

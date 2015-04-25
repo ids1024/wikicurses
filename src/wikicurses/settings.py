@@ -22,16 +22,18 @@ except (ValueError, configparser.NoOptionError):
     hide_references = False
 
 Attribute = collections.namedtuple('Attribute',
-        ('settings', 'fgcolor', 'bgcolor', 'align', 'padding'))
+        ('settings', 'fgcolor', 'bgcolor', 'align', 'padding', 'border'))
 defcolors = {
-        'b': Attribute(['bold',], '', '', '', 0),
-        'blockquote': Attribute([], 'dark gray', '', '', 0),
-        'searchresult': Attribute(['standout'], '', '', '', 0),
-        'h1': Attribute(['bold'], '', 'dark blue', '', 0),
-        'h2': Attribute(['bold', 'underline'], 'dark blue', '', 'center', 0),
-        'h': Attribute(['bold', 'underline'], 'dark blue', '', '', 0),
-        'pre': Attribute([], 'dark green', '', '', 3),
-        'code': Attribute([], '', '', '', 0),
+        'b': Attribute(['bold',], '', '', '', 0, False),
+        'blockquote': Attribute([], 'dark gray', '', '', 0, False),
+        'searchresult': Attribute(['standout'], '', '', '', 0, False),
+        'h1': Attribute(['bold'], '', 'dark blue', '', 0, False),
+        'h2': Attribute(['bold', 'underline'], 'dark blue', '', 'center', 0, False),
+        'h': Attribute(['bold', 'underline'], 'dark blue', '', '', 0, False),
+        'pre': Attribute([], 'dark green', '', '', 3, False),
+        'code': Attribute([], '', '', '', 0, False),
+        'divpadding': Attribute([], '', '', '', 6, False),
+        'divborder': Attribute([], '', '', '', 0, True),
         }
 colorspath = configpath + '/colors'
 if os.path.exists(colorspath):
@@ -47,7 +49,9 @@ if os.path.exists(colorspath):
         bgcolor = colorsconf.get(name, 'bgcolor', fallback=defattr.bgcolor)
         align = colorsconf.get(name, 'align', fallback=defattr.align)
         padding = colorsconf.getint(name, 'padding', fallback=defattr.padding)
-        colors[name] = Attribute(settings, fgcolor, bgcolor, align, padding)
+        border = colorsconf.getbool(name, 'border', fallback=defattr.border)
+        colors[name] = Attribute(settings,
+                fgcolor, bgcolor, align, padding, border)
 else:
     colors = defcolors
 
@@ -58,13 +62,14 @@ def getColor(tformat, name, default=''):
 
 def dumpColors():
     colorsconf = configparser.ConfigParser()
-    for name, (settings, fgcolor, bgcolor, align, padding) in colors.items():
+    for name, (settings, fgcolor, bgcolor, align, padding, border) in colors.items():
         colorsconf.add_section(name)
         colorsconf.set(name, 'settings', ' '.join(settings))
         colorsconf.set(name, 'fgcolor', fgcolor)
         colorsconf.set(name, 'bgcolor', bgcolor)
         colorsconf.set(name, 'align', align)
         colorsconf.set(name, 'padding', str(padding))
+        colorsconf.set(name, 'border', str(border))
     with open(colorspath, 'w') as file:
         colorsconf.write(file)
 
