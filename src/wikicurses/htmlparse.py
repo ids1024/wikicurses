@@ -43,6 +43,8 @@ def parseArticle(html):
 
     for i in soup.find_all(True, class_=skipclass):
         i.decompose()
+    for i in soup.find_all('script'):
+        i.decompose()
     for i in soup.find_all('h2'):
         if i.text in skipsection:
             for j in tuple(i.next_elements):
