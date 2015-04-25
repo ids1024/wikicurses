@@ -56,6 +56,7 @@ def parseArticle(html):
     for item in soup.strings:
         if isinstance(item, bs4.element.Comment):
             continue # Strip out html comments
+
         partags = {i.name for i in item.parents}
         tformat = sum(
             formats[i] for i in set(i.name for i in formats).intersection(partags))
@@ -66,6 +67,10 @@ def parseArticle(html):
             tformat |= formats.b
         if 'em' in partags:
             tformat |= formats.i
+
+        # Added specifically for handling spaces between removed references
+        if items and items[-1][1] and (items[-1][1][-1] == ' '):
+            item = item.lstrip()
 
         # If format same as previous, combine
         if items and items[-1][0] == tformat:
