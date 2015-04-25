@@ -8,7 +8,7 @@ from wikicurses import settings
 
 skipclass = ('wiki-sidebar', 'infobox', 'mw-editsection', 'editsection',
              'wikitable', 'thumb', 'gallery', 'article-thumb', 'infobox_v2',
-             'mw-headline-anchor', 'toc')
+             'mw-headline-anchor', 'toc', 'noprint', 'wikia-gallery')
 skipsection = ('External links', 'See also')
 
 if settings.hide_references:
@@ -56,6 +56,9 @@ def parseArticle(html):
 
     items = []
     for item in soup.strings:
+        if not item:
+            continue
+
         if isinstance(item, bs4.element.Comment):
             continue # Strip out html comments
 
@@ -71,18 +74,17 @@ def parseArticle(html):
             tformat |= formats.i
 
         # Handle divs with padding or borders defined in css style
-        stylediv = item.findParent('div', style=True)
-        if stylediv:
-            stylekeys = [i.split(':', 1)[0].strip() for i in 
-                    stylediv.get('style').split(';')]
-            if 'padding' in stylekeys:
-                tformat |= formats.divpadding
-            if 'border' in stylekeys:
-                tformat |= formats.divborder
+        styledivs = item.findParents('div', style=True)
+        stylekeys = [i.split(':', 1)[0].strip()
+                for div in styledivs for i in div.get('style').split(';')]
+        if 'padding' in stylekeys:
+            tformat |= formats.divpadding
+        if 'border' in stylekeys:
+            tformat |= formats.divborder
 
         # Added specifically for handling spaces between removed references
-        if items and items[-1][1] and (items[-1][1][-1] == ' '):
-            item = item.lstrip()
+        if items and items[-1][1] and (items[-1][1][-1] == item[0] == ' '):
+            item = item[1:]
 
         # If format same as previous, combine
         if items and items[-1][0] == tformat:
