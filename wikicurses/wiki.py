@@ -12,7 +12,7 @@ from wikicurses.htmlparse import parseArticle, parseFeature
 from wikicurses.settings import Settings, wikis, conf
 from wikicurses import formats
 
-useragent = "Wikicurses/1.2 (https://github.com/ids1024/wikicurses)"\
+useragent = "Wikicurses/1.3 (https://github.com/ids1024/wikicurses)"\
             " Python-urllib/%d.%d" % sys.version_info[:2]
 
 
