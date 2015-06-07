@@ -18,4 +18,17 @@ setup(name='Wikicurses',
           ],
       entry_points={'console_scripts': ['wikicurses = wikicurses.main:main']},
       install_requires = ['beautifulsoup4', 'lxml', 'urwid'],
+      classifiers=[
+          "Topic :: Internet :: WWW/HTTP",
+          "Environment :: Console",
+          "Environment :: Console :: Curses",
+          "Operating System :: POSIX :: Linux",
+          "Intended Audience :: End Users/Desktop",
+          "Programming Language :: Python",
+          "Programming Language :: Python :: 3",
+          "Programming Language :: Python :: 3.4",
+          "Programming Language :: Python :: 3 :: Only",
+          "Development Status :: 5 - Production/Stable",
+          "License :: OSI Approved :: MIT License"
+      ],
      )
