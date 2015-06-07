@@ -10,7 +10,6 @@ setup(name='Wikicurses',
       license = "MIT",
       url='http://github.com/ids1024/wikicurses/',
       packages = ['wikicurses'],
-      package_dir={'wikicurses': 'src/wikicurses'},
       data_files=[
           ('/etc', ['wikicurses.conf']),
           ('/usr/share/man/man1', ['wikicurses.1']),
