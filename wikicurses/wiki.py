@@ -7,13 +7,15 @@ import http.cookiejar
 from functools import lru_cache
 
 from bs4 import BeautifulSoup
+import pkg_resources
 
 from wikicurses.htmlparse import parseArticle, parseFeature
 from wikicurses.settings import Settings, wikis, conf
 from wikicurses import formats
 
-useragent = "Wikicurses/1.3 (https://github.com/ids1024/wikicurses)"\
-            " Python-urllib/%d.%d" % sys.version_info[:2]
+version = pkg_resources.require("wikicurses")[0].version
+useragent = "Wikicurses/%s (https://github.com/ids1024/wikicurses)"\
+            " Python-urllib/%d.%d" % ((version,) + sys.version_info[:2])
 
 
 class WikiError(Exception):
