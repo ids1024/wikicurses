@@ -209,7 +209,7 @@ class _Page:
 
 
 class _Article(_Page):
-    content = {'': ['Page Not Found.']}
+    content = [(0, 'Page Not Found.')]
 
     def __init__(self, search, result):
         self.title = result.get('title', search)
