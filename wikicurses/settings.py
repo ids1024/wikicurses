@@ -49,7 +49,7 @@ if os.path.exists(colorspath):
         bgcolor = colorsconf.get(name, 'bgcolor', fallback=defattr.bgcolor)
         align = colorsconf.get(name, 'align', fallback=defattr.align)
         padding = colorsconf.getint(name, 'padding', fallback=defattr.padding)
-        border = colorsconf.getbool(name, 'border', fallback=defattr.border)
+        border = colorsconf.getboolean(name, 'border', fallback=defattr.border)
         colors[name] = Attribute(settings,
                 fgcolor, bgcolor, align, padding, border)
 else:
