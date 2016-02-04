@@ -219,9 +219,7 @@ class Ex(urwid.Edit):
             if self.mode == 'ex':
                 matches = [i for i in cmds if i.startswith(self.edit_text)]
                 match = tabComplete(self.edit_text, matches)
-                self.edit_text = match
-
-                processCmd(*self.edit_text.split())
+                processCmd(*match.split())
             if self.mode == 'search':
                 self.highlightText(self.edit_text)
             self.exitexmode()
