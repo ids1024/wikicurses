@@ -14,11 +14,11 @@ conf.read(['/etc/wikicurses.conf', configpath + '/config'])
 
 try:
     mouse = conf.getboolean('general', 'mouse')
-except (ValueError, configparser.NoOptionError):
+except (ValueError, configparser.NoOptionError, configparser.NoSectionError):
     mouse = False
 try:
     hide_references = conf.getboolean('general', 'hide_references')
-except (ValueError, configparser.NoOptionError):
+except (ValueError, configparser.NoOptionError, configparser.NoSectionError):
     hide_references = False
 
 Attribute = collections.namedtuple('Attribute',
