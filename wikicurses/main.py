@@ -349,9 +349,8 @@ class Pager(StandardKeyBinds, urwid.ListBox):
             padding = settings.getColor(tformat, 'padding', default=0)
             border = settings.getColor(tformat, 'border', default=False)
 
-            if (((align != prevalign or padding != prevpadding or
-                    prevborder != border) and curtext) or
-                    (tformat & formats.h2 and not curh2)):
+            if (((align, padding, border) != (prevalign, prevpadding, prevborder)
+                    and curtext) or (tformat & formats.h2 and not curh2)):
                 # Also have new Text() for every h2 for TOC
                 widget = urwid.Text(curtext, align=prevalign)
                 if prevborder:
