@@ -13,9 +13,14 @@ from wikicurses.htmlparse import parseArticle, parseFeature
 from wikicurses.settings import Settings, wikis, conf
 from wikicurses import formats
 
-version = pkg_resources.require("wikicurses")[0].version
-useragent = "Wikicurses/%s (https://github.com/ids1024/wikicurses)"\
-            " Python-urllib/%d.%d" % ((version,) + sys.version_info[:2])
+progname = "Wikicurses"
+try:
+    version = pkg_resources.require("wikicurses")[0].version
+    progname += "/" + version
+except pkg_resources.DistributionNotFound:
+    pass
+useragent = "%s (https://github.com/ids1024/wikicurses)"\
+            " Python-urllib/%d.%d" % ((progname,) + sys.version_info[:2])
 
 
 class WikiError(Exception):
