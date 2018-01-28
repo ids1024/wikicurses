@@ -1,6 +1,6 @@
 from enum import IntEnum
 
-__version__ = "1.3"
+__version__ = "1.4"
 
 class formats(IntEnum):
     i, b, blockquote, searchresult, h1, h2, h, pre, code, \
