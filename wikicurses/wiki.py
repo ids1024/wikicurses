@@ -7,20 +7,13 @@ import http.cookiejar
 from functools import lru_cache
 
 from bs4 import BeautifulSoup
-import pkg_resources
 
 from wikicurses.htmlparse import parseArticle, parseFeature
 from wikicurses.settings import Settings, wikis, conf
-from wikicurses import formats
+from wikicurses import formats, __version__
 
-progname = "Wikicurses"
-try:
-    version = pkg_resources.require("wikicurses")[0].version
-    progname += "/" + version
-except pkg_resources.DistributionNotFound:
-    pass
-useragent = "%s (https://github.com/ids1024/wikicurses)"\
-            " Python-urllib/%d.%d" % ((progname,) + sys.version_info[:2])
+useragent = "Wikicurses/%s (https://github.com/ids1024/wikicurses)"\
+            " Python-urllib/%d.%d" % (( __version__,) + sys.version_info[:2])
 
 
 class WikiError(Exception):
