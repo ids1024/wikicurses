@@ -11,3 +11,10 @@ Dependencies
 - [Urwid](http://www.urwid.org)
 - [Beautiful Soup 4](http://www.crummy.com/software/BeautifulSoup)
 - [lxml](http://lxml.de/)
+
+Installation
+------------
+
+On Arch Linux, wikicurses is in the Community repository and can be installed with `pacman -S wikicurses`.
+
+Otherwise, it can be installed like other Python projects with `pip install wikicurses`, or by cloning the repository and calling `./setup.py install`.
