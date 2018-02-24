@@ -25,6 +25,7 @@ Attribute = collections.namedtuple('Attribute',
         ('settings', 'fgcolor', 'bgcolor', 'align', 'padding', 'border'))
 defcolors = {
         'b': Attribute(['bold',], '', '', '', 0, False),
+        'i': Attribute(['italics',], '', '', '', 0, False),
         'blockquote': Attribute([], 'dark gray', '', '', 0, False),
         'searchresult': Attribute(['standout'], '', '', '', 0, False),
         'h1': Attribute(['bold'], '', 'dark blue', '', 0, False),
