@@ -339,7 +339,7 @@ class Pager(StandardKeyBinds, urwid.ListBox):
     def _render(self):
         self.body.clear()
         self.widgetnames = [(page.title, 0)]
-        curtext = []
+        curtext = [(0, '')]
         curh2 = ''
         prevalign = 'left'
         prevpadding = 0
